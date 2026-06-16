@@ -178,6 +178,12 @@ textarea{padding:11px 12px;border:1px solid var(--border);border-radius:var(--r-
 #_toast{position:fixed;bottom:calc(var(--nav-h)+10px);left:50%;transform:translateX(-50%);background:#1A1916;color:#fff;padding:12px 18px;border-radius:var(--r);font-size:13px;z-index:300;display:flex;align-items:center;gap:8px;max-width:88vw;box-shadow:0 4px 20px rgba(0,0,0,0.3)}
 ::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
 </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = "https://gcqqhjeqvnfbgdenflmk.supabase.co";
+const SUPABASE_KEY = "sb_publishable_P9Ze3f0sCIpuhzx4AYednA_Gbxf9TNucFWxc";
+const _sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+</script>
 </head>
 <body>
 <div class="app">
