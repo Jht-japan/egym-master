@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>EGYM ★★ スター2</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/3.19.0/iconfont/tabler-icons.min.css">
+<style>
+:root{
+  --bg:#F4F2ED;--bg2:#ECEAE3;--card:#FFFFFF;--border:#D8D5CC;--border2:#C8C5BB;
+  --text:#1A1916;--text2:#5C5A54;--text3:#9C9A94;
+  --blue:#2A6FDB;--blue-l:#E8F0FC;--blue-m:#B8CEEF;
+  --green:#1A8A5A;--green-l:#E5F5EC;--green-m:#9DD4B8;
+  --amber:#C47B14;--amber-l:#FDF3E3;--amber-m:#F0C878;
+  --red:#C0392B;--red-l:#FDECEA;
+  --acc:#1A8A5A;
+  --nav-h:62px;--top-h:56px;--r:12px;--r-sm:8px;--r-lg:16px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Hiragino Sans','Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5}
+.app{display:flex;flex-direction:column;height:100vh;height:100dvh}
+
+/* TOP BAR */
+.topbar{background:var(--card);border-bottom:1px solid var(--border);padding:0 14px;height:var(--top-h);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;z-index:10;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+.t-left{display:flex;align-items:center;gap:10px}
+.av{width:36px;height:36px;border-radius:50%;background:var(--green-l);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;border:2px solid var(--green-m);flex-shrink:0}
+.t-name{font-size:14px;font-weight:700;line-height:1.2}
+.t-fac{font-size:11px;color:var(--text3)}
+.t-badge{font-size:11px;padding:4px 10px;background:var(--green-l);border:1px solid var(--green-m);border-radius:20px;color:var(--green);font-weight:700;white-space:nowrap;flex-shrink:0}
+
+/* CONTENT */
+.content{flex:1;overflow-y:auto;padding:12px 14px;background:var(--bg);padding-bottom:calc(var(--nav-h)+12px);-webkit-overflow-scrolling:touch}
+
+/* BOTTOM NAV */
+.bnav{height:var(--nav-h);background:var(--card);border-top:1px solid var(--border);display:flex;align-items:stretch;flex-shrink:0;padding-bottom:env(safe-area-inset-bottom);box-shadow:0 -2px 10px rgba(0,0,0,0.06)}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;position:relative;border:none;background:transparent;padding:5px 2px}
+.ni.on .ni-icon,.ni.on .ni-lbl{color:var(--acc)}
+.ni.on .ni-lbl{font-weight:700}
+.ni.lk .ni-icon,.ni.lk .ni-lbl{color:var(--text3)}
+.ni-icon{font-size:22px;color:var(--text3);line-height:1}
+.ni-lbl{font-size:9px;color:var(--text3);line-height:1.2;text-align:center}
+.ni-badge{position:absolute;top:5px;right:calc(50% - 20px);min-width:16px;height:16px;padding:0 4px;background:var(--green);border-radius:8px;font-size:9px;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700}
+.ni-lock{position:absolute;top:4px;right:calc(50% - 20px);width:14px;height:14px;background:var(--bg2);border-radius:50%;font-size:8px;color:var(--text3);display:flex;align-items:center;justify-content:center}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:14px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+.ctitle{font-size:13px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+
+/* TAGS */
+.tag{display:inline-block;font-size:10px;padding:3px 8px;border-radius:20px;font-weight:700}
+.td{background:var(--green-l);color:var(--green)}.tp{background:var(--amber-l);color:var(--amber)}
+.tf{background:var(--red-l);color:var(--red)}.tb{background:var(--blue-l);color:var(--blue)}.tg{background:var(--bg2);color:var(--text3)}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:9px 14px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--card);color:var(--text);font-size:13px;cursor:pointer;font-weight:600;transition:opacity 0.12s}
+.btn:active{opacity:0.65}
+.btnp{background:var(--blue);border-color:var(--blue);color:#fff}
+.btng{background:var(--green);border-color:var(--green);color:#fff}
+.btnr{background:var(--red);border-color:var(--red);color:#fff}
+.btna{background:var(--amber);border-color:var(--amber);color:#fff}
+.btnsm{padding:6px 11px;font-size:11px}
+.btnfull{width:100%}
+
+/* FORM */
+select,input[type=email],input[type=text],input[type=number]{padding:11px 12px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--card);color:var(--text);font-size:15px;width:100%;-webkit-appearance:none}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%239C9A94' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px}
+textarea{padding:11px 12px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--card);color:var(--text);font-size:15px;width:100%;resize:vertical;min-height:80px;line-height:1.5;font-family:inherit}
+.flabel{font-size:12px;color:var(--text2);margin-bottom:6px;font-weight:700;display:block}
+.frow{margin-bottom:14px}
+
+/* GRIDS */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.met{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:12px 8px;text-align:center}
+.mv{font-size:20px;font-weight:700;line-height:1.2;margin-bottom:2px}
+.ml{font-size:10px;color:var(--text3)}
+.pb{height:5px;background:var(--bg2);border-radius:3px;overflow:hidden;margin-top:6px}
+.pf{height:100%;border-radius:3px;transition:width 0.4s}
+.pfb{background:var(--blue)}.pfg{background:var(--green)}.pfa{background:var(--amber)}
+
+/* CHECKLIST */
+.cl-item{display:flex;align-items:flex-start;gap:10px;padding:11px 12px;border-bottom:1px solid var(--bg2);min-height:50px}
+.cl-item:last-child{border-bottom:none}
+.cl-item:active{background:var(--bg)}
+.cb{width:22px;height:22px;min-width:22px;border:2px solid var(--border2);border-radius:5px;display:flex;align-items:center;justify-content:center;margin-top:1px;transition:all 0.15s;background:var(--card);flex-shrink:0;cursor:pointer}
+.cb.on{background:var(--green);border-color:var(--green);color:#fff}
+.cl-txt{font-size:13px;line-height:1.4;flex:1;min-width:0}
+.cl-txt.done{color:var(--text3);text-decoration:line-through}
+.cl-note{font-size:11px;color:var(--text3);margin-top:2px}
+.sec-hd{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--bg)}
+
+/* PHASE */
+.ph-block{border:1.5px solid var(--border);border-radius:var(--r);margin-bottom:10px;overflow:hidden}
+.ph-block.ph-active{border-color:var(--blue)}.ph-block.ph-done{border-color:var(--green)}
+.ph-head{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--bg);cursor:pointer;min-height:54px}
+.ph-body{padding:14px;border-top:1px solid var(--border)}
+.sess-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+@media(min-width:480px){.sess-grid{grid-template-columns:repeat(6,1fr)}}
+.sess-slot{border:1.5px solid var(--border);border-radius:var(--r-sm);padding:10px 4px;text-align:center;cursor:pointer;min-height:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:var(--card)}
+.sess-slot:active{opacity:0.7}
+.sess-slot.has-d{background:var(--blue-l);border-color:var(--blue-m)}
+.sess-n{font-size:10px;color:var(--text3);font-weight:700}
+.sess-d{font-size:12px;font-weight:700;color:var(--blue);line-height:1.3}
+
+/* CALENDAR */
+.cal-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-top:10px}
+.cal-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.cal-nb{width:40px;height:40px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--card);cursor:pointer;font-size:20px;color:var(--text2)}
+.cal-nb:active{background:var(--bg2)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-dow{font-size:11px;color:var(--text3);text-align:center;padding:4px 0;font-weight:700}
+.cal-day{font-size:13px;text-align:center;padding:8px 2px;border-radius:var(--r-sm);cursor:pointer;min-height:36px;display:flex;align-items:center;justify-content:center;font-weight:500}
+.cal-day:active{opacity:0.7}
+.cal-day.empty{cursor:default}
+.cal-day.sel-d{background:var(--blue);color:#fff;font-weight:700}
+.cal-day.other-d{background:var(--green-l);color:var(--green);font-weight:700}
+.cal-day.today-d{border:2px solid var(--blue);color:var(--blue);font-weight:700}
+
+/* DATA */
+.data-row{background:var(--bg);border-radius:var(--r-sm);padding:12px 14px;margin-bottom:10px}
+.data-pair{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+.data-field label{font-size:11px;color:var(--text3);font-weight:700;display:block;margin-bottom:5px}
+.data-input{padding:10px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--card);color:var(--text);font-size:15px;width:100%;text-align:right}
+.diff-badge{font-size:12px;font-weight:700;padding:3px 10px;border-radius:20px}
+.diff-good{background:var(--green-l);color:var(--green)}.diff-bad{background:var(--red-l);color:var(--red)}.diff-zero{background:var(--bg2);color:var(--text3)}
+
+/* STAR1 CANDIDATE CARD */
+.s1-card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r-lg);padding:14px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+.s1-card.certified{border-color:var(--green)}
+.s1-head{display:flex;align-items:center;gap:10px;margin-bottom:12px}
+.av-lg{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;border:2px solid}
+.cl-progress-row{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--bg2);font-size:12px}
+.cl-progress-row:last-child{border-bottom:none}
+.dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+
+/* STEP */
+.step{display:flex;align-items:flex-start;gap:12px;padding:11px 0;border-bottom:1px solid var(--bg2)}
+.step:last-child{border-bottom:none}
+.sdot{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.s-done{background:var(--green-l);color:var(--green)}.s-prog{background:var(--blue-l);color:var(--blue)}.s-lock{background:var(--bg2);color:var(--text3)}.s-warn{background:var(--amber-l);color:var(--amber)}
+
+/* TEST */
+.tq{margin-bottom:12px;padding:14px;border:1px solid var(--border);border-radius:var(--r);background:var(--card)}
+.tq-txt{font-size:14px;font-weight:700;margin-bottom:12px;line-height:1.5}
+.topt{display:flex;align-items:flex-start;gap:10px;padding:12px;border:1.5px solid var(--border);border-radius:var(--r-sm);cursor:pointer;margin-bottom:8px;font-size:13px;line-height:1.4}
+.topt:last-child{margin-bottom:0}
+.topt:active{opacity:0.7}
+.topt.sel{border-color:var(--blue);background:var(--blue-l);color:var(--blue)}
+.topt.cor{border-color:var(--green);background:var(--green-l);color:var(--green)}
+.topt.wrg{border-color:var(--red);background:var(--red-l);color:var(--red)}
+.radio{width:20px;height:20px;min-width:20px;border:2px solid var(--border2);border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.radio.on{background:var(--blue);border-color:var(--blue)}
+.radio.on::after{content:'';width:8px;height:8px;border-radius:50%;background:#fff}
+
+/* RESULT */
+.rc{width:80px;height:80px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:24px;font-weight:700;margin:0 auto 14px;border:3px solid}
+.rcp{background:var(--green-l);color:var(--green);border-color:var(--green-m)}
+.rcf{background:var(--red-l);color:var(--red);border-color:#e8a9a9}
+
+/* PROG TAB */
+.prog-tab{display:flex;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:12px;background:var(--card)}
+.ptab{flex:1;padding:11px 8px;text-align:center;font-size:13px;cursor:pointer;border-right:1px solid var(--border);color:var(--text2);font-weight:600;line-height:1.3}
+.ptab:last-child{border-right:none}
+.ptab.on{background:var(--blue);color:#fff}
+.ptab:not(.on):active{background:var(--bg)}
+
+/* MODAL */
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:200;display:flex;align-items:flex-end}
+.modal{background:var(--card);border-radius:var(--r-lg) var(--r-lg) 0 0;padding:20px 16px;padding-bottom:calc(20px + env(safe-area-inset-bottom));width:100%;max-height:88vh;overflow-y:auto}
+.modal-handle{width:40px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 18px}
+
+/* LOCK */
+.lock-screen{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:32px 16px;text-align:center;margin-bottom:12px}
+
+/* TOAST */
+#_toast{position:fixed;bottom:calc(var(--nav-h)+10px);left:50%;transform:translateX(-50%);background:#1A1916;color:#fff;padding:12px 18px;border-radius:var(--r);font-size:13px;z-index:300;display:flex;align-items:center;gap:8px;max-width:88vw;box-shadow:0 4px 20px rgba(0,0,0,0.3)}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="t-left">
+      <div class="av">中涼</div>
+      <div><div class="t-name">中間 涼子</div><div class="t-fac">八事施設</div></div>
+    </div>
+    <div class="t-badge">★★ スター2挑戦中</div>
+  </div>
+  <div class="content" id="content"></div>
+  <div class="bnav" id="nav"></div>
+</div>
+<div id="modal-slot"></div>
+
+<script>
+/* ══════════════════════════════
+   CONSTANTS
+══════════════════════════════ */
+const METHODS=['レギュラー','ネガティブ','アダプティブ','アイソキネティック','エクスプロニック'];
+const P1_PROGS=['ボディトーニング','筋肉増加','ウエイトロス','アスリート'];
+const P2_PROGS=['リハビリ','メタボリックフィット','免疫向上'];
+const DOW=['月','火','水','木','金','土','日'];
+const MN=['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+
+// Star1 checklist sections (what Star2 育成 candidates need to complete)
+const S1_SECS=[
+  {k:'hub',l:'FitnessHub',icon:'ti-device-desktop',items:[
+    {id:'h1',t:'EGYMアカウント作成'},{id:'h2',t:'RFIDバンドの連携'},
+    {id:'h3',t:'身体スキャン'},{id:'h4',t:'体組成測定'},
+    {id:'h5',t:'EGYMモードを選択'},{id:'h6',t:'柔軟性測定'},
+  ]},
+  {k:'trainer',l:'トレーナーアプリ',icon:'ti-device-mobile',items:[
+    {id:'t1',t:'プロフィール写真撮影'},{id:'t2',t:'健康情報を収集'},
+    {id:'t3',t:'ノート作成'},{id:'t4',t:'各フェーズ毎にタスクを作成'},
+    {id:'t5',t:'トレーニングプランを作成'},
+  ]},
+  {k:'member',l:'メンバーアプリ',icon:'ti-users',items:[
+    {id:'m1',t:'アプリをダウンロード'},{id:'m2',t:'施設コードを入力'},{id:'m3',t:'ログイン'},
+  ]},
+  {k:'strength',l:'スマートストレングス',icon:'ti-barbell',items:[
+    {id:'s1',t:'オンボーディングセットアップ'},{id:'s2',t:'筋力テスト'},{id:'s3',t:'各マシンの姿勢を確認'},
+  ]},
+  {k:'cardio',l:'カーディオ',icon:'ti-heart-rate-monitor',items:[
+    {id:'c1',t:'プログラム選択及び設定'},{id:'c2',t:'VO2 Max測定'},
+  ]},
+];
+
+const S2_CL_SECS=[
+  {k:'hub',l:'FitnessHub',icon:'ti-device-desktop',items:[
+    {id:'sh1',t:'体組成測定',n:'FitnessHubで測定を実施する'},
+    {id:'sh2',t:'柔軟性測定',n:'FitnessHubで実施する'},
+    {id:'sh3',t:'Bio Ageの確認',n:'BioAge数値を確認・記録する'},
+  ]},
+  {k:'trainer',l:'トレーナーアプリ',icon:'ti-device-mobile',items:[
+    {id:'st1',t:'ワークアウトプログラムを割り当て',n:'トレーナーアプリで設定する'},
+    {id:'st2',t:'タスクの割り当て及び過程管理',n:'各フェーズのタスクを管理する'},
+    {id:'st3',t:'メンバーの進捗確認',n:'定期的に確認・フォローする'},
+    {id:'st4',t:'BIO Age・メンバー内容を確認',n:'測定データを継続確認する'},
+  ]},
+  {k:'memberapp',l:'メンバーアプリ',icon:'ti-users',items:[
+    {id:'sm1',t:'コネクティングアプリの接続方法',n:'メンバーアプリとの連携設定'},
+    {id:'sm2',t:'トレーニングプラン',n:'プラン作成と割り当て'},
+    {id:'sm3',t:'アクティビティポイント',n:'ポイント確認と活用方法'},
+    {id:'sm4',t:'アクティビティレベル',n:'レベル設定と確認'},
+    {id:'sm5',t:'ランキング',n:'施設内ランキング機能の確認'},
+    {id:'sm6',t:'Bio Age',n:'メンバーアプリでのBioAge確認'},
+  ]},
+  {k:'strength',l:'スマートストレングス',icon:'ti-barbell',items:[
+    {id:'ss1',t:'ベーシックコースの構成を確認',n:'各マシン構成を理解する'},
+    {id:'ss2',t:'ベーシックコースの負荷方法を確認',n:'ネガティブ・アダプティブ等'},
+    {id:'ss3',t:'個別マシン設定',n:'各マシンの個別設定方法'},
+    {id:'ss4',t:'プログラムを変更',n:'プログラム変更の手順'},
+    {id:'ss5',t:'バンド選択を確認',n:'適切なバンド選択方法'},
+  ]},
+  {k:'test',l:'テスト項目',icon:'ti-clipboard-check',items:[
+    {id:'ste1',t:'柔軟性テスト実施と説明',n:'テスト手順と説明方法'},
+    {id:'ste2',t:'体組成計測定実施と説明',n:'InBody測定の実施と説明'},
+    {id:'ste3',t:'筋力テスト',n:'スマートストレングス筋力測定'},
+    {id:'ste4',t:'カーディオテスト（VO2Max）',n:'VO2Max測定の実施と説明'},
+  ]},
+  {k:'knowledge',l:'知識総合',icon:'ti-book',items:[
+    {id:'sk1',t:'EGYM特徴とは',n:'EGYMの主要特徴を説明できる'},
+    {id:'sk2',t:'トレーニング理論の基礎',n:'基礎的なトレーニング理論'},
+    {id:'sk3',t:'運動指導における接遇スキル',n:'会員への接し方・コミュニケーション'},
+    {id:'sk4',t:'BIO Ageの確認と説明',n:'BioAge推移の説明方法'},
+    {id:'sk5',t:'VO2maxの説明',n:'VO2Maxの意味と説明方法'},
+  ]},
+];
+
+const TEST_SECTIONS = [
+  {
+    title:'システム知識', icon:'ti-cpu',
+    questions:[
+      {id:'q1',text:'ベーシックプログラムとEGYM＋プログラムの違いは何ですか？また、どのような基準で使い分けますか？',scored:true},
+      {id:'q2',text:'BioAgeとは何ですか？どのようなデータを基に算出されますか？',scored:true},
+      {id:'q3',text:'EGYMでトレーニング4フェーズ（レベル）が分かれている理由は何ですか？',scored:true},
+    ]
+  },
+  {
+    title:'プログラム知識', icon:'ti-barbell',
+    questions:[
+      {id:'q4',text:'あなたが体験したプログラムを2つ選び、各Phaseの目的と負荷方法を説明してください。',scored:true},
+      {id:'q5',text:'あなたの店舗でよく使用されると思うプログラムを2つ選び、各Phaseの目的と負荷方法を説明してください。',scored:true},
+      {id:'q6',text:'「免疫向上」「リハビリ」「メタボリックフィット」と一般的な筋肉増加の違いを説明してください。',scored:true},
+    ]
+  },
+  {
+    title:'運用＆タスク', icon:'ti-checkbox',
+    questions:[
+      {id:'q7',text:'タスク機能はなぜ重要ですか？会員サポートの観点から説明してください。',scored:true},
+      {id:'q8',text:'今後活用してみたいタスク内容を2つ挙げ、理由も説明してください。',scored:true},
+      {id:'q9',text:'会員の満足度や継続率を高めるために、トレーナーとして意識すべきことは何ですか？',scored:true},
+    ]
+  },
+  {
+    title:'ケーススタディー', icon:'ti-user',
+    caseDesc:'【ケース】40歳男性 / 体脂肪率高め / 運動経験なし / 4ヶ月で減量と基礎体力向上を目標',
+    questions:[
+      {id:'q10',text:'どのようにEGYMプログラムを選択しますか？理由も説明してください。',scored:true},
+      {id:'q11',text:'実施前後で記録すべきデータは何ですか？',scored:true},
+      {id:'q12',text:'基礎筋力向上と減量のためのポイントを3つ挙げてください。',scored:true},
+      {id:'q13',text:'トリガー機能が反応し、会員の進捗が思うように進んでいない場合どのように対応しますか？',scored:true},
+    ]
+  },
+  {
+    title:'トラブルシューティング', icon:'ti-tool',
+    note:'※この3問はご自身で読んで自己確認します。AI採点は行いません。',
+    questions:[
+      {id:'ts1',text:'会員がEGYMバンドを紛失した場合どのように対応しますか？',scored:false},
+      {id:'ts2',text:'オンボーディング時に登録したメールアドレスとメンバーアプリのメールアドレスが違う場合、どのような問題が発生しますか？またどう対応しますか？',scored:false},
+      {id:'ts3',text:'スター1メンバーをサポートしていた際に、どのような質問やトラブルを受けましたか？また、それにどのように対応しましたか？',scored:false},
+    ]
+  },
+];
+
+const ANSWER_KEY = {
+  q1:'ベーシックプログラムは1つの基本プログラムで構成され、RegularとNegativeの負荷方法を使用して筋力向上を行う。比較的低負荷でトレーニング初心者でも取り組みやすく、運動を習慣化することを目的とする。EGYM+は8つの目的別プログラムがあり、5つの負荷方法を使用。筋力向上、減量、健康改善など会員の目的に応じたトレーニングが可能。使い分けは初心者にはベーシック、目的が明確な場合はEGYM+を選択する。',
+  q2:'BioAgeとはEGYMの各種測定データを基に算出される身体年齢の指標。筋力（EGYMストレングスマシン）、柔軟性（Fitness Hub）、代謝（体組成計）、持久力（VO2maxまたは心拍数・Matrixカーディオ）のデータを総合的に評価して算出される。会員の体力レベルを可視化しモチベーション向上につなげることを目的とする。',
+  q3:'同じトレーニングを続けると身体がその刺激に慣れてしまうため、フェーズごとに負荷方法やトレーニング内容を変えることで常に新しい刺激を与え、効率的に筋力向上・体力向上を図るため。初期はフォーム習得、中盤は筋力向上、後半は最大刺激やパワー向上といった段階的なアプローチができる。',
+  q4:'プログラムの名前を2つ挙げ、各Phase（フェーズ1〜4）の目的と負荷方法（Regular/Negative/Adaptive/Isokinetic/Explonicなど）が具体的に説明されていれば正解。フェーズごとの目的の変化や負荷方法の理由が述べられているとより高評価。',
+  q5:'店舗の会員ニーズや特徴を考慮してプログラムを2つ選び、各Phaseの目的と負荷方法を説明できていれば正解。選んだ理由が店舗の状況と合致していると高評価。',
+  q6:'免疫向上：体調改善・免疫機能向上を目的とし中〜低負荷で継続しやすいトレーニング。リハビリ：関節や筋肉への負担を最小限にした低負荷、可動域改善・機能回復が目的。メタボリックフィット：脂肪燃焼と代謝向上を目的とし中負荷・高回数で心拍数を維持。一般的な筋肉増加：筋肥大を目的とした高負荷・低回数で強い刺激を与えるトレーニング。',
+  q7:'タスク機能は会員のトレーニング状況や進捗を把握し適切なタイミングでサポートするために重要。フォームの乱れ・モチベーション低下・進捗停滞などに対して見逃さず対応できる。フォームチェックやBioAge確認をタスクとして設定することで具体的な改善提案や声掛けが可能となり会員の継続率・満足度の向上につながる。',
+  q8:'具体的な2つのタスク内容と、それが会員サポートや継続率向上にどうつながるかの理由が述べられていれば正解。例：BioAge確認タスク、筋力テスト後のフォロー、来館頻度低下時のアラートなど。',
+  q9:'会員一人ひとりの目標や体力レベルに合わせた個別対応、BioAgeや筋力データを活用した進捗の可視化、定期的な声掛けやフォローアップ、トレーニングの習慣化支援などが含まれていれば正解。',
+  q10:'運動経験がないため高負荷を避け安全に運動習慣を作りながら減量と基礎体力向上を進める。ベーシックプログラムまたは基礎体力向上に適したEGYM+プログラムから開始し慣れたらメタボリックフィットなどを組み合わせる。安全性・継続性・減量効果を重視した理由が述べられていれば正解。',
+  q11:'体組成計データ（体重・体脂肪率・筋肉量・BMA）、筋力データ（EGYMストレングスマシン）、トレーニング回数・内容が含まれていれば正解。BioAgeも含まれるとより高評価。',
+  q12:'①大筋群の筋肉量を増やして基礎代謝を向上させること、②有酸素運動や活動量増加で消費カロリーを増やすこと、③カロリー摂取コントロールとタンパク質摂取・栄養バランス。3つのポイントが具体的に説明されていれば正解。',
+  q13:'原因確認（来館頻度・フォーム・負荷設定・食事・モチベーション低下のヒアリング）→プログラム内容見直し・負荷設定調整・フォーム指導・目標再確認・声掛け強化という流れで対応。',
+};
+
+/* ══════════════════════════════
+   STATE
+══════════════════════════════ */
+function makeData(){return{bma:'',muscle:'',weight:''}}
+function makePhases(){
+  return['フェーズ1','フェーズ2','フェーズ3','フェーズ4'].map((label,i)=>({
+    label,method:'',note:'',sessions:Array(6).fill(null),open:i===0,done:false
+  }));
+}
+// Build Star2 checklist state
+const s2clState={};
+S2_CL_SECS.forEach(s=>s.items.forEach(it=>{s2clState[it.id]=false;}));
+
+// Build initial Star1 candidate checklist (simulating candidate's own progress)
+function makeCandCl(){
+  const cl={};
+  S1_SECS.forEach(s=>s.items.forEach(it=>{cl[it.id]=false;}));
+  return cl;
+}
+
+const ST={
+  page:'home',
+  // Star2's own checklist
+  cl:s2clState,
+  // Programs
+  p1:{selected:'',phases:makePhases(),pre:makeData(),post:makeData()},
+  p2:{selected:'',phases:makePhases(),pre:makeData(),post:makeData()},
+  schProg:'p1',
+  cal:{show:false,prog:null,pi:null,si:null,year:new Date().getFullYear(),month:new Date().getMonth()},
+  // Star1 candidates that Star2 is 育成ing
+  candidates:[
+    {
+      id:'cand1',name:'田中 直子',initials:'田直',email:'tanaka@egym.jp',
+      addedAt:'2024/10/15',status:'progress',certifiedAt:null,
+      cl:makeCandCl(),testDone:false,testPass:false,
+    }
+  ],
+  // Test (AI-graded, 5-day timer, auto-save)
+  testAnswers:{},testSubmitted:false,testScore:null,testResult:null,
+  testStartedAt:null,
+  // Modal
+  modal:null, // 'invite' | 'certify:id' | 'approve:id'
+};
+
+/* ══════════════════════════════
+   HELPERS
+══════════════════════════════ */
+function allS2Cl(){return Object.keys(ST.cl);}
+function doneS2Cl(){return allS2Cl().filter(id=>ST.cl[id]).length;}
+function s2ClPct(){return Math.round(doneS2Cl()/allS2Cl().length*100);}
+function clComplete(){return s2ClPct()===100;}
+
+function allS1Items(){return S1_SECS.flatMap(s=>s.items);}
+function candPct(cand){
+  const total=allS1Items().length;
+  const done=allS1Items().filter(it=>cand.cl[it.id]).length;
+  return Math.round(done/total*100);
+}
+function candDone(cand){return allS1Items().filter(it=>cand.cl[it.id]).length;}
+
+function p1Done(){return ST.p1.phases.every(p=>p.done);}
+function p2Done(){return ST.p2.phases.every(p=>p.done);}
+function certifiedCount(){return ST.candidates.filter(c=>c.status==='certified').length;}
+function canInvite(){return p1Done();}// プログラム①完了後から招待可
+function testUnlocked(){return clComplete()&&p1Done()&&p2Done();}
+
+function totalSess(pk){return ST[pk].phases.reduce((a,ph)=>a+ph.sessions.filter(Boolean).length,0);}
+function donePh(pk){return ST[pk].phases.filter(p=>p.done).length;}
+function fmtD(d){return d?`${d.m}/${d.d}`:''}
+
+/* ══════════════════════════════
+   NAV
+══════════════════════════════ */
+const NAV_CFG=[
+  {k:'home',i:'ti-home',l:'ホーム'},
+  {k:'checklist',i:'ti-checkbox',l:'チェック'},
+  {k:'schedule',i:'ti-calendar',l:'スケジュール'},
+  {k:'star1',i:'ti-star',l:'スター1育成'},
+  {k:'test',i:'ti-clipboard-check',l:'テスト'},
+  {k:'cert',i:'ti-certificate',l:'認定状況'},
+];
+
+function go(pg){
+  if(pg==='test'&&!testUnlocked()){
+    toast('チェックリスト完了＋プログラム①②完了後にテストが解放されます');return;
+  }
+  ST.page=pg;ST.cal.show=false;ST.modal=null;
+  document.getElementById('nav').innerHTML=NAV_CFG.map(n=>{
+    const locked=n.k==='test'&&!testUnlocked();
+    const on=ST.page===n.k;
+    const isS1=n.k==='star1';
+    const sc=certifiedCount();
+    return`<button class="ni ${on?'on':locked?'lk':''}" onclick="${locked?'toast()':("go('"+n.k+"')")}">
+      ${isS1&&sc>0?`<div class="ni-badge">${sc}/2</div>`:''}
+      ${locked?`<div class="ni-lock"><i class="ti ti-lock" style="font-size:8px"></i></div>`:''}
+      <i class="ti ${locked?'ti-lock':n.i} ni-icon"></i>
+      <span class="ni-lbl">${n.l}</span>
+    </button>`;
+  }).join('');
+  render();
+}
+
+function toast(msg){
+  const ex=document.getElementById('_toast');if(ex)ex.remove();
+  const t=document.createElement('div');t.id='_toast';
+  t.innerHTML=`<i class="ti ti-info-circle" style="font-size:16px;flex-shrink:0"></i><span>${msg}</span>`;
+  document.body.appendChild(t);setTimeout(()=>{if(t.parentNode)t.remove();},3200);
+}
+
+/* ══════════════════════════════
+   RENDER
+══════════════════════════════ */
+function render(){
+  document.getElementById('content').scrollTop=0;
+  const fns={home:rHome,checklist:rChecklist,schedule:rSchedule,star1:rStar1,test:rTest,cert:rCert};
+  document.getElementById('content').innerHTML=(fns[ST.page]||rHome)();
+  renderModal();
+}
+
+function renderModal(){
+  const slot=document.getElementById('modal-slot');
+  if(!ST.modal){slot.innerHTML='';return;}
+  if(ST.modal==='invite') slot.innerHTML=mInvite();
+  else if(ST.modal.startsWith('certify:')) slot.innerHTML=mCertify(ST.modal.split(':')[1]);
+  else if(ST.modal.startsWith('viewcl:')) slot.innerHTML=mViewCl(ST.modal.split(':')[1]);
+  else slot.innerHTML='';
+}
+
+/* ══════════════════════════════
+   HOME
+══════════════════════════════ */
+function rHome(){
+  const p=s2ClPct();const sc=certifiedCount();
+  const testPass=ST.submitted&&ST.score>=80;
+  const dp1=donePh('p1');const dp2=donePh('p2');
+  return`
+  <div class="g4" style="margin-bottom:12px">
+    <div class="met"><div class="mv" style="color:var(--green);font-size:18px">${p}%</div><div class="ml">チェック</div><div class="pb"><div class="pf pfg" style="width:${p}%"></div></div></div>
+    <div class="met"><div class="mv" style="color:${p1Done()&&p2Done()?'var(--green)':'var(--amber)'};font-size:18px">${dp1+dp2}<span style="font-size:11px;color:var(--text3)">/8</span></div><div class="ml">フェーズ</div><div class="pb"><div class="pf pfg" style="width:${Math.round((dp1+dp2)/8*100)}%"></div></div></div>
+    <div class="met"><div class="mv" style="color:${sc>=2?'var(--green)':'var(--amber)'};font-size:18px">${sc}<span style="font-size:11px;color:var(--text3)">/2</span></div><div class="ml">★1育成</div><div class="pb"><div class="pf pfg" style="width:${Math.min(100,sc/2*100)}%"></div></div></div>
+    <div class="met"><div class="mv" style="font-size:13px;padding-top:2px">${ST.submitted?(ST.score>=80?'<span style="color:var(--green)">合格</span>':'<span style="color:var(--red)">不合格</span>'):'<span style="color:var(--text3)">未受験</span>'}</div><div class="ml">テスト</div></div>
+  </div>
+
+  <div class="card">
+    <div class="ctitle">認定までの手順</div>
+    ${[
+      {l:'スター2チェックリスト 全項目完了',s:`${doneS2Cl()}/${allS2Cl().length}項目（${p}%）`,ok:p===100,icon:p===100?'ti-check':'ti-checkbox',lock:false},
+      {l:'プログラム① 完了',s:'全4フェーズ完了（完了後にスター1育成が解放）',ok:p1Done(),icon:p1Done()?'ti-check':'ti-calendar',lock:false},
+      {l:'プログラム② 完了',s:'全4フェーズ完了',ok:p2Done(),icon:p2Done()?'ti-check':'ti-calendar',lock:false},
+      {l:'スター1を2名以上育成・認定',s:`現在 ${sc}名認定済み（プログラム①完了後から招待可）`,ok:sc>=2,icon:sc>=2?'ti-check':'ti-star',lock:false},
+      {l:'確認テスト合格（80点以上）',s:ST.submitted?`スコア: ${ST.score}点`:testUnlocked()?'受験可能':'チェック＋プログラム①②完了後に解放',ok:testPass,icon:testPass?'ti-check':testUnlocked()?'ti-clipboard-check':'ti-lock',lock:!testUnlocked()},
+    ].map(it=>`
+    <div class="step">
+      <div class="sdot ${it.ok?'s-done':it.lock?'s-lock':'s-prog'}"><i class="ti ${it.icon}" style="font-size:14px"></i></div>
+      <div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">${it.l}</div><div style="font-size:11px;color:var(--text3);margin-top:3px">${it.s}</div></div>
+      <span class="tag ${it.ok?'td':it.lock?'tg':'tp'}" style="flex-shrink:0;margin-left:8px">${it.ok?'完了':it.lock?'ロック':'未完了'}</span>
+    </div>`).join('')}
+  </div>
+
+  <div class="card">
+    <div class="ctitle">スター1 育成状況 <button class="btn btnsm" onclick="go('star1')">詳細 →</button></div>
+    ${ST.candidates.length===0?`<div style="text-align:center;padding:20px;color:var(--text3);font-size:13px">${p1Done()?'「スター1育成」タブから候補者を招待してください':'プログラム①完了後に招待できます'}</div>`:''}
+    ${ST.candidates.map(c=>{
+      const pct=candPct(c);
+      return`<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--bg2)">
+        <div class="av-lg" style="width:38px;height:38px;background:${c.status==='certified'?'var(--green-l)':'var(--blue-l)'};color:${c.status==='certified'?'var(--green)':'var(--blue)'};border-color:${c.status==='certified'?'var(--green-m)':'var(--blue-m)'};">${c.initials}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:700">${c.name}</div>
+          <div style="display:flex;align-items:center;gap:6px;margin-top:4px">
+            <div class="pb" style="flex:1;margin:0"><div class="pf pfb" style="width:${pct}%"></div></div>
+            <span style="font-size:11px;color:var(--text3)">${pct}%</span>
+          </div>
+        </div>
+        <span class="tag ${c.status==='certified'?'td':pct===100?'tb':'tp'}" style="flex-shrink:0">${c.status==='certified'?'認定済':pct===100?'認定可':'進行中'}</span>
+      </div>`;
+    }).join('')}
+  </div>`;
+}
+
+/* ══════════════════════════════
+   STAR2 CHECKLIST
+══════════════════════════════ */
+function rChecklist(){
+  const p=s2ClPct();const done=doneS2Cl();const total=allS2Cl().length;
+  return`
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <span style="font-size:14px;font-weight:700">全体進捗 ${done}/${total}項目</span>
+      <span style="font-size:16px;font-weight:700;color:var(--green)">${p}%</span>
+    </div>
+    <div class="pb" style="height:8px"><div class="pf pfg" style="width:${p}%"></div></div>
+  </div>
+  ${S2_CL_SECS.map(s=>{
+    const d=s.items.filter(it=>ST.cl[it.id]).length;
+    const sp=Math.round(d/s.items.length*100);
+    return`<div class="card" style="padding:0;overflow:hidden">
+      <div class="sec-hd">
+        <div style="font-size:13px;font-weight:700;display:flex;align-items:center;gap:6px"><i class="ti ${s.icon}" style="font-size:15px"></i>${s.l}</div>
+        <div style="display:flex;align-items:center;gap:7px">
+          <div class="pb" style="width:46px;margin:0"><div class="pf pfg" style="width:${sp}%"></div></div>
+          <span style="font-size:11px;color:var(--text3)">${d}/${s.items.length}</span>
+          <span class="tag ${sp===100?'td':'tp'}">${sp===100?'完了':'進行中'}</span>
+        </div>
+      </div>
+      ${s.items.map(it=>`
+      <div class="cl-item" onclick="toggleCl('${it.id}')">
+        <div class="cb ${ST.cl[it.id]?'on':''}">${ST.cl[it.id]?'<i class="ti ti-check" style="font-size:13px"></i>':''}</div>
+        <div style="flex:1;min-width:0">
+          <div class="cl-txt ${ST.cl[it.id]?'done':''}">${it.t}</div>
+          <div class="cl-note">${it.n}</div>
+        </div>
+      </div>`).join('')}
+    </div>`;
+  }).join('')}`;
+}
+function toggleCl(id){ST.cl[id]=!ST.cl[id];go(ST.page);}
+
+/* ══════════════════════════════
+   SCHEDULE
+══════════════════════════════ */
+function rSchedule(){
+  return`
+  <div class="prog-tab">
+    <div class="ptab ${ST.schProg==='p1'?'on':''}" onclick="schSwitch('p1')">プログラム①<br><span style="font-size:11px;opacity:0.8">${ST.p1.selected||'未選択'}</span></div>
+    <div class="ptab ${ST.schProg==='p2'?'on':''}" onclick="schSwitch('p2')">プログラム②<br><span style="font-size:11px;opacity:0.8">${ST.p2.selected||'未選択'}</span></div>
+  </div>
+  ${buildSchProg()}`;
+}
+function schSwitch(p){ST.schProg=p;ST.cal.show=false;render();}
+
+function buildSchProg(){
+  const pk=ST.schProg;const prog=ST[pk];
+  const list=pk==='p1'?P1_PROGS:P2_PROGS;
+  const dp=donePh(pk);const ts=totalSess(pk);
+  let html=`<div class="card">
+    <div class="frow">
+      <label class="flabel">EGYMプログラム選択</label>
+      <select onchange="schSetProg(this.value)">
+        <option value="">-- プログラムを選択 --</option>
+        ${list.map(n=>`<option value="${n}" ${prog.selected===n?'selected':''}>${n}</option>`).join('')}
+      </select>
+    </div>
+    ${prog.selected
+      ?`<div style="padding:10px 12px;background:var(--blue-l);border-radius:var(--r-sm);font-size:13px;color:var(--blue);font-weight:600;margin-bottom:12px"><i class="ti ti-circle-check"></i> 選択中: ${prog.selected}</div>`
+      :`<div style="padding:10px 12px;background:var(--amber-l);border-radius:var(--r-sm);font-size:13px;color:var(--amber);margin-bottom:12px"><i class="ti ti-alert-circle"></i> プログラムを選択してください</div>`}
+    <div class="g2">
+      <div class="met"><div class="mv" style="color:var(--blue)">${dp}<span style="font-size:13px;color:var(--text3)">/4</span></div><div class="ml">フェーズ完了</div><div class="pb"><div class="pf pfb" style="width:${dp/4*100}%"></div></div></div>
+      <div class="met"><div class="mv" style="color:var(--green)">${ts}<span style="font-size:13px;color:var(--text3)">/24</span></div><div class="ml">セッション記録</div><div class="pb"><div class="pf pfg" style="width:${ts/24*100}%"></div></div></div>
+    </div>
+    ${pk==='p1'&&p1Done()?`<div style="margin-top:10px;padding:10px 12px;background:var(--green-l);border-radius:var(--r-sm);font-size:12px;color:var(--green);font-weight:600"><i class="ti ti-star"></i> プログラム①完了！スター1育成タブから候補者を招待できます</div>`:''}
+  </div>`;
+
+  prog.phases.forEach((ph,pi)=>{
+    const sc=ph.sessions.filter(Boolean).length;
+    html+=`<div class="ph-block ${ph.done?'ph-done':sc>0?'ph-active':''}">
+      <div class="ph-head" onclick="schTogglePhase(${pi})">
+        <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0">
+          <i class="ti ${ph.open?'ti-chevron-down':'ti-chevron-right'}" style="font-size:17px;color:var(--text3);flex-shrink:0"></i>
+          <span style="font-size:14px;font-weight:700">${ph.label}</span>
+          ${ph.method?('<span class="tag tb" style="flex-shrink:0">'+ph.method+'</span>'):'<span class="tag tg" style="flex-shrink:0">負荷未設定</span>'}
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;margin-left:8px">
+          <span style="font-size:12px;color:var(--text3)">${sc}/6</span>
+          <span class="tag ${ph.done?'td':sc>0?'tb':'tg'}">${ph.done?'完了':sc>0?'進行中':'未開始'}</span>
+        </div>
+      </div>`;
+    if(ph.open){
+      html+=`<div class="ph-body">
+        <div class="frow">
+          <label class="flabel">負荷方法</label>
+          <select onchange="schSetMethod(${pi},this.value)">
+            <option value="">-- 選択 --</option>
+            ${METHODS.map(m=>`<option value="${m}" ${ph.method===m?'selected':''}>${m}</option>`).join('')}
+          </select>
+        </div>
+        <div class="frow">
+          <label class="flabel">フェーズメモ</label>
+          <textarea placeholder="メモを入力（トレーニング内容、気づき、特記事項など）" oninput="schSetNote(${pi},this.value)">${ph.note||''}</textarea>
+        </div>
+        <div class="frow">
+          <label class="flabel">ワークアウトセッション（6回）— タップして日付選択</label>
+          <div class="sess-grid">
+            ${ph.sessions.map((d,si)=>`
+            <div class="sess-slot ${d?'has-d':''}" onclick="schOpenCal(${pi},${si})">
+              <div class="sess-n">第${si+1}回</div>
+              ${d?('<div class="sess-d">'+fmtD(d)+'</div>'):'<i class="ti ti-calendar-plus" style="font-size:22px;color:var(--text3)"></i>'}
+            </div>`).join('')}
+          </div>
+        </div>
+        ${ST.cal.show&&ST.cal.pi===pi&&ST.cal.prog===pk?buildCal(pi):''}
+        <div style="display:flex;gap:10px;margin-top:14px">
+          <button class="btn btnsm" style="flex:1" onclick="schClearPhase(${pi})"><i class="ti ti-refresh" style="font-size:14px"></i> リセット</button>
+          <button class="btn btnp btnsm" style="flex:1" onclick="schMarkDone(${pi})"><i class="ti ti-check" style="font-size:14px"></i> フェーズ完了</button>
+        </div>
+      </div>`;
+    }
+    html+=`</div>`;
+  });
+
+  // Before/after data
+  const pre=prog.pre;const post=prog.post;
+  const metrics=[{k:'bma',l:'体脂肪率',u:'%',ph:'例: 23.5'},{k:'muscle',l:'筋肉量',u:'kg',ph:'例: 28.0'},{k:'weight',l:'体重',u:'kg',ph:'例: 68.0'}];
+  html+=`<div class="card">
+    <div class="ctitle">実施前後データ記録</div>
+    ${metrics.map(m=>{
+      const diff=pre[m.k]&&post[m.k]?diffDisplay(pre[m.k],post[m.k],m.k):'';
+      return`<div class="data-row">
+        <div style="font-size:13px;font-weight:700;display:flex;justify-content:space-between;align-items:center">${m.l}（${m.u}）${diff}</div>
+        <div class="data-pair">
+          <div class="data-field"><label>実施前</label><input type="number" step="0.1" class="data-input" value="${pre[m.k]||''}" placeholder="${m.ph}" oninput="schSetData('pre','${m.k}',this.value)"></div>
+          <div class="data-field"><label>実施後</label><input type="number" step="0.1" class="data-input" value="${post[m.k]||''}" placeholder="${m.ph}" oninput="schSetData('post','${m.k}',this.value)"></div>
+        </div>
+      </div>`;
+    }).join('')}
+  </div>`;
+  return html;
+}
+
+function buildCal(pi){
+  const{year,month,si,prog:cp}=ST.cal;
+  const ph=ST[cp].phases[pi];
+  const allKeys=ph.sessions.filter(Boolean).map(d=>`${d.y}-${d.m}-${d.d}`);
+  const first=new Date(year,month,1).getDay();
+  const offset=(first+6)%7;
+  const dim=new Date(year,month+1,0).getDate();
+  const now=new Date();
+  return`<div class="cal-wrap">
+    <div class="cal-hd">
+      <button class="cal-nb" onclick="calMv(-1)">‹</button>
+      <div style="text-align:center">
+        <div style="font-size:14px;font-weight:700">${year}年 ${MN[month]}</div>
+        <div style="font-size:12px;color:var(--blue);font-weight:700;margin-top:2px">第${si+1}回を選択中</div>
+      </div>
+      <button class="cal-nb" onclick="calMv(1)">›</button>
+    </div>
+    <div class="cal-grid">
+      ${DOW.map(d=>`<div class="cal-dow">${d}</div>`).join('')}
+      ${Array(offset).fill('<div class="cal-day empty"></div>').join('')}
+      ${Array.from({length:dim},(_,i)=>{
+        const day=i+1;const key=`${year}-${month+1}-${day}`;
+        const cur2=ph.sessions[si];
+        const isSel=cur2&&cur2.y===year&&cur2.m===month+1&&cur2.d===day;
+        const isOther=!isSel&&allKeys.includes(key);
+        const isToday=now.getFullYear()===year&&now.getMonth()===month&&now.getDate()===day;
+        return`<div class="cal-day ${isSel?'sel-d':isOther?'other-d':isToday?'today-d':''}" onclick="pickDate(${year},${month+1},${day})">${day}</div>`;
+      }).join('')}
+    </div>
+    <div style="margin-top:10px;display:flex;gap:12px">
+      <div style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text3)"><div style="width:12px;height:12px;border-radius:3px;background:var(--blue)"></div>選択中</div>
+      <div style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text3)"><div style="width:12px;height:12px;border-radius:3px;background:var(--green-l);border:1px solid var(--green-m)"></div>他セッション</div>
+    </div>
+    <button class="btn btnfull" style="margin-top:12px;padding:12px" onclick="closeCal()">閉じる</button>
+  </div>`;
+}
+
+function diffDisplay(pre,post,metric){
+  if(!pre||!post)return'';
+  const d=parseFloat(post)-parseFloat(pre);if(isNaN(d))return'';
+  const sign=d>0?'+':'';const good=metric==='muscle'?(d>0):(d<0);
+  const cls=d===0?'diff-zero':good?'diff-good':'diff-bad';
+  const unit=metric==='bma'?'%':'kg';
+  return`<span class="diff-badge ${cls}">${sign}${d.toFixed(1)}${unit}</span>`;
+}
+function schSetProg(v){ST[ST.schProg].selected=v;render();}
+function schSetMethod(pi,v){ST[ST.schProg].phases[pi].method=v;}
+function schSetNote(pi,v){ST[ST.schProg].phases[pi].note=v;}
+function schSetData(t,k,v){ST[ST.schProg][t][k]=v;}
+function schOpenCal(pi,si){
+  const pk=ST.schProg;
+  if(ST.cal.show&&ST.cal.pi===pi&&ST.cal.si===si&&ST.cal.prog===pk){ST.cal.show=false;}
+  else{ST.cal={...ST.cal,show:true,prog:pk,pi,si};}
+  render();
+}
+function closeCal(){ST.cal.show=false;render();}
+function calMv(d){
+  ST.cal.month+=d;
+  if(ST.cal.month<0){ST.cal.month=11;ST.cal.year--;}
+  if(ST.cal.month>11){ST.cal.month=0;ST.cal.year++;}
+  render();
+}
+function pickDate(y,m,d){
+  const{pi,si,prog:pk}=ST.cal;
+  ST[pk].phases[pi].sessions[si]={y,m,d};
+  const next=si<5?si+1:null;
+  if(next!==null){ST.cal.si=next;}else{ST.cal.show=false;}
+  render();
+}
+function schTogglePhase(pi){
+  const pk=ST.schProg;
+  ST[pk].phases.forEach((ph,i)=>{ph.open=(i===pi)?!ph.open:false;});
+  ST.cal.show=false;render();
+}
+function schClearPhase(pi){
+  const ph=ST[ST.schProg].phases[pi];
+  ph.method='';ph.note='';ph.sessions=Array(6).fill(null);ph.done=false;
+  ST.cal.show=false;render();
+}
+function schMarkDone(pi){
+  if(ST[ST.schProg].phases[pi].sessions.filter(Boolean).length<6){alert('6回のセッション日をすべて設定してから完了にしてください');return;}
+  ST[ST.schProg].phases[pi].done=true;ST[ST.schProg].phases[pi].open=false;
+  const next=ST[ST.schProg].phases[pi+1];if(next){next.open=true;}
+  ST.cal.show=false;render();
+}
+
+/* ══════════════════════════════
+   ★ STAR1 育成管理
+══════════════════════════════ */
+function rStar1(){
+  const sc=certifiedCount();
+  if(!canInvite()){
+    return`<div class="lock-screen">
+      <i class="ti ti-star" style="font-size:48px;color:var(--text3);display:block;margin-bottom:14px"></i>
+      <div style="font-size:16px;font-weight:700;margin-bottom:8px">スター1育成はロック中</div>
+      <div style="font-size:13px;color:var(--text2);margin-bottom:16px">プログラム①を完了すると<br>スター1候補者を招待できます</div>
+      <div style="padding:12px;background:var(--bg);border-radius:var(--r-sm);margin-bottom:20px;font-size:13px">
+        <div style="font-weight:700;margin-bottom:4px">プログラム① 進捗</div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <div class="pb" style="flex:1;margin:0"><div class="pf pfb" style="width:${donePh('p1')/4*100}%"></div></div>
+          <span style="font-size:12px;color:var(--text3)">${donePh('p1')}/4フェーズ</span>
+        </div>
+      </div>
+      <button class="btn btnp btnfull" style="padding:13px" onclick="go('schedule')"><i class="ti ti-calendar"></i> スケジュールへ</button>
+    </div>`;
+  }
+
+  return`
+  <!-- HEADER -->
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+    <div>
+      <div style="font-size:15px;font-weight:700">スター1育成管理</div>
+      <div style="font-size:12px;color:var(--text3);margin-top:2px">2名の認定がスター2の条件です</div>
+    </div>
+    <button class="btn btng btnsm" onclick="ST.modal='invite';renderModal()">
+      <i class="ti ti-plus" style="font-size:14px"></i> 候補者を招待
+    </button>
+  </div>
+
+
+  <!-- SUMMARY -->
+  <div class="card" style="margin-bottom:12px">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div style="font-size:13px;color:var(--text2)">認定済み</div>
+      <div style="font-size:28px;font-weight:700;color:${sc>=2?'var(--green)':'var(--blue)'}">${sc}<span style="font-size:15px;color:var(--text3)">/2名</span></div>
+    </div>
+    <div class="pb" style="height:8px;margin-top:8px"><div class="pf pfg" style="width:${Math.min(100,sc/2*100)}%"></div></div>
+    ${sc>=2?`<div style="margin-top:10px;padding:8px 12px;background:var(--green-l);border-radius:var(--r-sm);font-size:12px;color:var(--green);font-weight:700"><i class="ti ti-circle-check"></i> 条件達成！2名以上認定完了</div>`:''}
+  </div>
+
+  <!-- CANDIDATE LIST -->
+  ${ST.candidates.length===0?`
+  <div class="card" style="text-align:center;padding:28px 16px">
+    <i class="ti ti-users" style="font-size:40px;color:var(--text3);display:block;margin-bottom:10px"></i>
+    <div style="font-size:14px;font-weight:700;margin-bottom:6px">候補者がいません</div>
+    <div style="font-size:13px;color:var(--text3);margin-bottom:16px">メールアドレスで候補者を招待してください</div>
+    <button class="btn btng" onclick="ST.modal='invite';renderModal()"><i class="ti ti-plus"></i> 候補者を招待する</button>
+  </div>`:''}
+
+  ${ST.candidates.map(c=>{
+    const pct=candPct(c);const done=candDone(c);const total=allS1Items().length;
+    const isCert=c.status==='certified';
+    const canCert=pct===100&&c.testPass&&!isCert;
+    return`<div class="s1-card ${isCert?'certified':''}">
+      <!-- CANDIDATE HEADER -->
+      <div class="s1-head">
+        <div class="av-lg" style="background:${isCert?'var(--green-l)':'var(--blue-l)'};color:${isCert?'var(--green)':'var(--blue)'};border-color:${isCert?'var(--green-m)':'var(--blue-m)'};">${c.initials}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:14px;font-weight:700">${c.name}</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px">${c.email}</div>
+          <div style="font-size:11px;color:var(--text3)">招待日: ${c.addedAt}</div>
+        </div>
+        <span class="tag ${isCert?'td':pct===100&&c.testPass?'tb':'tp'}" style="flex-shrink:0">${isCert?'認定済み':pct===100&&c.testPass?'認定可':'進行中'}</span>
+      </div>
+
+      <!-- PROGRESS -->
+      <div style="margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+          <span style="font-size:12px;font-weight:700">チェックリスト進捗</span>
+          <span style="font-size:12px;color:var(--text3)">${done}/${total}項目（${pct}%）</span>
+        </div>
+        <div class="pb" style="height:8px"><div class="pf pfb" style="width:${pct}%"></div></div>
+      </div>
+
+      <!-- SECTION BREAKDOWN -->
+      ${S1_SECS.map(s=>{
+        const sDone=s.items.filter(it=>c.cl[it.id]).length;
+        const sPct=Math.round(sDone/s.items.length*100);
+        return`<div class="cl-progress-row">
+          <div style="display:flex;align-items:center;gap:6px;flex:1">
+            <div class="dot" style="background:${sPct===100?'var(--green)':sDone>0?'var(--amber)':'var(--border2)'}"></div>
+            <span>${s.l}</span>
+          </div>
+          <span style="color:var(--text3)">${sDone}/${s.items.length}</span>
+          ${sPct===100?`<span class="tag td" style="margin-left:6px">完了</span>`:''}
+        </div>`;
+      }).join('')}
+
+      <!-- TEST STATUS -->
+      <div style="margin-top:12px;padding:10px 12px;background:var(--bg);border-radius:var(--r-sm)">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:12px;font-weight:700">確認テスト</span>
+          <span class="tag ${c.testPass?'td':c.testDone?'tf':'tg'}">${c.testPass?'合格':c.testDone?'不合格':'未受験'}</span>
+        </div>
+        <!-- Simulate test progress for demo -->
+        <div style="margin-top:8px;display:flex;gap:6px">
+          <button class="btn btnsm" style="flex:1;font-size:11px" onclick="simCandTest('${c.id}',true)"><i class="ti ti-check" style="font-size:12px"></i> テスト合格（テスト）</button>
+          <button class="btn btnsm" style="flex:1;font-size:11px" onclick="simCandProgress('${c.id}')"><i class="ti ti-refresh" style="font-size:12px"></i> 進捗をシミュレート</button>
+        </div>
+      </div>
+
+      <!-- ACTIONS -->
+      <div style="margin-top:12px;display:flex;gap:8px">
+        <button class="btn btnsm" style="flex:1" onclick="ST.modal='viewcl:${c.id}';renderModal()"><i class="ti ti-list" style="font-size:13px"></i> チェック詳細</button>
+        ${isCert
+          ? `<div style="flex:1;padding:8px;background:var(--green-l);border-radius:var(--r-sm);font-size:12px;color:var(--green);font-weight:700;text-align:center"><i class="ti ti-shield-check"></i> 認定完了 ${c.certifiedAt}</div>`
+          : canCert
+            ? `<button class="btn btnsm btng" style="flex:1" onclick="ST.modal='certify:${c.id}';renderModal()"><i class="ti ti-award" style="font-size:13px"></i> スター1認定</button>`
+            : `<button class="btn btnsm" style="flex:1;opacity:0.5;cursor:not-allowed" onclick="toast('チェックリスト100%完了＋テスト合格が必要です')"><i class="ti ti-award" style="font-size:13px"></i> スター1認定</button>`
+        }
+      </div>
+    </div>`;
+  }).join('')}`;
+}
+
+// Simulate candidate progress for demo
+function simCandProgress(cid){
+  const c=ST.candidates.find(x=>x.id===cid);if(!c)return;
+  const items=allS1Items();
+  const notDone=items.filter(it=>!c.cl[it.id]);
+  const toCheck=notDone.slice(0,Math.max(1,Math.ceil(notDone.length/3)));
+  toCheck.forEach(it=>{c.cl[it.id]=true;});
+  render();
+}
+function simCandTest(cid,pass){
+  const c=ST.candidates.find(x=>x.id===cid);if(!c)return;
+  c.testDone=true;c.testPass=pass;render();
+}
+
+/* ══════════════════════════════
+   MODALS
+══════════════════════════════ */
+function mInvite(){
+  return`<div class="modal-bg" onclick="if(event.target===this){ST.modal=null;renderModal()}">
+    <div class="modal">
+      <div class="modal-handle"></div>
+      <div style="font-size:17px;font-weight:700;margin-bottom:4px">スター1候補者を招待</div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:18px">メールアドレスを入力するとスター1アプリへのアクセスが付与されます</div>
+      <div class="frow"><label class="flabel">氏名</label><input type="text" id="inv-name" placeholder="例: 佐藤 花子"></div>
+      <div class="frow"><label class="flabel">メールアドレス</label><input type="email" id="inv-email" placeholder="example@egym.jp"></div>
+      <div style="padding:12px;background:var(--green-l);border-radius:var(--r-sm);color:var(--green);font-size:12px;margin-bottom:18px;line-height:1.6">
+        <i class="ti ti-info-circle"></i> 招待メールが送信され、候補者はスター1アプリでチェックリストを進めます。進捗はこの画面でリアルタイムに確認できます。
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn" style="flex:1" onclick="ST.modal=null;renderModal()">キャンセル</button>
+        <button class="btn btng" style="flex:1" onclick="doInvite()"><i class="ti ti-send"></i> 招待する</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function doInvite(){
+  const name=document.getElementById('inv-name').value.trim();
+  const email=document.getElementById('inv-email').value.trim();
+  if(!name||!email){alert('氏名とメールアドレスを入力してください');return;}
+  if(!email.includes('@')){alert('正しいメールアドレスを入力してください');return;}
+  const initials=name.replace(/\s/g,'').slice(0,2);
+  const newCl=makeCandCl();
+  ST.candidates.push({
+    id:'cand'+Date.now(),name,initials,email,
+    addedAt:new Date().toLocaleDateString('ja-JP'),
+    status:'progress',certifiedAt:null,cl:newCl,testDone:false,testPass:false,
+  });
+  ST.modal=null;
+  toast(`${name}さんへ招待メールを送信しました`);
+  render();
+}
+
+function mCertify(cid){
+  const c=ST.candidates.find(x=>x.id===cid);if(!c)return'';
+  const pct=candPct(c);
+  return`<div class="modal-bg" onclick="if(event.target===this){ST.modal=null;renderModal()}">
+    <div class="modal">
+      <div class="modal-handle"></div>
+      <div style="font-size:17px;font-weight:700;margin-bottom:4px">スター1を認定する</div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:16px">この認定はJHTJapanへ通知されます</div>
+      <div style="display:flex;align-items:center;gap:12px;padding:14px;background:var(--bg);border-radius:var(--r-sm);margin-bottom:14px">
+        <div class="av-lg" style="background:var(--blue-l);color:var(--blue);border-color:var(--blue-m)">${c.initials}</div>
+        <div>
+          <div style="font-size:15px;font-weight:700">${c.name}</div>
+          <div style="font-size:12px;color:var(--text3)">${c.email}</div>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:18px">
+        <div style="display:flex;justify-content:space-between;padding:10px 12px;background:var(--green-l);border-radius:var(--r-sm)">
+          <span style="font-size:13px;font-weight:700">チェックリスト</span>
+          <span class="tag td">${pct}% 完了</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;padding:10px 12px;background:${c.testPass?'var(--green-l)':'var(--red-l)'};border-radius:var(--r-sm)">
+          <span style="font-size:13px;font-weight:700">確認テスト</span>
+          <span class="tag ${c.testPass?'td':'tf'}">${c.testPass?'合格':'未合格'}</span>
+        </div>
+      </div>
+      <div style="padding:12px;background:var(--amber-l);border-radius:var(--r-sm);font-size:12px;color:var(--amber);margin-bottom:18px;line-height:1.6">
+        <i class="ti ti-alert-triangle"></i> 認定後は取り消せません。候補者が全条件を満たしていることを確認してから認定してください。
+      </div>
+      <div style="display:flex;gap:10px">
+        <button class="btn" style="flex:1" onclick="ST.modal=null;renderModal()">キャンセル</button>
+        <button class="btn btng" style="flex:1;padding:13px" onclick="doCertify('${cid}')"><i class="ti ti-award"></i> 認定する</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function doCertify(cid){
+  const c=ST.candidates.find(x=>x.id===cid);if(!c)return;
+  c.status='certified';
+  c.certifiedAt=new Date().toLocaleDateString('ja-JP');
+  ST.modal=null;
+  toast(`${c.name}さんをスター1として認定しました`);
+  render();
+}
+
+function mViewCl(cid){
+  const c=ST.candidates.find(x=>x.id===cid);if(!c)return'';
+  const pct=candPct(c);
+  return`<div class="modal-bg" onclick="if(event.target===this){ST.modal=null;renderModal()}">
+    <div class="modal">
+      <div class="modal-handle"></div>
+      <div style="font-size:16px;font-weight:700;margin-bottom:4px">${c.name}さんのチェックリスト</div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:14px">進捗: ${candDone(c)}/${allS1Items().length}項目（${pct}%）</div>
+      <div class="pb" style="height:7px;margin-bottom:16px"><div class="pf pfb" style="width:${pct}%"></div></div>
+      ${S1_SECS.map(s=>{
+        const done=s.items.filter(it=>c.cl[it.id]).length;
+        const sp=Math.round(done/s.items.length*100);
+        return`<div style="margin-bottom:14px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <div style="font-size:13px;font-weight:700;display:flex;align-items:center;gap:5px"><i class="ti ${s.icon}" style="font-size:14px"></i>${s.l}</div>
+            <span class="tag ${sp===100?'td':'tp'}">${done}/${s.items.length}</span>
+          </div>
+          ${s.items.map(it=>`
+          <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--bg2)">
+            <i class="ti ${c.cl[it.id]?'ti-circle-check':'ti-circle'}" style="color:${c.cl[it.id]?'var(--green)':'var(--border2)'};font-size:16px;flex-shrink:0"></i>
+            <span style="font-size:13px;${c.cl[it.id]?'color:var(--text3);text-decoration:line-through':''}">${it.t}</span>
+          </div>`).join('')}
+        </div>`;
+      }).join('')}
+      <button class="btn btnfull" style="margin-top:8px;padding:13px" onclick="ST.modal=null;renderModal()">閉じる</button>
+    </div>
+  </div>`;
+}
+
+/* ══════════════════════════════
+   TEST
+══════════════════════════════ */
+/* ══ TEST HELPERS ══ */
+function testAllItems(){return TEST_SECTIONS.flatMap(s=>s.questions);}
+function testAnsweredCount(){return testAllItems().filter(q=>(ST.testAnswers[q.id]||'').trim().length>10).length;}
+function testTotalQ(){return testAllItems().length;}
+function testDeadline(){return ST.testStartedAt?(ST.testStartedAt+(5*24*60*60*1000)):null;}
+function testRemaining(){const dl=testDeadline();return dl?Math.max(0,dl-Date.now()):null;}
+function testFmtRemaining(){
+  const ms=testRemaining();if(ms===null)return '未開始';
+  const d=Math.floor(ms/(24*60*60*1000));
+  const h=Math.floor((ms%(24*60*60*1000))/(60*60*1000));
+  const m=Math.floor((ms%(60*60*1000))/60000);
+  if(d>0)return d+'日 '+h+'時間';
+  if(h>0)return h+'時間 '+m+'分';
+  return m+'分';
+}
+function saveTestState(){
+  try{localStorage.setItem('egym_s2_test',JSON.stringify({
+    answers:ST.testAnswers,startedAt:ST.testStartedAt,
+    submitted:ST.testSubmitted,score:ST.testScore,result:ST.testResult
+  }));}catch(e){}
+}
+function loadTestState(){
+  try{
+    const raw=localStorage.getItem('egym_s2_test');
+    if(!raw)return;
+    const d=JSON.parse(raw);
+    ST.testAnswers=d.answers||{};ST.testStartedAt=d.startedAt||null;
+    ST.testSubmitted=d.submitted||false;ST.testScore=d.score||null;
+    ST.testResult=d.result||null;
+  }catch(e){}
+}
+
+var _testTimer=null;
+function rTest(){
+  loadTestState();
+  if(!testUnlocked()){
+    return '<div class="lock-screen">'
+      +'<i class="ti ti-lock" style="font-size:52px;color:var(--text3);display:block;margin-bottom:14px"></i>'
+      +'<div style="font-size:17px;font-weight:700;margin-bottom:8px">テストはロック中</div>'
+      +'<div style="font-size:13px;color:var(--text2);margin-bottom:20px">以下の条件を全て満たすと解放されます</div>'
+      +[{l:'チェックリスト 全項目完了',ok:clComplete(),s:s2ClPct()+'%'},
+        {l:'プログラム① 全フェーズ完了',ok:p1Done(),s:''},
+        {l:'プログラム② 全フェーズ完了',ok:p2Done(),s:''}].map(function(it){
+          return '<div style="display:flex;align-items:center;gap:10px;padding:12px;background:var(--bg);border-radius:var(--r-sm);margin-bottom:8px;font-size:13px">'
+            +'<i class="ti '+(it.ok?'ti-check':'ti-x')+'" style="color:'+(it.ok?'var(--green)':'var(--red)')+';font-size:20px;flex-shrink:0"></i>'
+            +'<span>'+it.l+(it.s?' ('+it.s+')':'')+'</span></div>';
+        }).join('')
+      +'<div style="display:flex;flex-direction:column;gap:8px;margin-top:20px">'
+      +'<button class="btn btnp btnfull" style="padding:13px" onclick="go('checklist')"><i class="ti ti-checkbox"></i> チェックリストへ</button>'
+      +'<button class="btn btnfull" style="padding:13px" onclick="go('schedule')"><i class="ti ti-calendar"></i> スケジュールへ</button>'
+      +'</div></div>';
+  }
+
+  // Start timer on first open
+  if(!ST.testStartedAt){ST.testStartedAt=Date.now();saveTestState();}
+
+  if(ST.testSubmitted && ST.testResult){return rTestResult();}
+
+  const answered=testAnsweredCount();const total=testTotalQ();
+  const ms=testRemaining();const urgent=ms!==null&&ms<24*60*60*1000;
+
+  var html='<div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between">'
+    +'<div><div style="font-size:11px;color:var(--text2);font-weight:700">残り時間</div>'
+    +'<div style="font-size:14px;font-weight:700;color:'+(urgent?'var(--red)':'var(--text)')+'" id="test-timer">'+testFmtRemaining()+'</div></div>'
+    +'<div style="flex:1;height:6px;background:var(--bg2);border-radius:3px;overflow:hidden;margin:0 14px">'
+    +'<div class="pf pfb" style="width:'+Math.round(answered/total*100)+'%"></div></div>'
+    +'<div style="text-align:right"><div style="font-size:20px;font-weight:700">'+answered+'<span style="font-size:13px;color:var(--text3)">/'+total+'</span></div>'
+    +'<div style="font-size:10px;color:var(--text3)">回答済</div></div></div>';
+
+  html+='<div style="padding:10px 14px;background:var(--blue-l);border-radius:var(--r-sm);font-size:12px;color:var(--blue);margin-bottom:14px;line-height:1.6">'
+    +'<i class="ti ti-info-circle"></i> 回答は自動保存されます。5日以内に提出してください。AIが理解度を判断し80点以上で合格です。</div>';
+
+  var qNum=0;
+  TEST_SECTIONS.forEach(function(sec){
+    html+='<div style="font-size:13px;font-weight:700;color:var(--blue);padding:8px 0 6px;border-bottom:2px solid var(--blue-m);margin-bottom:12px">'
+      +'<i class="ti '+sec.icon+'" style="font-size:14px"></i> '+sec.title+'</div>';
+    if(sec.note){
+      html+='<div style="padding:10px 12px;background:var(--amber-l);border-radius:var(--r-sm);font-size:12px;color:var(--amber);font-weight:700;margin-bottom:10px">'+sec.note+'</div>';
+    }
+    if(sec.caseDesc){
+      html+='<div style="background:var(--amber-l);border:1px solid var(--amber-m);border-radius:var(--r-sm);padding:12px;margin-bottom:12px;font-size:13px;font-weight:700">'+sec.caseDesc+'</div>';
+    }
+    sec.questions.forEach(function(q){
+      qNum++;
+      var ans=ST.testAnswers[q.id]||'';
+      html+='<div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:12px">'
+        +'<div style="font-size:11px;color:var(--text3);font-weight:700;margin-bottom:6px">Q'+qNum+(sec.note?' ＜自己確認＞':'')+'</div>'
+        +'<div style="font-size:14px;font-weight:700;margin-bottom:10px;line-height:1.5">'+q.text+'</div>'
+        +'<textarea id="ta-'+q.id+'" placeholder="こちらに回答を入力してください..." '
+        +'style="width:100%;padding:11px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--card);color:var(--text);font-size:14px;line-height:1.7;resize:vertical;min-height:110px;font-family:inherit" '
+        +'oninput="onTestAnswer(''+q.id+'',this)" onblur="onTestAnswer(''+q.id+'',this)">'+(ans.replace(/</g,'&lt;').replace(/>/g,'&gt;'))+'</textarea>'
+        +'<div style="font-size:11px;color:var(--text3);text-align:right;margin-top:4px" id="cc-'+q.id+'">'+ans.length+' 文字</div>'
+        +'</div>';
+    });
+  });
+
+  html+='<div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:18px;margin-bottom:14px">'
+    +'<div style="font-size:15px;font-weight:700;margin-bottom:6px">提出する</div>'
+    +'<div style="font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.6">13問がAIにより採点されます（80点以上で合格）。<br>トラブルシューティング3問は自己確認用です。</div>'
+    +'<button class="btn btng btnfull" style="padding:14px;font-size:15px" onclick="submitTestAI()"><i class="ti ti-send"></i> テストを提出してAI採点する</button>'
+    +'</div>';
+
+  // start timer refresh
+  clearInterval(_testTimer);
+  _testTimer=setInterval(function(){
+    var el=document.getElementById('test-timer');
+    if(el)el.textContent=testFmtRemaining();
+  },60000);
+
+  return html;
+}
+
+var _saveTimers={};
+function onTestAnswer(qid,el){
+  ST.testAnswers[qid]=el.value;
+  var cc=document.getElementById('cc-'+qid);
+  if(cc)cc.textContent=el.value.length+' 文字';
+  clearTimeout(_saveTimers[qid]);
+  _saveTimers[qid]=setTimeout(function(){saveTestState();},800);
+}
+
+async function submitTestAI(){
+  if(!ST.testStartedAt){ST.testStartedAt=Date.now();}
+  var answered=testAnsweredCount();
+  if(answered<10){if(!confirm('まだ'+(testTotalQ()-answered)+'問が未回答です。このまま提出しますか？'))return;}
+
+  // Show loading
+  document.getElementById('content').innerHTML='<div style="text-align:center;padding:60px 20px">'
+    +'<div style="width:48px;height:48px;border:3px solid var(--bg2);border-top-color:var(--green);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px"></div>'
+    +'<div style="font-size:15px;font-weight:700;margin-bottom:6px">AIが採点中です...</div>'
+    +'<div style="font-size:13px;color:var(--text3)">13問の理解度を評価しています。しばらくお待ちください</div></div>'
+    +'<style>@keyframes spin{to{transform:rotate(360deg)}}</style>';
+
+  var scoredQs=[];var qNum=0;
+  TEST_SECTIONS.forEach(function(sec){sec.questions.forEach(function(q){qNum++;
+    if(q.scored)scoredQs.push({num:qNum,id:q.id,question:q.text,answer:ST.testAnswers[q.id]||'（未回答）',modelAnswer:ANSWER_KEY[q.id]||''});
+  });});
+
+  var prompt='あなたはEGYMマスタートレーナー認定試験の採点者です。
+以下の'+scoredQs.length+'問について、受験者がEGYMのトレーニングシステムを正しく理解しているかを評価してください。
+
+【採点基準】
+- 模範解答と一字一句同じである必要はありません
+- 概念や本質を理解していれば正解とします
+- 各問は0〜10点で採点してください
+- 未回答や非常に短い回答は0点にしてください
+- フィードバックは日本語で1〜2文で具体的に書いてください
+
+';
+  scoredQs.forEach(function(q){
+    prompt+='---
+問'+q.num+'：'+q.question+'
+模範解答のポイント：'+q.modelAnswer+'
+受験者の回答：'+q.answer+'
+
+';
+  });
+  prompt+='---
+以下のJSON形式のみで回答してください（他のテキストは不要）：
+{"scores":[{"id":"q1","score":8,"feedback":"フィードバック"},...],"total_score":75,"overall_comment":"全体的なコメント（2〜3文）"}';
+
+  try{
+    var response=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2000,
+        messages:[{role:'user',content:prompt}]})
+    });
+    var data=await response.json();
+    var raw=data.content.map(function(c){return c.text||'';}).join('');
+    var m=raw.match(/\{[\s\S]*\}/);
+    if(!m)throw new Error('JSON parse failed');
+    var result=JSON.parse(m[0]);
+    ST.testResult=result;ST.testSubmitted=true;ST.testScore=result.total_score;
+    saveTestState();render();
+  }catch(err){
+    render();
+    alert('採点中にエラーが発生しました。もう一度お試しください。\n'+err.message);
+  }
+}
+
+function rTestResult(){
+  var result=ST.testResult;if(!result)return rTest();
+  var total=result.total_score||0;var pass=total>=80;
+  var scoreMap={};(result.scores||[]).forEach(function(s){scoreMap[s.id]=s;});
+
+  var html='<div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:28px 16px;text-align:center;margin-bottom:12px">'
+    +'<div style="width:84px;height:84px;border-radius:50%;background:'+(pass?'var(--green-l)':'var(--red-l)')+';border:3px solid '+(pass?'var(--green-m)':'#e8a9a9')+';display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;margin:0 auto 14px;color:'+(pass?'var(--green)':'var(--red)')+'">'+total+'点</div>'
+    +'<div style="font-size:18px;font-weight:700;margin-bottom:6px">'+(pass?'合格おめでとうございます！':'もう一度挑戦しましょう')+'</div>'
+    +'<span style="display:inline-block;font-size:13px;padding:5px 20px;border-radius:20px;font-weight:700;background:'+(pass?'var(--green-l)':'var(--red-l)')+';color:'+(pass?'var(--green)':'var(--red)')+';">'+(pass?'合格 — 80点以上':'不合格 — 80点未満')+'</span>';
+  if(result.overall_comment){
+    html+='<div style="margin-top:14px;padding:12px;background:var(--bg);border-radius:var(--r-sm);font-size:13px;color:var(--text2);text-align:left;line-height:1.7">'+result.overall_comment+'</div>';
+  }
+  if(!pass){html+='<div style="margin-top:14px"><button class="btn btnsm btnfull" onclick="retakeTest()"><i class="ti ti-refresh"></i> 再受験する</button></div>';}
+  html+='</div>';
+
+  html+='<div style="font-size:14px;font-weight:700;margin-bottom:12px">問題別 結果</div>';
+  var qNum=0;
+  TEST_SECTIONS.forEach(function(sec){
+    html+='<div style="font-size:12px;font-weight:700;color:var(--text2);padding:6px 10px;background:var(--bg2);border-radius:var(--r-sm);margin-bottom:8px"><i class="ti '+sec.icon+'" style="font-size:13px"></i> '+sec.title+'</div>';
+    sec.questions.forEach(function(q){
+      qNum++;var ans=ST.testAnswers[q.id]||'（未回答）';var sr=scoreMap[q.id];
+      html+='<div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);margin-bottom:10px;overflow:hidden">'
+        +'<div style="display:flex;align-items:flex-start;justify-content:space-between;padding:10px 12px;background:var(--bg);gap:10px">'
+        +'<div style="flex:1;min-width:0"><div style="font-size:11px;color:var(--text3);font-weight:700;margin-bottom:3px">Q'+qNum+'</div>'
+        +'<div style="font-size:13px;font-weight:700;line-height:1.4">'+q.text+'</div></div>';
+      if(q.scored&&sr){
+        var sc=sr.score;var col=sc>=8?'var(--green)':sc>=5?'var(--amber)':'var(--red)';
+        html+='<div style="text-align:center;flex-shrink:0;margin-left:10px"><div style="font-size:22px;font-weight:700;color:'+col+'">'+sc+'</div><div style="font-size:10px;color:var(--text3)">/ 10点</div></div>';
+      }else{
+        html+='<span style="font-size:10px;padding:3px 8px;border-radius:20px;background:var(--amber-l);color:var(--amber);font-weight:700;flex-shrink:0">自己確認</span>';
+      }
+      html+='</div><div style="padding:12px">'
+        +'<div style="font-size:11px;font-weight:700;color:var(--text3);margin-bottom:5px">あなたの回答</div>'
+        +'<div style="background:var(--bg);border-radius:var(--r-sm);padding:10px;font-size:13px;line-height:1.7;white-space:pre-wrap;color:var(--text2)">'+ans+'</div>';
+      if(q.scored&&sr&&sr.feedback){
+        html+='<div style="font-size:11px;font-weight:700;color:var(--blue);margin:8px 0 4px"><i class="ti ti-robot"></i> AIフィードバック</div>'
+          +'<div style="font-size:13px;color:var(--text2);line-height:1.7">'+sr.feedback+'</div>';
+      }
+      html+='</div></div>';
+    });
+  });
+  return html;
+}
+
+function retakeTest(){
+  if(!confirm('再受験しますか？回答がリセットされます。'))return;
+  ST.testAnswers={};ST.testStartedAt=Date.now();ST.testSubmitted=false;ST.testScore=null;ST.testResult=null;
+  saveTestState();render();
+}
+
+
+/* ══════════════════════════════
+   CERT STATUS
+══════════════════════════════ */
+function rCert(){
+  const p=s2ClPct();const testPass=ST.submitted&&ST.score>=80;
+  const sc=certifiedCount();const certified=p===100&&testPass&&sc>=2&&p1Done()&&p2Done();
+  const tu=testUnlocked();
+  const conds=[
+    {l:'チェックリスト 全項目完了',s:`${doneS2Cl()}/${allS2Cl().length}項目（${p}%）`,ok:p===100},
+    {l:'プログラム① 完了',s:'全4フェーズ',ok:p1Done()},
+    {l:'プログラム② 完了',s:'全4フェーズ',ok:p2Done()},
+    {l:'スター1を2名以上育成・認定',s:`現在 ${sc}名認定済み`,ok:sc>=2},
+    {l:'確認テスト合格（80点以上）',s:ST.submitted?`スコア: ${ST.score}点`:tu?'受験可能':'ロック中',ok:testPass},
+  ];
+  const dn=conds.filter(c=>c.ok).length;
+  return`
+  <div class="card" style="text-align:center;padding:28px 16px">
+    <div style="width:94px;height:94px;border-radius:50%;background:${certified?'var(--green-l)':'var(--bg2)'};border:3px solid ${certified?'var(--green-m)':'var(--border)'};display:flex;align-items:center;justify-content:center;margin:0 auto 16px;${certified?'':'opacity:0.35;filter:grayscale(1)'}">
+      <i class="ti ti-award" style="font-size:46px;color:${certified?'var(--green)':'var(--text3)'}"></i>
+    </div>
+    <div style="font-size:18px;font-weight:700;margin-bottom:4px">${certified?'スター2 認定済み':'スター2 認定バッジ'}</div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:${certified?16:4}px">${certified?'EGYM Senior Trainer':'全条件を満たすと解除されます'}</div>
+    ${certified?`<div style="display:inline-block;padding:8px 22px;background:var(--green-l);border:1px solid var(--green-m);border-radius:20px;font-size:14px;color:var(--green);font-weight:700">認定番号: EGYM-ST2-2024-012</div>`:''}
+  </div>
+  <div class="card">
+    <div class="ctitle">認定条件 <span style="font-size:12px;font-weight:400;color:var(--text3)">${dn}/${conds.length}完了</span></div>
+    ${conds.map(it=>`
+    <div class="step">
+      <div class="sdot ${it.ok?'s-done':'s-lock'}"><i class="ti ${it.ok?'ti-check':'ti-clock'}" style="font-size:14px"></i></div>
+      <div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">${it.l}</div><div style="font-size:11px;color:var(--text3);margin-top:3px">${it.s}</div></div>
+      <span class="tag ${it.ok?'td':'tp'}" style="flex-shrink:0;margin-left:8px">${it.ok?'完了':'未完了'}</span>
+    </div>`).join('')}
+  </div>
+  ${certified?`
+  <div class="card" style="border:2px solid var(--green)">
+    <div style="font-size:15px;font-weight:700;color:var(--green);margin-bottom:8px"><i class="ti ti-circle-check"></i> 認定申請が可能です</div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:16px">全条件が満たされました。施設アカウントへ申請するとJHTJapanへ通知されます。</div>
+    <button class="btn btng btnfull" style="padding:14px;font-size:15px"><i class="ti ti-send"></i> 施設アカウントへ申請通知を送る</button>
+  </div>`:`
+  <div class="card" style="background:var(--bg)">
+    <div style="font-size:14px;font-weight:700;margin-bottom:12px">スター2認定の流れ</div>
+    ${['スター2チェックリストを全項目完了する','プログラム①②を全フェーズ完了する','スター1を2名育成・認定する（プログラム①完了後から可）','確認テストに合格する（80点以上）','施設→JHTJapanへ申請 → バッジ・認定証を授与'].map((s,i)=>`
+    <div style="display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--bg2)">
+      <div style="width:26px;height:26px;border-radius:50%;background:var(--green-l);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0">${i+1}</div>
+      <div style="font-size:13px;padding-top:3px">${s}</div>
+    </div>`).join('')}
+  </div>`}`;
+}
+
+/* ══════════════════════════════
+   INIT
+══════════════════════════════ */
+go('home');
+</script>
+</body>
+</html>

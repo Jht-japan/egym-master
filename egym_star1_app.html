@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>EGYM ★ スター1</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/3.19.0/iconfont/tabler-icons.min.css">
+<style>
+:root{
+  --bg:#F4F2ED;--bg2:#ECEAE3;--card:#FFF;--border:#D8D5CC;--border2:#C8C5BB;
+  --text:#1A1916;--text2:#5C5A54;--text3:#9C9A94;
+  --amber:#C47B14;--amber-l:#FDF3E3;--amber-m:#F0C878;
+  --green:#1A8A5A;--green-l:#E5F5EC;--green-m:#9DD4B8;
+  --blue:#2A6FDB;--blue-l:#E8F0FC;--blue-m:#B8CEEF;
+  --red:#C0392B;--red-l:#FDECEA;
+  --nav-h:62px;--top-h:56px;--r:12px;--r-sm:8px;--r-lg:16px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Hiragino Sans','Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5}
+.app{display:flex;flex-direction:column;height:100vh;height:100dvh}
+.topbar{background:var(--card);border-bottom:1px solid var(--border);padding:0 14px;height:var(--top-h);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;z-index:10;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+.t-left{display:flex;align-items:center;gap:10px}
+.av{width:36px;height:36px;border-radius:50%;background:var(--amber-l);color:var(--amber);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;border:2px solid var(--amber-m);flex-shrink:0}
+.t-name{font-size:14px;font-weight:700;line-height:1.2}
+.t-fac{font-size:11px;color:var(--text3)}
+.t-badge{font-size:11px;padding:4px 10px;background:var(--amber-l);border:1px solid var(--amber-m);border-radius:20px;color:var(--amber);font-weight:700;white-space:nowrap}
+.content{flex:1;overflow-y:auto;padding:12px 14px;background:var(--bg);padding-bottom:calc(var(--nav-h)+12px);-webkit-overflow-scrolling:touch}
+.bnav{height:var(--nav-h);background:var(--card);border-top:1px solid var(--border);display:flex;align-items:stretch;flex-shrink:0;padding-bottom:env(safe-area-inset-bottom);box-shadow:0 -2px 10px rgba(0,0,0,0.06)}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;position:relative;border:none;background:transparent;padding:5px 2px}
+.ni.on .ni-icon,.ni.on .ni-lbl{color:var(--amber)}
+.ni.on .ni-lbl{font-weight:700}
+.ni.lk .ni-icon,.ni.lk .ni-lbl{color:var(--text3)}
+.ni-icon{font-size:22px;color:var(--text3);line-height:1}
+.ni-lbl{font-size:9px;color:var(--text3);line-height:1.2;text-align:center}
+.ni-lock{position:absolute;top:4px;right:calc(50% - 18px);width:14px;height:14px;background:var(--bg2);border-radius:50%;font-size:8px;color:var(--text3);display:flex;align-items:center;justify-content:center}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:14px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+.ctitle{font-size:13px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+.tag{display:inline-block;font-size:10px;padding:3px 8px;border-radius:20px;font-weight:700}
+.td{background:var(--green-l);color:var(--green)}.tp{background:var(--amber-l);color:var(--amber)}
+.tf{background:var(--red-l);color:var(--red)}.tb{background:var(--blue-l);color:var(--blue)}.tg{background:var(--bg2);color:var(--text3)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:9px 14px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--card);color:var(--text);font-size:13px;cursor:pointer;font-weight:600;transition:opacity 0.12s}
+.btn:active{opacity:0.65}
+.btna{background:var(--amber);border-color:var(--amber);color:#fff}
+.btng{background:var(--green);border-color:var(--green);color:#fff}
+.btnsm{padding:6px 11px;font-size:11px}
+.btnfull{width:100%}
+.pb{height:5px;background:var(--bg2);border-radius:3px;overflow:hidden;margin-top:6px}
+.pf{height:100%;border-radius:3px;transition:width 0.4s}
+.pfa{background:var(--amber)}.pfg{background:var(--green)}.pfb{background:var(--blue)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px}
+.met{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:11px 8px;text-align:center}
+.mv{font-size:18px;font-weight:700;line-height:1.2;margin-bottom:2px}
+.ml{font-size:10px;color:var(--text3)}
+/* GROUP */
+.group-banner{color:#fff;padding:10px 14px;font-size:13px;font-weight:700;display:flex;align-items:center;justify-content:space-between}
+.group-wrap{margin-bottom:14px;border-radius:var(--r-lg);overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,0.08)}
+/* SECTION */
+.sec-wrap{background:var(--card);border-top:1px solid var(--border)}
+.sec-hd{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--bg2);cursor:pointer;min-height:46px}
+.sec-hd-left{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--text2)}
+.sec-hd-right{display:flex;align-items:center;gap:7px}
+/* CL ITEM */
+.cl-item{display:flex;align-items:flex-start;gap:10px;padding:11px 14px;border-top:1px solid var(--bg2);cursor:pointer;min-height:50px;background:var(--card)}
+.cl-item:active{background:var(--bg)}
+.cl-num{font-size:10px;color:var(--text3);font-weight:700;min-width:28px;margin-top:3px;flex-shrink:0}
+.cb{width:22px;height:22px;min-width:22px;border:2px solid var(--border2);border-radius:5px;display:flex;align-items:center;justify-content:center;margin-top:2px;transition:all 0.15s;background:var(--card);flex-shrink:0}
+.cb.on{background:var(--amber);border-color:var(--amber);color:#fff}
+.cl-txt{font-size:13px;line-height:1.4;flex:1;font-weight:500}
+.cl-txt.done{color:var(--text3);text-decoration:line-through;font-weight:400}
+.cl-sub{font-size:11px;color:var(--text3);margin-top:2px}
+/* PHASE */
+.ph-block{border:1.5px solid var(--border);border-radius:var(--r);margin-bottom:10px;overflow:hidden}
+.ph-block.ph-active{border-color:var(--amber)}
+.ph-block.ph-done{border-color:var(--green)}
+.ph-head{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;background:var(--bg);cursor:pointer;min-height:54px}
+.ph-body{padding:14px;border-top:1px solid var(--border)}
+/* SESSION */
+.sess-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}
+@media(min-width:480px){.sess-grid{grid-template-columns:repeat(6,1fr)}}
+.sess-slot{border:1.5px solid var(--border);border-radius:var(--r-sm);padding:10px 4px;text-align:center;cursor:pointer;min-height:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;background:var(--card)}
+.sess-slot:active{opacity:0.7}
+.sess-slot.has-d{background:var(--amber-l);border-color:var(--amber-m)}
+.sess-n{font-size:10px;color:var(--text3);font-weight:700}
+.sess-d{font-size:12px;font-weight:700;color:var(--amber);line-height:1.3}
+/* CALENDAR */
+.cal-wrap{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-top:10px}
+.cal-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.cal-nb{width:40px;height:40px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--card);cursor:pointer;font-size:20px;color:var(--text2)}
+.cal-nb:active{background:var(--bg2)}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:2px}
+.cal-dow{font-size:11px;color:var(--text3);text-align:center;padding:4px 0;font-weight:700}
+.cal-day{font-size:13px;text-align:center;padding:8px 2px;border-radius:var(--r-sm);cursor:pointer;min-height:36px;display:flex;align-items:center;justify-content:center;font-weight:500}
+.cal-day:active{opacity:0.7}
+.cal-day.empty{cursor:default}
+.cal-day.sel-d{background:var(--amber);color:#fff;font-weight:700}
+.cal-day.other-d{background:var(--green-l);color:var(--green);font-weight:700}
+.cal-day.today-d{border:2px solid var(--amber);color:var(--amber);font-weight:700}
+/* STEP */
+.step{display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--bg2)}
+.step:last-child{border-bottom:none}
+.sdot{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.s-done{background:var(--green-l);color:var(--green)}.s-prog{background:var(--amber-l);color:var(--amber)}.s-lock{background:var(--bg2);color:var(--text3)}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:200;display:flex;align-items:flex-end}
+.modal{background:var(--card);border-radius:var(--r-lg) var(--r-lg) 0 0;padding:20px 16px;padding-bottom:calc(20px + env(safe-area-inset-bottom));width:100%;max-height:85vh;overflow-y:auto}
+.modal-handle{width:40px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 18px}
+.frow{margin-bottom:14px}
+.flabel{font-size:12px;color:var(--text2);margin-bottom:6px;font-weight:700;display:block}
+select{padding:11px 12px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--card);color:var(--text);font-size:15px;width:100%;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%239C9A94' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px}
+textarea{padding:11px 12px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--card);color:var(--text);font-size:15px;width:100%;resize:vertical;min-height:80px;line-height:1.5;font-family:inherit}
+input[type=number]{padding:11px 12px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--card);color:var(--text);font-size:15px;width:100%;text-align:right}
+#_toast{position:fixed;bottom:calc(var(--nav-h)+10px);left:50%;transform:translateX(-50%);background:#1A1916;color:#fff;padding:12px 18px;border-radius:var(--r);font-size:13px;z-index:300;display:flex;align-items:center;gap:8px;max-width:88vw;box-shadow:0 4px 20px rgba(0,0,0,0.3)}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="t-left">
+      <div class="av">三知</div>
+      <div><div class="t-name">三田 知障</div><div class="t-fac">八事施設</div></div>
+    </div>
+    <div class="t-badge">★ スター1挑戦中</div>
+  </div>
+  <div class="content" id="content"></div>
+  <div class="bnav" id="nav"></div>
+</div>
+<div id="modal-slot"></div>
+<script>
+const GROUPS = [
+  { id:'onboarding', title:'オンボーディング', color:'#2C2C2A', sections:[
+    { id:'ob_hub', label:'FitnessHub', icon:'ti-device-desktop', items:[
+      {id:'1-1',t:'EGYMアカウント作成'},{id:'1-2',t:'RFIDバンドの連携'},
+      {id:'1-3',t:'身体スキャン'},{id:'1-4',t:'体組成測定'},
+      {id:'1-5',t:'トレーナーモードを理解'},{id:'1-6',t:'EGYMモードを理解'},
+    ]},
+    { id:'ob_trainer', label:'トレーナーアプリ', icon:'ti-device-mobile', items:[
+      {id:'1-7',t:'アプリダウンロード'},{id:'1-8',t:'ログイン'},
+      {id:'1-9',t:'プロフィール写真撮影'},{id:'1-10',t:'健康情報を収集'},
+      {id:'1-11',t:'ノート'},{id:'1-12',t:'PINを生成'},
+    ]},
+    { id:'ob_member', label:'メンバーアプリ', icon:'ti-users', items:[
+      {id:'1-13',t:'アプリをダウンロード'},{id:'1-14',t:'施設コードを入力'},
+      {id:'1-15',t:'ログイン'},{id:'1-16',t:'パスワードの再設定'},
+    ]},
+    { id:'ob_strength', label:'スマートストレングス', icon:'ti-barbell', items:[
+      {id:'1-17',t:'各マシンで正しい姿勢'},
+      {id:'1-18',t:'オンボーディングセットアップ',sub:'トレーナーモードの場合 / EGYMモードの場合'},
+      {id:'1-19',t:'筋力テストの説明'},{id:'1-20',t:'適応モードの説明'},
+      {id:'1-21',t:'サーキットモード画面説明'},{id:'1-22',t:'オープンモード画面説明'},
+    ]},
+    { id:'ob_cardio', label:'カーディオ', icon:'ti-heart-rate-monitor', items:[
+      {id:'1-23',t:'ログイン'},{id:'1-24',t:'プログラム選択及び設定'},
+      {id:'1-25',t:'VO2 Max測定'},{id:'1-26',t:'Matrixの画面を説明'},
+      {id:'1-27',t:'Sprint 8 の説明'},
+    ]},
+  ]},
+  { id:'machine', title:'マシンセットアップ', color:'#1A4A6E', sections:[
+    { id:'ms_hub', label:'FitnessHub', icon:'ti-device-desktop', items:[
+      {id:'2-1',t:'体組成計測定'},{id:'2-2',t:'柔軟性測定'},{id:'2-3',t:'Bio Ageの確認'},
+    ]},
+    { id:'ms_trainer', label:'トレーナーアプリ', icon:'ti-device-mobile', items:[
+      {id:'2-4',t:'ワークアウトプログラムを割り当て'},{id:'2-5',t:'タスクを割り当て及び管理'},
+      {id:'2-6',t:'メンバーの進捗確認'},{id:'2-7',t:'BIO Age、メンバー内容を確認'},
+    ]},
+    { id:'ms_member', label:'メンバーアプリ', icon:'ti-users', items:[
+      {id:'2-8',t:'コネクティングアプリの接続方法'},{id:'2-9',t:'トレーニングプラン'},
+      {id:'2-10',t:'アクティビティポイント'},{id:'2-11',t:'アクティビティレベル'},
+      {id:'2-12',t:'ランキング'},{id:'2-13',t:'Bio Age'},
+    ]},
+    { id:'ms_strength', label:'スマートストレングス', icon:'ti-barbell', items:[
+      {id:'2-14',t:'ベーシックコースの構成を理解'},{id:'2-15',t:'ベーシックコースの負荷方法を理解'},
+      {id:'2-16',t:'詳細マシン設定'},{id:'2-17',t:'プログラムを変更'},
+      {id:'2-18',t:'バンド連携を解除'},
+    ]},
+  ]},
+  { id:'rikaido', title:'理解度', color:'#3B1F6E', sections:[
+    { id:'test_sec', label:'測定内容', icon:'ti-clipboard-check', items:[
+      {id:'3-1',t:'柔軟性テスト実地と説明'},{id:'3-2',t:'体組成計測定実施と説明'},
+      {id:'3-3',t:'筋力テスト'},{id:'3-4',t:'カーディオテスト（VO2Maxの理解）'},
+    ]},
+    { id:'know_sec', label:'知識確認', icon:'ti-book', items:[
+      {id:'4-1',t:'EGYMの特徴とは'},{id:'4-2',t:'トレーニング原則の基礎'},
+      {id:'4-3',t:'運動指導における接遇スキル'},{id:'4-4',t:'見学会対応'},
+      {id:'4-5',t:'体験会対応'},{id:'4-6',t:'BIO Ageの項目を確認と説明'},
+      {id:'4-7',t:'VO2maxの説明'},
+    ]},
+  ]},
+];
+
+const DOW = ['月','火','水','木','金','土','日'];
+const MN = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+const METHODS = ['レギュラー','ネガティブ'];
+
+/* STATE */
+const clState = {}; const secOpen = {};
+GROUPS.forEach(g => g.sections.forEach(s => {
+  secOpen[s.id] = false;
+  s.items.forEach(it => { clState[it.id] = false; });
+}));
+secOpen['ob_hub'] = true;
+
+function makePhases(){
+  return ['フェーズ1','フェーズ2','フェーズ3','フェーズ4'].map((label,i)=>({
+    label, method:'', note:'', sessions:Array(6).fill(null), open:i===0, done:false
+  }));
+}
+
+const ST = {
+  page: 'home',
+  cl: clState, secOpen,
+  prog: { phases: makePhases() },
+  cal: { show:false, pi:null, si:null, year:new Date().getFullYear(), month:new Date().getMonth() },
+  certModal: false,
+};
+
+/* HELPERS */
+function allItems(){ return GROUPS.flatMap(g=>g.sections.flatMap(s=>s.items)); }
+function doneCount(){ return allItems().filter(it=>ST.cl[it.id]).length; }
+function totalCount(){ return allItems().length; }
+function clPct(){ return Math.round(doneCount()/totalCount()*100); }
+function clComplete(){ return clPct()===100; }
+function donePh(){ return ST.prog.phases.filter(p=>p.done).length; }
+function totalSess(){ return ST.prog.phases.reduce((a,ph)=>a+ph.sessions.filter(Boolean).length,0); }
+function progDone(){ return donePh()===4; }
+function allDone(){ return clComplete()&&progDone(); }
+function fmtD(d){ return d ? d.m+'/'+d.d : ''; }
+function groupDone(g){ return g.sections.flatMap(s=>s.items).filter(it=>ST.cl[it.id]).length; }
+function groupTotal(g){ return g.sections.flatMap(s=>s.items).length; }
+function groupPct(g){ return Math.round(groupDone(g)/groupTotal(g)*100); }
+function secDone(s){ return s.items.filter(it=>ST.cl[it.id]).length; }
+function secPct(s){ return Math.round(secDone(s)/s.items.length*100); }
+
+/* NAV */
+const NAV=[
+  {k:'home',     i:'ti-home',    l:'ホーム'},
+  {k:'checklist',i:'ti-checkbox',l:'チェック'},
+  {k:'program',  i:'ti-calendar',l:'プログラム'},
+  {k:'cert',     i:'ti-award',   l:'認定状況'},
+];
+
+function go(pg){
+  ST.page=pg; ST.certModal=false; ST.cal.show=false;
+  document.getElementById('nav').innerHTML=NAV.map(n=>{
+    const on=ST.page===n.k;
+    return '<button class="ni '+(on?'on':'')+'" onclick="go(\''+n.k+'\')">'
+      +'<i class="ti '+n.i+' ni-icon"></i>'
+      +'<span class="ni-lbl">'+n.l+'</span></button>';
+  }).join('');
+  render();
+}
+
+function toast(msg){
+  const ex=document.getElementById('_toast'); if(ex)ex.remove();
+  const t=document.createElement('div'); t.id='_toast';
+  t.innerHTML='<i class="ti ti-info-circle" style="font-size:16px;flex-shrink:0"></i><span>'+msg+'</span>';
+  document.body.appendChild(t);
+  setTimeout(()=>{if(t.parentNode)t.remove();},3000);
+}
+
+function render(){
+  document.getElementById('content').scrollTop=0;
+  const fns={home:rHome,checklist:rChecklist,program:rProgram,cert:rCert};
+  document.getElementById('content').innerHTML=(fns[ST.page]||rHome)();
+  document.getElementById('modal-slot').innerHTML=ST.certModal?rCertModal():'';
+}
+
+/* HOME */
+function rHome(){
+  const p=clPct(); const done=doneCount(); const total=totalCount();
+  const dp=donePh(); const ts=totalSess();
+  return '<div class="g3">'
+    +'<div class="met"><div class="mv" style="color:var(--amber);font-size:16px">'+p+'%</div><div class="ml">チェック完了率</div><div class="pb"><div class="pf pfa" style="width:'+p+'%"></div></div></div>'
+    +'<div class="met"><div class="mv" style="color:'+(progDone()?'var(--green)':'var(--amber)')+'">'+dp+'<span style="font-size:11px;color:var(--text3)">/4</span></div><div class="ml">フェーズ完了</div><div class="pb"><div class="pf pfg" style="width:'+(dp/4*100)+'%"></div></div></div>'
+    +'<div class="met"><div class="mv" style="color:'+(allDone()?'var(--amber)':'var(--text3)')+';font-size:13px">'+ts+'<span style="font-size:11px;color:var(--text3)">/24</span></div><div class="ml">セッション記録</div><div class="pb"><div class="pf pfb" style="width:'+(ts/24*100)+'%"></div></div></div>'
+    +'</div>'
+    +'<div class="card"><div class="ctitle">認定までの手順</div>'
+    +'<div class="step"><div class="sdot '+(clComplete()?'s-done':'s-prog')+'"><i class="ti '+(clComplete()?'ti-check':'ti-checkbox')+'" style="font-size:13px"></i></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">チェックリストを全て完了する</div><div style="font-size:11px;color:var(--text3);margin-top:3px">'+done+'/'+total+'項目完了（'+p+'%）</div></div><span class="tag '+(clComplete()?'td':'tp')+'">'+(clComplete()?'完了':'進行中')+'</span></div>'
+    +'<div class="step"><div class="sdot '+(progDone()?'s-done':'s-prog')+'"><i class="ti '+(progDone()?'ti-check':'ti-calendar')+'" style="font-size:13px"></i></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">ベーシックプログラムを完了する</div><div style="font-size:11px;color:var(--text3);margin-top:3px">'+dp+'/4フェーズ完了 · '+ts+'/24セッション記録済</div></div><span class="tag '+(progDone()?'td':'tp')+'">'+(progDone()?'完了':'進行中')+'</span></div>'
+    +'<div class="step"><div class="sdot s-lock"><i class="ti ti-award" style="font-size:13px"></i></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">スター2トレーナーによる認定</div><div style="font-size:11px;color:var(--text3);margin-top:3px">担当スター2が認定ボタンを押すと完了</div></div><span class="tag tg">待機中</span></div>'
+    +'</div>'
+    +'<div class="g2" style="margin-bottom:12px">'
+    +'<div class="card" style="margin-bottom:0"><div style="font-size:12px;font-weight:700;margin-bottom:8px">チェックリスト</div>'
+    +GROUPS.map(g=>{const gp=groupPct(g);return '<div style="margin-bottom:8px"><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:12px;display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:2px;background:'+g.color+';display:inline-block"></span>'+g.title+'</span><span style="font-size:11px;color:var(--text3)">'+gp+'%</span></div><div class="pb"><div class="pf pfa" style="width:'+gp+'%"></div></div></div>';}).join('')
+    +'<button class="btn btnsm btnfull" style="margin-top:4px" onclick="go(\'checklist\')">詳細を見る</button></div>'
+    +'<div class="card" style="margin-bottom:0"><div style="font-size:12px;font-weight:700;margin-bottom:8px">プログラム進捗</div>'
+    +ST.prog.phases.map((ph,i)=>{const sc=ph.sessions.filter(Boolean).length;return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:7px"><span style="font-size:11px;color:var(--text3);min-width:52px">'+ph.label+'</span><div class="pb" style="flex:1;margin:0"><div class="pf '+(ph.done?'pfg':'pfa')+'" style="width:'+(sc/6*100)+'%"></div></div><span style="font-size:10px;color:var(--text3)">'+sc+'/6</span></div>';}).join('')
+    +'<button class="btn btnsm btnfull" style="margin-top:4px" onclick="go(\'program\')">詳細を見る</button></div>'
+    +'</div>'
+    +(allDone()?'<div class="card" style="border:2px solid var(--amber);text-align:center;padding:20px 14px"><i class="ti ti-trophy" style="font-size:28px;color:var(--amber);display:block;margin-bottom:8px"></i><div style="font-size:14px;font-weight:700;margin-bottom:4px">全条件が揃いました！</div><div style="font-size:12px;color:var(--text2);margin-bottom:14px">チェックリストとプログラムが完了しました。認定申請を送ってください。</div><button class="btn btna btnfull" style="padding:12px;font-size:14px" onclick="go(\'cert\')"><i class="ti ti-award"></i> 認定状況を確認する</button></div>':'');
+}
+
+/* CHECKLIST */
+function rChecklist(){
+  const p=clPct(); const done=doneCount(); const total=totalCount();
+  let html='<div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span style="font-size:14px;font-weight:700">全体進捗　'+done+'/'+total+'項目</span><span style="font-size:17px;font-weight:700;color:var(--amber)">'+p+'%</span></div><div class="pb" style="height:9px"><div class="pf pfa" style="width:'+p+'%"></div></div></div>';
+  GROUPS.forEach(g=>{
+    const gd=groupDone(g); const gt=groupTotal(g); const gp=groupPct(g);
+    html+='<div class="group-wrap">'
+      +'<div class="group-banner" style="background:'+g.color+'"><span>'+g.title+'</span><span style="font-size:12px;opacity:0.8">'+gd+'/'+gt+' · '+gp+'%</span></div>';
+    g.sections.forEach(s=>{
+      const sd=secDone(s); const sp=secPct(s); const isOpen=ST.secOpen[s.id];
+      html+='<div class="sec-wrap"><div class="sec-hd" onclick="toggleSec(\''+s.id+'\')"><div class="sec-hd-left"><i class="ti '+(isOpen?'ti-chevron-down':'ti-chevron-right')+'" style="font-size:15px;color:var(--text3)"></i><i class="ti '+s.icon+'" style="font-size:15px"></i>'+s.label+'</div><div class="sec-hd-right"><div class="pb" style="width:44px;margin:0"><div class="pf pfa" style="width:'+sp+'%"></div></div><span style="font-size:11px;color:var(--text3)">'+sd+'/'+s.items.length+'</span><span class="tag '+(sp===100?'td':'tp')+'">'+(sp===100?'完了':'進行中')+'</span></div></div>';
+      if(isOpen){
+        s.items.forEach(it=>{
+          const checked=ST.cl[it.id];
+          html+='<div class="cl-item" onclick="toggleCl(\''+it.id+'\')">'
+            +'<span class="cl-num">'+it.id+'</span>'
+            +'<div class="cb '+(checked?'on':'')+'">'+( checked?'<i class="ti ti-check" style="font-size:12px"></i>':'')+'</div>'
+            +'<div style="flex:1;min-width:0"><div class="cl-txt '+(checked?'done':'')+'">'+(it.t)+'</div>'+(it.sub?'<div class="cl-sub">'+it.sub+'</div>':'')+'</div></div>';
+        });
+      }
+      html+='</div>';
+    });
+    html+='</div>';
+  });
+  return html;
+}
+function toggleCl(id){ ST.cl[id]=!ST.cl[id]; render(); }
+function toggleSec(id){ ST.secOpen[id]=!ST.secOpen[id]; render(); }
+
+/* PROGRAM */
+function rProgram(){
+  const dp=donePh(); const ts=totalSess();
+  let html='<div class="card">'
+    +'<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">'
+    +'<div><div style="font-size:15px;font-weight:700">ベーシックプログラム</div><div style="font-size:12px;color:var(--text3);margin-top:2px">負荷方法: レギュラー / ネガティブ</div></div>'
+    +'<span class="tag '+(progDone()?'td':'tp')+'">'+(progDone()?'完了':'進行中')+'</span>'
+    +'</div>'
+    +'<div class="g2">'
+    +'<div class="met"><div class="mv" style="color:var(--green)">'+dp+'<span style="font-size:13px;color:var(--text3)">/4</span></div><div class="ml">フェーズ完了</div><div class="pb"><div class="pf pfg" style="width:'+(dp/4*100)+'%"></div></div></div>'
+    +'<div class="met"><div class="mv" style="color:var(--blue)">'+ts+'<span style="font-size:13px;color:var(--text3)">/24</span></div><div class="ml">セッション記録</div><div class="pb"><div class="pf pfb" style="width:'+(ts/24*100)+'%"></div></div></div>'
+    +'</div></div>';
+
+  ST.prog.phases.forEach((ph,pi)=>{
+    const sc=ph.sessions.filter(Boolean).length;
+    const phCls=ph.done?'ph-done':sc>0?'ph-active':'';
+    html+='<div class="ph-block '+phCls+'">'
+      +'<div class="ph-head" onclick="togglePhase('+pi+')">'
+      +'<div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0">'
+      +'<i class="ti '+(ph.open?'ti-chevron-down':'ti-chevron-right')+'" style="font-size:17px;color:var(--text3);flex-shrink:0"></i>'
+      +'<span style="font-size:14px;font-weight:700">'+ph.label+'</span>'
+      +(ph.method?'<span class="tag tb" style="flex-shrink:0">'+ph.method+'</span>':'<span class="tag tg" style="flex-shrink:0">負荷未設定</span>')
+      +'</div>'
+      +'<div style="display:flex;align-items:center;gap:6px;flex-shrink:0;margin-left:8px">'
+      +'<span style="font-size:12px;color:var(--text3)">'+sc+'/6</span>'
+      +'<span class="tag '+(ph.done?'td':sc>0?'tb':'tg')+'">'+(ph.done?'完了':sc>0?'進行中':'未開始')+'</span>'
+      +'</div></div>';
+
+    if(ph.open){
+      html+='<div class="ph-body">'
+        +'<div class="frow"><label class="flabel">負荷方法</label>'
+        +'<select onchange="setMethod('+pi+',this.value)">'
+        +'<option value="">-- 選択 --</option>'
+        +METHODS.map(m=>'<option value="'+m+'" '+(ph.method===m?'selected':'')+'>'+m+'</option>').join('')
+        +'</select></div>'
+        +'<div class="frow"><label class="flabel">フェーズメモ</label>'
+        +'<textarea placeholder="メモを入力（トレーニング内容、気づき、特記事項など）" oninput="setNote('+pi+',this.value)">'+( ph.note||'')+'</textarea></div>'
+        +'<div class="frow"><label class="flabel">ワークアウトセッション（6回）— タップして日付選択</label>'
+        +'<div class="sess-grid">'
+        +ph.sessions.map((d,si)=>'<div class="sess-slot '+(d?'has-d':'')+'" onclick="openCal('+pi+','+si+')">'
+          +'<div class="sess-n">第'+(si+1)+'回</div>'
+          +(d?'<div class="sess-d">'+fmtD(d)+'</div>':'<i class="ti ti-calendar-plus" style="font-size:22px;color:var(--text3)"></i>')
+          +'</div>').join('')
+        +'</div></div>'
+        +(ST.cal.show&&ST.cal.pi===pi?buildCal(pi):'')
+        +'<div style="display:flex;gap:10px;margin-top:14px">'
+        +'<button class="btn btnsm" style="flex:1" onclick="clearPhase('+pi+')"><i class="ti ti-refresh" style="font-size:14px"></i> リセット</button>'
+        +'<button class="btn btna btnsm" style="flex:1" onclick="markDone('+pi+')"><i class="ti ti-check" style="font-size:14px"></i> フェーズ完了</button>'
+        +'</div></div>';
+    }
+    html+='</div>';
+  });
+  return html;
+}
+
+function buildCal(pi){
+  const {year,month,si}=ST.cal;
+  const ph=ST.prog.phases[pi];
+  const allKeys=ph.sessions.filter(Boolean).map(d=>d.y+'-'+d.m+'-'+d.d);
+  const first=new Date(year,month,1).getDay();
+  const offset=(first+6)%7;
+  const dim=new Date(year,month+1,0).getDate();
+  const now=new Date();
+  let html='<div class="cal-wrap"><div class="cal-hd">'
+    +'<button class="cal-nb" onclick="calMv(-1)">‹</button>'
+    +'<div style="text-align:center"><div style="font-size:14px;font-weight:700">'+year+'年 '+MN[month]+'</div>'
+    +'<div style="font-size:12px;color:var(--amber);font-weight:700;margin-top:2px">第'+(si+1)+'回を選択中</div></div>'
+    +'<button class="cal-nb" onclick="calMv(1)">›</button>'
+    +'</div><div class="cal-grid">'
+    +DOW.map(d=>'<div class="cal-dow">'+d+'</div>').join('')
+    +Array(offset).fill('<div class="cal-day empty"></div>').join('');
+  for(let i=1;i<=dim;i++){
+    const key=year+'-'+(month+1)+'-'+i;
+    const cur=ph.sessions[si];
+    const isSel=cur&&cur.y===year&&cur.m===month+1&&cur.d===i;
+    const isOther=!isSel&&allKeys.includes(key);
+    const isToday=now.getFullYear()===year&&now.getMonth()===month&&now.getDate()===i;
+    html+='<div class="cal-day '+(isSel?'sel-d':isOther?'other-d':isToday?'today-d':'')+'" onclick="pickDate('+year+','+(month+1)+','+i+')">'+i+'</div>';
+  }
+  html+='</div>'
+    +'<div style="margin-top:10px;display:flex;gap:12px">'
+    +'<div style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text3)"><div style="width:12px;height:12px;border-radius:3px;background:var(--amber)"></div>選択中</div>'
+    +'<div style="display:flex;align-items:center;gap:5px;font-size:12px;color:var(--text3)"><div style="width:12px;height:12px;border-radius:3px;background:var(--green-l);border:1px solid var(--green-m)"></div>他セッション</div>'
+    +'</div>'
+    +'<button class="btn btnfull" style="margin-top:12px;padding:12px" onclick="closeCal()">閉じる</button>'
+    +'</div>';
+  return html;
+}
+
+function setMethod(pi,v){ ST.prog.phases[pi].method=v; }
+function setNote(pi,v){ ST.prog.phases[pi].note=v; }
+function openCal(pi,si){
+  if(ST.cal.show&&ST.cal.pi===pi&&ST.cal.si===si){ ST.cal.show=false; }
+  else{ ST.cal.show=true; ST.cal.pi=pi; ST.cal.si=si; }
+  render();
+}
+function closeCal(){ ST.cal.show=false; render(); }
+function calMv(d){
+  ST.cal.month+=d;
+  if(ST.cal.month<0){ ST.cal.month=11; ST.cal.year--; }
+  if(ST.cal.month>11){ ST.cal.month=0; ST.cal.year++; }
+  render();
+}
+function pickDate(y,m,d){
+  const {pi,si}=ST.cal;
+  ST.prog.phases[pi].sessions[si]={y,m,d};
+  const next=si<5?si+1:null;
+  if(next!==null){ ST.cal.si=next; } else { ST.cal.show=false; }
+  render();
+}
+function togglePhase(pi){
+  ST.prog.phases.forEach((ph,i)=>{ ph.open=(i===pi)?!ph.open:false; });
+  ST.cal.show=false; render();
+}
+function clearPhase(pi){
+  const ph=ST.prog.phases[pi];
+  ph.method=''; ph.note=''; ph.sessions=Array(6).fill(null); ph.done=false;
+  ST.cal.show=false; render();
+}
+function markDone(pi){
+  if(ST.prog.phases[pi].sessions.filter(Boolean).length<6){ alert('6回のセッション日をすべて設定してから完了にしてください'); return; }
+  ST.prog.phases[pi].done=true; ST.prog.phases[pi].open=false;
+  const next=ST.prog.phases[pi+1]; if(next){ next.open=true; }
+  ST.cal.show=false; render();
+}
+
+/* CERT */
+function rCert(){
+  const certified=allDone();
+  let html='<div class="card" style="text-align:center;padding:28px 16px">'
+    +'<div style="width:92px;height:92px;border-radius:50%;background:'+(certified?'var(--amber-l)':'var(--bg2)')+';border:3px solid '+(certified?'var(--amber-m)':'var(--border)')+';display:flex;align-items:center;justify-content:center;margin:0 auto 16px;'+(certified?'':'opacity:0.35;filter:grayscale(1)')+'"><i class="ti ti-award" style="font-size:46px;color:'+(certified?'var(--amber)':'var(--text3)')+'"></i></div>'
+    +'<div style="font-size:17px;font-weight:700;margin-bottom:4px">'+(certified?'スター1 認定バッジ解除！':'スター1 認定バッジ')+'</div>'
+    +'<div style="font-size:12px;color:var(--text2);margin-bottom:'+(certified?14:4)+'px">'+(certified?'EGYM Certified Trainer':'下記の条件を全て満たすと解除されます')+'</div>'
+    +(certified?'<div style="display:inline-block;padding:7px 22px;background:var(--amber-l);border:1px solid var(--amber-m);border-radius:20px;font-size:13px;color:var(--amber);font-weight:700">認定番号: EGYM-CT1-2024-088</div>':'')
+    +'</div>';
+
+  html+='<div class="card"><div class="ctitle">認定条件</div>'
+    +'<div class="step"><div class="sdot '+(clComplete()?'s-done':'s-prog')+'"><i class="ti '+(clComplete()?'ti-check':'ti-checkbox')+'" style="font-size:13px"></i></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">チェックリスト 全項目完了</div><div style="font-size:11px;color:var(--text3);margin-top:3px">'+doneCount()+'/'+totalCount()+'項目完了（'+clPct()+'%）</div></div><span class="tag '+(clComplete()?'td':'tp')+'">'+(clComplete()?'完了':'未完了')+'</span></div>'
+    +'<div class="step"><div class="sdot '+(progDone()?'s-done':'s-prog')+'"><i class="ti '+(progDone()?'ti-check':'ti-calendar')+'" style="font-size:13px"></i></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">ベーシックプログラム 全フェーズ完了</div><div style="font-size:11px;color:var(--text3);margin-top:3px">'+donePh()+'/4フェーズ · '+totalSess()+'/24セッション</div></div><span class="tag '+(progDone()?'td':'tp')+'">'+(progDone()?'完了':'未完了')+'</span></div>'
+    +'</div>';
+
+  if(certified){
+    html+='<div class="card" style="border:2px solid var(--green)"><div style="font-size:14px;font-weight:700;color:var(--green);margin-bottom:8px"><i class="ti ti-circle-check"></i> 認定申請が可能です</div><div style="font-size:13px;color:var(--text2);margin-bottom:16px">担当スター2トレーナーに認定申請を行ってください。認定後にバッジとノベルティが授与されます。</div><button class="btn btng btnfull" style="padding:14px;font-size:14px" onclick="ST.certModal=true;render()"><i class="ti ti-send"></i> スター2トレーナーへ申請通知を送る</button></div>';
+  } else {
+    html+='<div class="card" style="background:var(--bg)"><div style="font-size:14px;font-weight:700;margin-bottom:12px">スター1認定の流れ</div>'
+      +['チェックリスト（オンボーディング・マシンセットアップ・理解度）を全項目完了する','ベーシックプログラム4フェーズ・24セッションを完了する','担当スター2トレーナーへ申請通知を送る','スター2が認定ボタンを押すと認定完了','バッジとノベルティが授与される'].map((s,i)=>'<div style="display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--bg2)"><div style="width:26px;height:26px;border-radius:50%;background:var(--amber-l);color:var(--amber);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0">'+(i+1)+'</div><div style="font-size:13px;padding-top:3px">'+s+'</div></div>').join('')
+      +'</div>';
+  }
+  return html;
+}
+
+function rCertModal(){
+  return '<div class="modal-bg" onclick="if(event.target===this){ST.certModal=false;render()}"><div class="modal"><div class="modal-handle"></div><div style="font-size:17px;font-weight:700;margin-bottom:4px">認定申請を送る</div><div style="font-size:12px;color:var(--text3);margin-bottom:16px">担当スター2トレーナーに申請通知が送られます</div><div style="display:flex;align-items:center;gap:12px;padding:14px;background:var(--bg);border-radius:var(--r-sm);margin-bottom:16px"><div style="width:44px;height:44px;border-radius:50%;background:var(--green-l);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;border:2px solid var(--green-m)">中涼</div><div><div style="font-size:14px;font-weight:700">中間 涼子</div><div style="font-size:12px;color:var(--text3)">担当スター2トレーナー · 八事施設</div></div></div><div style="padding:12px;background:var(--green-l);border-radius:var(--r-sm);font-size:12px;color:var(--green);margin-bottom:18px;line-height:1.6"><i class="ti ti-info-circle"></i> 申請後、スター2トレーナーが確認して認定ボタンを押すと認定完了です。</div><div style="display:flex;gap:10px"><button class="btn" style="flex:1" onclick="ST.certModal=false;render()">キャンセル</button><button class="btn btng" style="flex:1" onclick="sendCert()"><i class="ti ti-send"></i> 送信する</button></div></div></div>';
+}
+function sendCert(){ ST.certModal=false; render(); toast('中間 涼子（スター2）へ認定申請通知を送信しました'); }
+
+go('home');
+</script>
+</body>
+</html>

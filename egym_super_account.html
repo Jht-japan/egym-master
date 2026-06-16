@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>EGYM JHTJapan スーパーアカウント</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/3.19.0/iconfont/tabler-icons.min.css">
+<style>
+:root{
+  --bg:#F4F2ED;--bg2:#ECEAE3;--card:#FFF;--border:#D8D5CC;--border2:#C8C5BB;
+  --text:#1A1916;--text2:#5C5A54;--text3:#9C9A94;
+  --blue:#2A6FDB;--blue-l:#E8F0FC;--blue-m:#B8CEEF;
+  --green:#1A8A5A;--green-l:#E5F5EC;--green-m:#9DD4B8;
+  --amber:#C47B14;--amber-l:#FDF3E3;--amber-m:#F0C878;
+  --purple:#6B3FA0;--purple-l:#F0EBF8;--purple-m:#C4A8E0;
+  --red:#C0392B;--red-l:#FDECEA;
+  --nav-h:62px;--top-h:56px;--r:12px;--r-sm:8px;--r-lg:16px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Hiragino Sans','Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5}
+.app{display:flex;flex-direction:column;height:100vh;height:100dvh}
+.topbar{background:#1A1916;padding:0 14px;height:var(--top-h);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;z-index:10}
+.t-left{display:flex;align-items:center;gap:10px}
+.av{width:36px;height:36px;border-radius:8px;background:#333;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;border:1px solid #555}
+.t-name{font-size:14px;font-weight:700;color:#fff}
+.t-sub{font-size:11px;color:#888}
+.t-badge{font-size:11px;padding:4px 10px;background:#292929;border:1px solid #444;border-radius:20px;color:#ccc;font-weight:700}
+.content{flex:1;overflow-y:auto;padding:12px 14px;background:var(--bg);padding-bottom:calc(var(--nav-h)+12px);-webkit-overflow-scrolling:touch}
+.bnav{height:var(--nav-h);background:var(--card);border-top:1px solid var(--border);display:flex;align-items:stretch;flex-shrink:0;padding-bottom:env(safe-area-inset-bottom);box-shadow:0 -2px 10px rgba(0,0,0,.06)}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;position:relative;border:none;background:transparent;padding:5px 2px}
+.ni.on .ni-icon,.ni.on .ni-lbl{color:#1A1916}
+.ni.on .ni-lbl{font-weight:700}
+.ni-icon{font-size:20px;color:var(--text3);line-height:1}
+.ni-lbl{font-size:9px;color:var(--text3);line-height:1.2;text-align:center}
+.ni-badge{position:absolute;top:5px;right:calc(50% - 18px);min-width:16px;height:16px;padding:0 4px;background:var(--red);border-radius:8px;font-size:9px;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:14px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.ctitle{font-size:13px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+.tag{display:inline-block;font-size:10px;padding:3px 8px;border-radius:20px;font-weight:700}
+.td{background:var(--green-l);color:var(--green)}.tp{background:var(--amber-l);color:var(--amber)}
+.tf{background:var(--red-l);color:var(--red)}.tb{background:var(--blue-l);color:var(--blue)}
+.tg{background:var(--bg2);color:var(--text3)}.tpur{background:var(--purple-l);color:var(--purple)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:9px 14px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--card);color:var(--text);font-size:13px;cursor:pointer;font-weight:600;transition:opacity .12s}
+.btn:active{opacity:.65}
+.btnd{background:#1A1916;border-color:#1A1916;color:#fff}
+.btng{background:var(--green);border-color:var(--green);color:#fff}
+.btnr{background:var(--red);border-color:var(--red);color:#fff}
+.btnsm{padding:6px 11px;font-size:11px}
+.btnfull{width:100%}
+.pb{height:5px;background:var(--bg2);border-radius:3px;overflow:hidden;margin-top:6px}
+.pf{height:100%;border-radius:3px;transition:width .4s}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.met{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:11px 8px;text-align:center}
+.mv{font-size:20px;font-weight:700;line-height:1.2;margin-bottom:2px}
+.ml{font-size:10px;color:var(--text3)}
+.fac-row{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--bg2);cursor:pointer}
+.fac-row:last-child{border-bottom:none}
+.fac-row:active{background:var(--bg)}
+.fac-av{width:40px;height:40px;border-radius:10px;background:#1A1916;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.trainer-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--bg2)}
+.trainer-row:last-child{border-bottom:none}
+.av-sm{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;border:2px solid}
+.step{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--bg2)}
+.step:last-child{border-bottom:none}
+.sdot{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
+.s-done{background:var(--green-l);color:var(--green)}.s-prog{background:var(--amber-l);color:var(--amber)}.s-lock{background:var(--bg2);color:var(--text3)}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:flex-end}
+.modal{background:var(--card);border-radius:var(--r-lg) var(--r-lg) 0 0;padding:20px 16px;padding-bottom:calc(20px + env(safe-area-inset-bottom));width:100%;max-height:88vh;overflow-y:auto}
+.modal-handle{width:40px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 18px}
+.flabel{font-size:12px;color:var(--text2);margin-bottom:6px;font-weight:700;display:block}
+.frow{margin-bottom:14px}
+input[type=text],input[type=email],select{padding:11px 12px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--card);color:var(--text);font-size:15px;width:100%;-webkit-appearance:none}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%239C9A94' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px}
+#_toast{position:fixed;bottom:calc(var(--nav-h)+10px);left:50%;transform:translateX(-50%);background:#1A1916;color:#fff;padding:12px 18px;border-radius:var(--r);font-size:13px;z-index:300;display:flex;align-items:center;gap:8px;max-width:88vw;box-shadow:0 4px 20px rgba(0,0,0,.3)}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="t-left">
+      <div class="av">JHT</div>
+      <div><div class="t-name">Johnson Health Tech Japan</div><div class="t-sub">Super Account</div></div>
+    </div>
+    <div class="t-badge">最高管理者</div>
+  </div>
+  <div class="content" id="content"></div>
+  <div class="bnav" id="nav"></div>
+</div>
+<div id="modal-slot"></div>
+<script>
+var FACILITIES = [
+  {
+    id:'f1', name:'八事施設', region:'名古屋', status:'active', createdAt:'2024/04/01',
+    trainers:[
+      {id:'t1',name:'中間 涼子',initials:'中涼',star:'star2',status:'active',clPct:72,certDate:null},
+      {id:'t2',name:'山本 健太',initials:'山健',star:'star1',status:'active',clPct:100,certDate:null},
+      {id:'t3',name:'田中 直子',initials:'田直',star:'star1',status:'certified',clPct:100,certDate:'2024/10/20'},
+      {id:'t4',name:'佐々木 舞',initials:'佐舞',star:'star2',status:'certified',clPct:100,certDate:'2024/11/05'},
+    ]
+  },
+  {
+    id:'f2', name:'栄施設', region:'名古屋', status:'active', createdAt:'2024/05/15',
+    trainers:[
+      {id:'t5',name:'加藤 雄介',initials:'加雄',star:'star3',status:'active',clPct:45,certDate:null},
+      {id:'t6',name:'伊藤 翔',  initials:'伊翔',star:'star1',status:'active',clPct:30,certDate:null},
+    ]
+  },
+  {
+    id:'f3', name:'芦屋施設', region:'兵庫', status:'active', createdAt:'2024/08/01',
+    trainers:[
+      {id:'t7',name:'鈴木 花子',initials:'鈴花',star:'star2',status:'certified',clPct:100,certDate:'2024/12/01'},
+      {id:'t8',name:'渡辺 浩',  initials:'渡浩',star:'star1',status:'active',clPct:65,certDate:null},
+    ]
+  },
+];
+
+var SC={
+  star1:{bg:'var(--amber-l)',text:'var(--amber)',border:'var(--amber-m)',label:'★ Star1'},
+  star2:{bg:'var(--green-l)',text:'var(--green)',border:'var(--green-m)',label:'★★ Star2'},
+  star3:{bg:'var(--purple-l)',text:'var(--purple)',border:'var(--purple-m)',label:'★★★ Star3'},
+};
+
+var ST={page:'home',modal:null,selectedFac:null};
+
+function allTrainers(){return FACILITIES.flatMap(function(f){return f.trainers;});}
+function certCount(){return allTrainers().filter(function(t){return t.status==='certified';}).length;}
+function starCount(s){return allTrainers().filter(function(t){return t.star===s;}).length;}
+function starCert(s){return allTrainers().filter(function(t){return t.star===s&&t.status==='certified';}).length;}
+
+var NAV=[
+  {k:'home',     i:'ti-home',     l:'ホーム'},
+  {k:'facilities',i:'ti-building', l:'施設管理'},
+  {k:'trainers', i:'ti-users',    l:'全トレーナー'},
+  {k:'reports',  i:'ti-chart-bar',l:'レポート'},
+];
+
+function go(pg){
+  ST.page=pg;ST.modal=null;
+  document.getElementById('nav').innerHTML=NAV.map(function(n){
+    var on=ST.page===n.k;
+    return '<button class="ni '+(on?'on':'')+'" onclick="go(\''+n.k+'\')">'
+      +'<i class="ti '+n.i+' ni-icon"></i>'
+      +'<span class="ni-lbl">'+n.l+'</span></button>';
+  }).join('');
+  render();
+}
+
+function toast(msg){
+  var ex=document.getElementById('_toast');if(ex)ex.remove();
+  var t=document.createElement('div');t.id='_toast';
+  t.innerHTML='<i class="ti ti-info-circle" style="font-size:16px;flex-shrink:0"></i><span>'+msg+'</span>';
+  document.body.appendChild(t);setTimeout(function(){if(t.parentNode)t.remove();},3000);
+}
+
+function render(){
+  document.getElementById('content').scrollTop=0;
+  var fns={home:rHome,facilities:rFacilities,trainers:rTrainers,reports:rReports};
+  document.getElementById('content').innerHTML=(fns[ST.page]||rHome)();
+  document.getElementById('modal-slot').innerHTML=ST.modal?rModal():'';
+}
+
+/* HOME */
+function rHome(){
+  var totalFac=FACILITIES.length;
+  var totalT=allTrainers().length;
+  var totalCert=certCount();
+  var html='<div class="g2" style="margin-bottom:10px">'
+    +'<div class="met"><div class="mv">'+totalFac+'</div><div class="ml">施設数</div></div>'
+    +'<div class="met"><div class="mv">'+totalT+'</div><div class="ml">総トレーナー数</div></div>'
+    +'</div>'
+    +'<div class="g3" style="margin-bottom:12px">'
+    +'<div class="met"><div class="mv" style="color:var(--amber)">'+starCount('star1')+'</div><div class="ml">★ Star1</div></div>'
+    +'<div class="met"><div class="mv" style="color:var(--green)">'+starCount('star2')+'</div><div class="ml">★★ Star2</div></div>'
+    +'<div class="met"><div class="mv" style="color:var(--purple)">'+starCount('star3')+'</div><div class="ml">★★★ Star3</div></div>'
+    +'</div>';
+
+  html+='<div class="card"><div class="ctitle">施設一覧 <button class="btn btnsm" onclick="go(\'facilities\')">全て見る →</button></div>';
+  FACILITIES.forEach(function(f){
+    var cert=f.trainers.filter(function(t){return t.status==='certified';}).length;
+    html+='<div class="fac-row" onclick="openFac(\''+f.id+'\')"><div class="fac-av">'+f.name.slice(0,2)+'</div>'
+      +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">'+f.name+'</div>'
+      +'<div style="font-size:11px;color:var(--text3);margin-top:2px">'+f.region+' · '+f.trainers.length+'名 · 認定済: '+cert+'名</div></div>'
+      +'<i class="ti ti-chevron-right" style="color:var(--text3);font-size:16px"></i></div>';
+  });
+  html+='</div>';
+
+  html+='<div class="card"><div class="ctitle">認定状況サマリー</div>';
+  ['star1','star2','star3'].forEach(function(s){
+    var sc=SC[s];var tot=starCount(s);var cert=starCert(s);
+    html+='<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--bg2)">'
+      +'<div style="width:68px;font-size:12px;font-weight:700;color:'+sc.text+'">'+sc.label+'</div>'
+      +'<div class="pb" style="flex:1;margin:0"><div class="pf" style="width:'+(tot>0?Math.round(cert/tot*100):0)+'%;background:'+sc.text+'"></div></div>'
+      +'<span style="font-size:12px;font-weight:700">'+cert+'/'+tot+'名</span>'
+      +'<span class="tag" style="background:'+sc.bg+';color:'+sc.text+'">'+(cert===tot&&tot>0?'全員完了':'進行中')+'</span></div>';
+  });
+  html+='</div>';
+
+  html+='<button class="btn btnd btnfull" style="padding:13px;font-size:14px" onclick="ST.modal=\'addfac\';render()">'
+    +'<i class="ti ti-plus"></i> 新しい施設を追加する</button>';
+  return html;
+}
+
+/* FACILITIES */
+function rFacilities(){
+  var html='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">'
+    +'<div style="font-size:14px;font-weight:700">施設管理（'+FACILITIES.length+'施設）</div>'
+    +'<button class="btn btnd btnsm" onclick="ST.modal=\'addfac\';render()"><i class="ti ti-plus" style="font-size:13px"></i> 施設追加</button></div>';
+
+  if(ST.selectedFac){
+    var f=FACILITIES.find(function(x){return x.id===ST.selectedFac;});
+    if(f){
+      html+='<div class="card" style="border-color:#1A1916">'
+        +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">'
+        +'<button class="btn btnsm" onclick="ST.selectedFac=null;render()"><i class="ti ti-arrow-left" style="font-size:13px"></i></button>'
+        +'<div class="fac-av">'+f.name.slice(0,2)+'</div>'
+        +'<div><div style="font-size:15px;font-weight:700">'+f.name+'</div><div style="font-size:12px;color:var(--text3)">'+f.region+' · 作成: '+f.createdAt+'</div></div></div>';
+
+      var cert=f.trainers.filter(function(t){return t.status==='certified';}).length;
+      html+='<div class="g3" style="margin-bottom:14px">'
+        +'<div class="met"><div class="mv">'+f.trainers.length+'</div><div class="ml">トレーナー数</div></div>'
+        +'<div class="met"><div class="mv" style="color:var(--green)">'+cert+'</div><div class="ml">認定済み</div></div>'
+        +'<div class="met"><div class="mv" style="color:var(--amber)">'+(f.trainers.length-cert)+'</div><div class="ml">挑戦中</div></div>'
+        +'</div>';
+
+      f.trainers.forEach(function(t){
+        var sc=SC[t.star];
+        html+='<div class="trainer-row"><div class="av-sm" style="background:'+sc.bg+';color:'+sc.text+';border-color:'+sc.border+'">'+t.initials+'</div>'
+          +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">'+t.name+'</div>'
+          +'<div style="display:flex;align-items:center;gap:6px;margin-top:3px">'
+          +'<div class="pb" style="width:70px;margin:0"><div class="pf" style="width:'+t.clPct+'%;background:'+sc.text+'"></div></div>'
+          +'<span style="font-size:11px;color:var(--text3)">CL '+t.clPct+'%</span>'
+          +'<span style="font-size:10px;font-weight:700;color:'+sc.text+'">'+sc.label+'</span>'
+          +'</div></div>'
+          +'<span class="tag '+(t.status==='certified'?'td':'tg')+'">'+(t.status==='certified'?'認定済':'進行中')+'</span></div>';
+      });
+      html+='</div>';
+      return html;
+    }
+  }
+
+  html+='<div class="card" style="padding:0;overflow:hidden">';
+  FACILITIES.forEach(function(f){
+    var cert=f.trainers.filter(function(t){return t.status==='certified';}).length;
+    var pct=Math.round(cert/f.trainers.length*100);
+    html+='<div class="fac-row" onclick="ST.selectedFac=\''+f.id+'\';render()">'
+      +'<div class="fac-av">'+f.name.slice(0,2)+'</div>'
+      +'<div style="flex:1;min-width:0">'
+      +'<div style="font-size:13px;font-weight:700">'+f.name+'</div>'
+      +'<div style="font-size:11px;color:var(--text3);margin-top:2px">'+f.region+' · '+f.trainers.length+'名</div>'
+      +'<div style="display:flex;align-items:center;gap:6px;margin-top:4px">'
+      +'<div class="pb" style="width:80px;margin:0"><div class="pf" style="width:'+pct+'%;background:#1A1916"></div></div>'
+      +'<span style="font-size:11px;color:var(--text3)">認定 '+cert+'/'+f.trainers.length+'名</span>'
+      +'</div></div>'
+      +'<i class="ti ti-chevron-right" style="color:var(--text3);font-size:16px;flex-shrink:0"></i></div>';
+  });
+  html+='</div>';
+  return html;
+}
+
+function openFac(id){ST.selectedFac=id;go('facilities');}
+
+/* ALL TRAINERS */
+function rTrainers(){
+  var all=allTrainers();
+  var html='<div style="font-size:14px;font-weight:700;margin-bottom:12px">全トレーナー（'+all.length+'名）</div>';
+  ['star3','star2','star1'].forEach(function(s){
+    var list=all.filter(function(t){return t.star===s;});
+    if(list.length===0)return;
+    var sc=SC[s];var cert=list.filter(function(t){return t.status==='certified';}).length;
+    html+='<div class="card"><div class="ctitle" style="color:'+sc.text+'">'+sc.label+' <span style="font-size:12px;color:var(--text3);font-weight:400">'+list.length+'名 / 認定済 '+cert+'名</span></div>';
+    list.forEach(function(t){
+      var fac=FACILITIES.find(function(f){return f.trainers.find(function(x){return x.id===t.id;});});
+      html+='<div class="trainer-row"><div class="av-sm" style="background:'+sc.bg+';color:'+sc.text+';border-color:'+sc.border+'">'+t.initials+'</div>'
+        +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">'+t.name+'</div>'
+        +'<div style="font-size:11px;color:var(--text3);margin-top:2px">'+(fac?fac.name:'—')+'</div>'
+        +'<div style="display:flex;align-items:center;gap:6px;margin-top:3px">'
+        +'<div class="pb" style="width:60px;margin:0"><div class="pf" style="width:'+t.clPct+'%;background:'+sc.text+'"></div></div>'
+        +'<span style="font-size:11px;color:var(--text3)">CL '+t.clPct+'%</span>'
+        +'</div></div>'
+        +'<span class="tag '+(t.status==='certified'?'td':'tg')+'">'+(t.status==='certified'?'認定済':'進行中')+'</span></div>';
+    });
+    html+='</div>';
+  });
+  return html;
+}
+
+/* REPORTS */
+function rReports(){
+  var total=allTrainers().length;var cert=certCount();
+  var html='<div style="font-size:14px;font-weight:700;margin-bottom:12px">全体レポート</div>';
+
+  html+='<div class="card" style="text-align:center;padding:20px 14px;margin-bottom:12px">'
+    +'<div style="font-size:48px;font-weight:700;color:#1A1916">'+Math.round(cert/total*100)+'%</div>'
+    +'<div style="font-size:13px;color:var(--text3);margin-top:4px">全体認定率（'+cert+'/'+total+'名）</div>'
+    +'<div class="pb" style="height:10px;margin-top:10px"><div class="pf" style="width:'+Math.round(cert/total*100)+'%;background:#1A1916"></div></div>'
+    +'</div>';
+
+  html+='<div class="card"><div class="ctitle">施設別 認定状況</div>';
+  FACILITIES.forEach(function(f){
+    var c=f.trainers.filter(function(t){return t.status==='certified';}).length;
+    var pct=Math.round(c/f.trainers.length*100);
+    html+='<div style="margin-bottom:12px">'
+      +'<div style="display:flex;justify-content:space-between;margin-bottom:4px">'
+      +'<span style="font-size:13px;font-weight:700">'+f.name+'</span>'
+      +'<span style="font-size:12px;color:var(--text3)">'+c+'/'+f.trainers.length+'名（'+pct+'%）</span></div>'
+      +'<div class="pb" style="height:8px"><div class="pf" style="width:'+pct+'%;background:#1A1916"></div></div>'
+      +'</div>';
+  });
+  html+='</div>';
+
+  html+='<div class="card"><div class="ctitle">レベル別 認定状況</div>';
+  ['star3','star2','star1'].forEach(function(s){
+    var sc=SC[s];var tot=starCount(s);var c=starCert(s);
+    html+='<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--bg2)">'
+      +'<div style="width:72px;font-size:12px;font-weight:700;color:'+sc.text+'">'+sc.label+'</div>'
+      +'<div class="pb" style="flex:1;margin:0"><div class="pf" style="width:'+(tot>0?Math.round(c/tot*100):0)+'%;background:'+sc.text+'"></div></div>'
+      +'<span style="font-size:12px;font-weight:700">'+c+'/'+tot+'名</span></div>';
+  });
+  html+='</div>';
+  return html;
+}
+
+/* MODAL */
+function rModal(){
+  if(ST.modal==='addfac'){
+    return '<div class="modal-bg" onclick="if(event.target===this){ST.modal=null;render()}">'
+      +'<div class="modal"><div class="modal-handle"></div>'
+      +'<div style="font-size:17px;font-weight:700;margin-bottom:4px">新しい施設を追加</div>'
+      +'<div style="font-size:12px;color:var(--text3);margin-bottom:16px">施設を追加すると施設アカウントへの招待メールが送信されます</div>'
+      +'<div class="frow"><label class="flabel">施設名 *</label><input type="text" id="fac-name" placeholder="例: 金山施設"></div>'
+      +'<div class="frow"><label class="flabel">地域</label><input type="text" id="fac-region" placeholder="例: 名古屋"></div>'
+      +'<div class="frow"><label class="flabel">施設管理者メールアドレス *</label><input type="email" id="fac-email" placeholder="facility@egym.jp"></div>'
+      +'<div style="padding:12px;background:var(--bg);border-radius:var(--r-sm);font-size:12px;color:var(--text2);margin-bottom:18px;line-height:1.6">'
+      +'<i class="ti ti-info-circle"></i> 施設アカウントが作成され、管理者にログイン用メールが送信されます。施設管理者はその後Star1/2/3のトレーナーを招待できます。</div>'
+      +'<div style="display:flex;gap:10px">'
+      +'<button class="btn" style="flex:1" onclick="ST.modal=null;render()">キャンセル</button>'
+      +'<button class="btn btnd" style="flex:1" onclick="doAddFac()"><i class="ti ti-plus"></i> 施設を追加する</button>'
+      +'</div></div></div>';
+  }
+  return '';
+}
+
+function doAddFac(){
+  var name=document.getElementById('fac-name').value.trim();
+  var region=document.getElementById('fac-region').value.trim();
+  var email=document.getElementById('fac-email').value.trim();
+  if(!name||!email){alert('施設名とメールアドレスを入力してください');return;}
+  if(!email.includes('@')){alert('正しいメールアドレスを入力してください');return;}
+  var newId='f'+Date.now();
+  FACILITIES.push({id:newId,name:name,region:region||'未設定',status:'active',
+    createdAt:new Date().toLocaleDateString('ja-JP'),trainers:[]});
+  ST.modal=null;
+  toast(name+'を追加しました。施設管理者へ招待メールを送信しました。');
+  go('facilities');
+}
+
+go('home');
+</script>
+</body>
+</html>
