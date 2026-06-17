@@ -496,8 +496,20 @@ function schClearPhase(pi){const ph=ST[ST.schProg].phases[pi];ph.method='';ph.no
 function schMarkDone(pi){if(ST[ST.schProg].phases[pi].sessions.filter(Boolean).length<6){alert('6回のセッション日をすべて設定してから完了にしてください');return;}ST[ST.schProg].phases[pi].done=true;ST[ST.schProg].phases[pi].open=false;const next=ST[ST.schProg].phases[pi+1];if(next){next.open=true;}ST.cal.show=false;render();}
 
 /* CERT */
+function baAllComplete(){
+  if(!ST.baData||ST.baData.length<2)return false;
+  const fields=['weight','fat','muscle','bio_str','bio_meta','bio_flex','bio_cardio'];
+  return ST.baData.every(function(ba){
+    return ['before','mid','after'].every(function(phase){
+      return fields.every(function(f){
+        var v=ba[phase] && ba[phase][f];
+        return v!==undefined && v!==null && String(v).trim()!=='';
+      });
+    }) && ba.name && ba.name.trim()!=='';
+  });
+}
 function rCert(){
-  const p=clPct();const sc=certifiedCount();const certified=clComplete()&&sc>=2;
+  const p=clPct();const sc=certifiedCount();const baOk=baAllComplete();const certified=clComplete()&&sc>=2&&baOk;
   let html='<div class="card" style="text-align:center;padding:28px 16px">'+
     '<div style="width:92px;height:92px;border-radius:50%;background:'+(certified?'var(--purple-l)':'var(--bg2)')+';border:3px solid '+(certified?'var(--purple-m)':'var(--border)')+';display:flex;align-items:center;justify-content:center;margin:0 auto 16px;'+(certified?'':'opacity:.35;filter:grayscale(1)')+'"><i class="ti ti-award" style="font-size:46px;color:'+(certified?'var(--purple)':'var(--text3)')+'"></i></div>'+
     '<div style="font-size:17px;font-weight:700;margin-bottom:4px">'+(certified?'スター3 認定バッジ解除！':'スター3 認定バッジ')+'</div>'+
@@ -507,6 +519,7 @@ function rCert(){
     '<div class="card"><div class="ctitle">認定条件</div>'+
     '<div class="step"><div class="sdot '+(clComplete()?'s-done':'s-prog')+'"><i class="ti '+(clComplete()?'ti-check':'ti-checkbox')+'" style="font-size:13px"></i></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">チェックリスト 全項目完了</div><div style="font-size:11px;color:var(--text3);margin-top:3px">'+doneCount()+'/'+totalCount()+'項目（'+p+'%）</div></div><span class="tag '+(clComplete()?'td':'tp')+'">'+(clComplete()?'完了':'未完了')+'</span></div>'+
     '<div class="step"><div class="sdot '+(sc>=2?'s-done':'s-prog')+'"><i class="ti '+(sc>=2?'ti-check':'ti-star')+'" style="font-size:13px"></i></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">スター2を2名以上育成・認定する</div><div style="font-size:11px;color:var(--text3);margin-top:3px">現在 '+sc+'名認定済み</div></div><span class="tag '+(sc>=2?'td':'tp')+'">'+(sc>=2?'達成':'進行中')+'</span></div>'+
+    '<div class="step" style="cursor:pointer" onclick="go(\'ba\')"><div class="sdot '+(baOk?'s-done':'s-prog')+'"><i class="ti '+(baOk?'ti-check':'ti-chart-line')+'" style="font-size:13px"></i></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">お客様2名のB/Aデータ作成（Before・Mid・After）</div><div style="font-size:11px;color:var(--text3);margin-top:3px">'+(baOk?'全項目入力済み':'未入力の項目があります → タップして記録')+'</div></div><span class="tag '+(baOk?'td':'tp')+'">'+(baOk?'完了':'未完了')+'</span></div>'+
     '<div class="step"><div class="sdot s-lock"><i class="ti ti-clipboard-check" style="font-size:13px"></i></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">確認テスト合格</div><div style="font-size:11px;color:var(--text3);margin-top:3px">テスト内容は準備中です</div></div><span class="tag tg">準備中</span></div>'+
     '</div>';
 
@@ -552,7 +565,17 @@ function rCert(){
       '</div></div>';
   });
 
-  if(certified){html+='<div class="card" style="border:2px solid var(--green);margin-top:8px"><div style="font-size:14px;font-weight:700;color:var(--green);margin-bottom:8px"><i class="ti ti-circle-check"></i> 認定申請が可能です</div><div style="font-size:13px;color:var(--text2);margin-bottom:16px">全条件が揃いました。JHTJapanへ申請してください。</div><button class="btn btng btnfull" style="padding:14px" onclick="ST.modal=\'certjht\';render()"><i class="ti ti-send"></i> JHTJapanへ申請通知を送る</button></div>';}
+  if(certified){
+    html+='<div class="card" style="border:2px solid var(--green);margin-top:8px"><div style="font-size:14px;font-weight:700;color:var(--green);margin-bottom:8px"><i class="ti ti-circle-check"></i> 認定申請が可能です</div><div style="font-size:13px;color:var(--text2);margin-bottom:16px">全条件が揃いました。JHTJapanへ申請してください。</div><button class="btn btng btnfull" style="padding:14px" onclick="ST.modal=\'certjht\';render()"><i class="ti ti-send"></i> JHTJapanへ申請通知を送る</button></div>';
+  } else {
+    var missing=[];
+    if(!clComplete())missing.push('チェックリストの完了');
+    if(sc<2)missing.push('スター2の育成・認定（あと'+(2-sc)+'名）');
+    if(!baOk)missing.push('お客様B/Aデータの入力（Before/Mid/After）');
+    html+='<div class="card" style="margin-top:8px"><div style="font-size:13px;font-weight:700;color:var(--text2);margin-bottom:10px">未達成の条件</div>'
+      +missing.map(function(m){return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:12px;color:var(--text2)"><i class="ti ti-circle-dot" style="color:var(--amber);font-size:14px"></i>'+m+'</div>';}).join('')
+      +'<button class="btn btnfull" style="padding:14px;margin-top:10px;opacity:.4;cursor:not-allowed" disabled><i class="ti ti-send"></i> JHTJapanへ申請通知を送る</button></div>';
+  }
   html += rNotes();
   return html;
 }

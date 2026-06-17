@@ -1240,15 +1240,12 @@ function rCert(){
   <div class="card" style="border:2px solid var(--green)">
     <div style="font-size:15px;font-weight:700;color:var(--green);margin-bottom:8px"><i class="ti ti-circle-check"></i> 認定申請が可能です</div>
     <div style="font-size:13px;color:var(--text2);margin-bottom:16px">全条件が満たされました。施設アカウントへ申請するとJHTJapanへ通知されます。</div>
-    <button class="btn btng btnfull" style="padding:14px;font-size:15px"><i class="ti ti-send"></i> 施設アカウントへ申請通知を送る</button>
+    <button class="btn btng btnfull" style="padding:14px;font-size:15px" onclick="alert('施設アカウントへ申請通知を送信しました')"><i class="ti ti-send"></i> 施設アカウントへ申請通知を送る</button>
   </div>`:`
-  <div class="card" style="background:var(--bg)">
-    <div style="font-size:14px;font-weight:700;margin-bottom:12px">スター2認定の流れ</div>
-    ${['スター2チェックリストを全項目完了する','プログラム①②を全フェーズ完了する','スター1を2名育成・認定する（プログラム①完了後から可）','確認テストに合格する（80点以上）','施設→JHTJapanへ申請 → バッジ・認定証を授与'].map((s,i)=>`
-    <div style="display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--bg2)">
-      <div style="width:26px;height:26px;border-radius:50%;background:var(--green-l);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0">${i+1}</div>
-      <div style="font-size:13px;padding-top:3px">${s}</div>
-    </div>`).join('')}
+  <div class="card">
+    <div style="font-size:13px;font-weight:700;color:var(--text2);margin-bottom:10px">未達成の条件</div>
+    ${conds.filter(c=>!c.ok).map(c=>`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:12px;color:var(--text2)"><i class="ti ti-circle-dot" style="color:var(--amber);font-size:14px"></i>${c.l}</div>`).join('')}
+    <button class="btn btnfull" style="padding:14px;margin-top:10px;opacity:.4;cursor:not-allowed" disabled><i class="ti ti-send"></i> 施設アカウントへ申請通知を送る</button>
   </div>`}${rNotes()}`;
 }
 
