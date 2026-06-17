@@ -147,7 +147,15 @@ function rHome(){
   var totalFac=FACILITIES.length;
   var totalT=allTrainers().length;
   var totalCert=certCount();
-  var html='<div class="g2" style="margin-bottom:10px">'
+  var html='';
+  if(LOAD_ERROR){
+    html+='<div style="padding:14px;background:var(--red-l);border:1px solid #e8a9a9;border-radius:var(--r);margin-bottom:14px">'
+      +'<div style="font-size:13px;font-weight:700;color:var(--red);margin-bottom:4px"><i class="ti ti-alert-triangle"></i> データ読み込みエラー</div>'
+      +'<div style="font-size:12px;color:var(--red);word-break:break-all">'+LOAD_ERROR+'</div>'
+      +'<button class="btn btnsm" style="margin-top:8px" onclick="loadAllData()"><i class="ti ti-refresh" style="font-size:12px"></i> 再読み込み</button>'
+      +'</div>';
+  }
+  html+='<div class="g2" style="margin-bottom:10px">'
     +'<div class="met"><div class="mv">'+totalFac+'</div><div class="ml">施設数</div></div>'
     +'<div class="met"><div class="mv">'+totalT+'</div><div class="ml">総トレーナー数</div></div>'
     +'</div>'
@@ -596,8 +604,9 @@ async function loadAllData(){
     LOADING=false;
   } catch(err){
     LOADING=false;
-    LOAD_ERROR = err.message || '読み込みエラーが発生しました';
-    console.error('loadAllData error:', err);
+    var detail = (err && (err.message || err.error_description || err.details || err.hint)) || JSON.stringify(err);
+    LOAD_ERROR = detail || '読み込みエラーが発生しました';
+    console.error('loadAllData error detail:', detail, 'full object:', JSON.stringify(err));
   }
   go(ST.page||'home');
 }
@@ -611,6 +620,36 @@ function renderLoading(){
 }
 
 /* ══════════════════════════════
+   EDGE FUNCTION (招待メール送信)
+══════════════════════════════ */
+const EDGE_FUNCTION_URL = 'https://gcqqhjeqvnfbgdenflmk.supabase.co/functions/v1/bright-endpoint';
+
+async function callEdgeFunction(payload){
+  var res = await fetch(EDGE_FUNCTION_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + SUPABASE_KEY,
+      'apikey': SUPABASE_KEY,
+    },
+    body: JSON.stringify(payload),
+  });
+  var json = await res.json();
+  if(!res.ok || json.error){
+    throw new Error(json.error || '処理に失敗しました');
+  }
+  return json;
+}
+
+async function inviteUser(email, name, role, facilityId){
+  return callEdgeFunction({ action:'invite', email: email, name: name, role: role, facilityId: facilityId || null });
+}
+
+async function deleteUserAccount(email){
+  return callEdgeFunction({ action:'delete_user', email: email });
+}
+
+/* ══════════════════════════════
    SUPABASE WRITE HELPERS
 ══════════════════════════════ */
 async function sbAddFacility(name, region, email){
@@ -618,11 +657,36 @@ async function sbAddFacility(name, region, email){
     name: name, region: region||null, admin_email: email||null, status:'active'
   }).select().single();
   if(error) throw error;
+
+  // Send invite email + create login account for facility admin
+  try {
+    await inviteUser(email, name, 'facility', data.id);
+  } catch(inviteErr){
+    console.error('Invite failed:', inviteErr);
+    throw new Error('施設は作成されましたが、招待メールの送信に失敗しました: '+inviteErr.message);
+  }
   return data;
 }
 
 async function sbDeleteFacility(facId){
-  // Delete trainers first (FK constraint), then facility
+  // 1. Get all trainers in this facility (need their emails to delete login accounts)
+  var {data: trainersInFac, error: getErr} = await _sb.from('trainers').select('email').eq('facility_id', facId);
+  if(getErr) throw getErr;
+
+  // 2. Get the facility's admin email
+  var {data: facData, error: facGetErr} = await _sb.from('facilities').select('admin_email').eq('id', facId).single();
+  if(facGetErr) throw facGetErr;
+
+  // 3. Delete login accounts for all trainers + facility admin
+  var emailsToDelete = (trainersInFac||[]).map(function(t){return t.email;}).filter(Boolean);
+  if(facData && facData.admin_email) emailsToDelete.push(facData.admin_email);
+
+  for (var i=0; i<emailsToDelete.length; i++){
+    try { await deleteUserAccount(emailsToDelete[i]); }
+    catch(e){ console.error('Failed to delete account for', emailsToDelete[i], e); }
+  }
+
+  // 4. Delete trainers rows, then facility row
   await _sb.from('trainers').delete().eq('facility_id', facId);
   var {error} = await _sb.from('facilities').delete().eq('id', facId);
   if(error) throw error;
@@ -634,10 +698,27 @@ async function sbAddTrainer(facilityId, name, email, starLevel){
     status:'active', cl_pct:0
   }).select().single();
   if(error) throw error;
+
+  // Send invite email + create login account for trainer
+  try {
+    await inviteUser(email, name, starLevel, facilityId);
+  } catch(inviteErr){
+    console.error('Invite failed:', inviteErr);
+    throw new Error('トレーナーは追加されましたが、招待メールの送信に失敗しました: '+inviteErr.message);
+  }
   return data;
 }
 
 async function sbDeleteTrainer(trainerId){
+  // Get the trainer's email first so we can delete their login account too
+  var {data: trainerData, error: getErr} = await _sb.from('trainers').select('email').eq('id', trainerId).single();
+  if(getErr) throw getErr;
+
+  if(trainerData && trainerData.email){
+    try { await deleteUserAccount(trainerData.email); }
+    catch(e){ console.error('Failed to delete login account:', e); }
+  }
+
   var {error} = await _sb.from('trainers').delete().eq('id', trainerId);
   if(error) throw error;
 }
