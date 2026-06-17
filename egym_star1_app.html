@@ -118,6 +118,7 @@ input[type=number]{padding:11px 12px;border:1px solid var(--border);border-radiu
 const SUPABASE_URL = "https://gcqqhjeqvnfbgdenflmk.supabase.co";
 const SUPABASE_KEY = "sb_publishable_P9Ze3fOsCIpuhzx4AYednA_Gbxf9OO1";
 const _sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const STAR_KEY = 'star1';
 </script>
 </head>
 <body>
@@ -474,7 +475,64 @@ function rCert(){
       +['チェックリスト（オンボーディング・マシンセットアップ・理解度）を全項目完了する','ベーシックプログラム4フェーズ・24セッションを完了する','担当スター2トレーナーへ申請通知を送る','スター2が認定ボタンを押すと認定完了','バッジとノベルティが授与される'].map((s,i)=>'<div style="display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--bg2)"><div style="width:26px;height:26px;border-radius:50%;background:var(--amber-l);color:var(--amber);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0">'+(i+1)+'</div><div style="font-size:13px;padding-top:3px">'+s+'</div></div>').join('')
       +'</div>';
   }
+  html += rNotes();
   return html;
+}
+
+
+/* ══════ NOTES (メモ) ══════ */
+function notesStorageKey(){return 'egym_notes_'+(typeof STAR_KEY!=='undefined'?STAR_KEY:'star');}
+function loadNotes(){
+  try{
+    var raw=localStorage.getItem(notesStorageKey());
+    return raw?JSON.parse(raw):[];
+  }catch(e){return [];}
+}
+function saveNotes(notes){
+  try{localStorage.setItem(notesStorageKey(),JSON.stringify(notes));}catch(e){}
+}
+function rNotes(){
+  var notes=loadNotes();
+  var html='<div class="card">';
+  html+='<div class="ctitle">メモ <span style="font-size:11px;color:var(--text3);font-weight:400">'+notes.length+'件</span></div>';
+  html+='<textarea id="new-note-input" placeholder="メモを入力（トレーニング内容、気づき、申請の経緯など）" style="width:100%;min-height:80px;padding:11px;border:1px solid var(--border);border-radius:var(--r-sm);font-size:14px;font-family:inherit;resize:vertical;margin-bottom:10px"></textarea>';
+  html+='<button class="btn btnd btnfull" style="padding:11px" onclick="addNote()"><i class="ti ti-plus"></i> メモを追加</button>';
+  html+='</div>';
+
+  if(notes.length>0){
+    html+='<div class="card">';
+    notes.slice().reverse().forEach(function(n){
+      html+='<div style="padding:12px 0;border-bottom:1px solid var(--bg2)">'
+        +'<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:6px">'
+        +'<span style="font-size:11px;color:var(--text3);font-weight:700">'+n.date+'</span>'
+        +'<button class="btn btnsm" style="padding:3px 8px" onclick="deleteNote(\''+n.id+'\')"><i class="ti ti-trash" style="font-size:11px"></i></button>'
+        +'</div>'
+        +'<div style="font-size:13px;color:var(--text);line-height:1.7;white-space:pre-wrap">'+escNoteHtml(n.text)+'</div>'
+        +'</div>';
+    });
+    html+='</div>';
+  } else {
+    html+='<div class="card" style="text-align:center;padding:24px 16px;color:var(--text3);font-size:13px">まだメモがありません</div>';
+  }
+  return html;
+}
+function escNoteHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function addNote(){
+  var input=document.getElementById('new-note-input');
+  var text=input.value.trim();
+  if(!text){return;}
+  var notes=loadNotes();
+  var now=new Date();
+  var dateStr=now.getFullYear()+'/'+String(now.getMonth()+1).padStart(2,'0')+'/'+String(now.getDate()).padStart(2,'0')+' '+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+  notes.push({id:'n'+Date.now(),text:text,date:dateStr});
+  saveNotes(notes);
+  render();
+}
+function deleteNote(id){
+  if(!confirm('このメモを削除しますか？'))return;
+  var notes=loadNotes().filter(function(n){return n.id!==id;});
+  saveNotes(notes);
+  render();
 }
 
 function rCertModal(){

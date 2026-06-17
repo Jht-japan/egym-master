@@ -226,7 +226,12 @@ function makeCandCl(){const cl={};S2_ITEMS.forEach(it=>{cl[it.id]=false;});retur
 function s2BySec(cl){const s={};S2_ITEMS.forEach(it=>{if(!s[it.sec])s[it.sec]=[];s[it.sec].push({...it,done:cl[it.id]});});return s;}
 
 // Body + BioAge state
-function makeBaData(){return{weight:'',fat:'',muscle:'',bio_str:'',bio_meta:'',bio_flex:'',bio_cardio:''};}
+function makeMeasure(){return{weight:'',fat:'',muscle:'',bio_str:'',bio_meta:'',bio_flex:'',bio_cardio:''};
+}
+function makeBaData(){return{
+  name:'',age:'',gender:'',goal:'',
+  before:makeMeasure(),mid:makeMeasure(),after:makeMeasure()
+};}
 function makePhases(){return['フェーズ1','フェーズ2','フェーズ3','フェーズ4'].map((label,i)=>({label,method:'',note:'',sessions:Array(6).fill(null),open:i===0,done:false}));}
 
 const clState={};const secOpen={};
@@ -235,7 +240,7 @@ secOpen['ba_plan']=true;
 
 const ST={
   page:'home',cl:clState,secOpen,
-  baData:[{name:'お客様1',pre:makeBaData(),post:makeBaData()},{name:'お客様2',pre:makeBaData(),post:makeBaData()}],
+  baData:[makeBaData(),makeBaData()],
   schProg:'p1',
   p1:{selected:'',phases:makePhases()},
   p2:{selected:'',phases:makePhases()},
@@ -334,21 +339,104 @@ function toggleSec(id){ST.secOpen[id]=!ST.secOpen[id];render();}
 
 /* BEFORE/AFTER */
 function rBeforeAfter(){
-  const bodyM=[{k:'weight',l:'体重',u:'kg',ph:'例: 68.0',up:false},{k:'fat',l:'体脂肪率',u:'%',ph:'例: 23.5',up:false},{k:'muscle',l:'筋肉量',u:'kg',ph:'例: 28.0',up:true}];
-  const bioM=[{k:'bio_str',l:'筋力 BioAge',u:'歳',ph:'例: 45',up:false},{k:'bio_meta',l:'代謝 BioAge',u:'歳',ph:'例: 45',up:false},{k:'bio_flex',l:'柔軟性 BioAge',u:'歳',ph:'例: 45',up:false},{k:'bio_cardio',l:'カーディオ BioAge',u:'歳',ph:'例: 45',up:false}];
-  let html='<div style="font-size:14px;font-weight:700;margin-bottom:12px">お客様ビフォーアフター記録</div>';
+  const bodyM=[
+    {k:'weight',l:'体重',u:'kg',ph:'68.0',up:false},
+    {k:'fat',   l:'体脂肪率',u:'%',ph:'23.5',up:false},
+    {k:'muscle',l:'筋肉量',u:'kg',ph:'28.0',up:true},
+  ];
+  const bioM=[
+    {k:'bio_str',  l:'筋力 BioAge',   ph:'45'},
+    {k:'bio_meta', l:'代謝 BioAge',   ph:'45'},
+    {k:'bio_flex', l:'柔軟性 BioAge', ph:'45'},
+    {k:'bio_cardio',l:'カーディオ BioAge',ph:'45'},
+  ];
+  const phases=[
+    {k:'before',l:'Before',color:'var(--blue)'},
+    {k:'mid',   l:'Mid',   color:'var(--amber)'},
+    {k:'after', l:'After', color:'var(--green)'},
+  ];
+
+  function diffBa(ba,mk,up){
+    const b=parseFloat(ba.before[mk]);const a=parseFloat(ba.after[mk]);
+    if(isNaN(b)||isNaN(a))return '';
+    const d=a-b;const sign=d>0?'+':'';
+    const good=up?(d>0):(d<0);
+    const cls=d===0?'diff-zero':good?'diff-good':'diff-bad';
+    return '<span class="diff-badge '+cls+'">'+sign+d.toFixed(1)+'</span>';
+  }
+
+  let html='<div style="font-size:14px;font-weight:700;margin-bottom:12px">お客様 ビフォーアフター記録</div>';
+
   ST.baData.forEach((ba,bi)=>{
-    html+='<div class="card"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px"><div style="font-size:14px;font-weight:700">'+ba.name+'</div><input type="text" value="'+ba.name+'" placeholder="お客様のお名前" oninput="ST.baData['+bi+'].name=this.value" style="width:130px;padding:6px 10px;font-size:13px;border:1px solid var(--border);border-radius:var(--r-sm)"></div>';
-    html+='<div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--bg2)">身体データ</div>';
-    bodyM.forEach(m=>{const pre=ba.pre[m.k];const post=ba.post[m.k];html+='<div class="ba-sec"><div style="font-size:13px;font-weight:700;display:flex;justify-content:space-between;align-items:center">'+m.l+'（'+m.u+'）'+diffBadge(pre,post,m.up)+'</div><div class="ba-grid"><div class="ba-field"><label>実施前</label><input type="number" step=".1" class="ba-input" value="'+(pre||'')+'" placeholder="'+m.ph+'" oninput="ST.baData['+bi+'].pre.'+m.k+'=this.value"></div><div class="ba-field"><label>実施後</label><input type="number" step=".1" class="ba-input" value="'+(post||'')+'" placeholder="'+m.ph+'" oninput="ST.baData['+bi+'].post.'+m.k+'=this.value"></div></div></div>';});
-    html+='<div style="font-size:12px;font-weight:700;color:var(--text2);margin:12px 0 8px;padding-top:10px;border-top:1px solid var(--bg2)">BioAge 4項目（歳）<span style="font-size:10px;font-weight:400;color:var(--text3);margin-left:6px">数値が低いほど良好</span></div>';
-    bioM.forEach(m=>{const pre=ba.pre[m.k];const post=ba.post[m.k];html+='<div class="ba-sec"><div style="font-size:13px;font-weight:700;display:flex;justify-content:space-between;align-items:center">'+m.l+' '+diffBadge(pre,post,false)+'</div><div class="ba-grid"><div class="ba-field"><label>実施前</label><input type="number" step=".1" class="ba-input" value="'+(pre||'')+'" placeholder="'+m.ph+'" oninput="ST.baData['+bi+'].pre.'+m.k+'=this.value"></div><div class="ba-field"><label>実施後</label><input type="number" step=".1" class="ba-input" value="'+(post||'')+'" placeholder="'+m.ph+'" oninput="ST.baData['+bi+'].post.'+m.k+'=this.value"></div></div></div>';});
+    const label='お客様 '+(bi+1);
+    html+='<div class="card">';
+
+    // Customer info header
+    html+='<div style="font-size:14px;font-weight:700;color:var(--purple);margin-bottom:12px;padding-bottom:10px;border-bottom:2px solid var(--purple-m)">'+label+'</div>';
+
+    // Customer info fields
+    html+='<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">';
+    html+='<div><label style="font-size:11px;font-weight:700;color:var(--text3);display:block;margin-bottom:4px">お名前</label>'
+      +'<input type="text" value="'+escH(ba.name)+'" placeholder="例: 田中 様" style="width:100%;padding:9px 10px;border:1px solid var(--border);border-radius:var(--r-sm);font-size:14px" oninput="ST.baData['+bi+'].name=this.value"></div>';
+    html+='<div><label style="font-size:11px;font-weight:700;color:var(--text3);display:block;margin-bottom:4px">年齢</label>'
+      +'<input type="number" value="'+escH(ba.age)+'" placeholder="例: 45" style="width:100%;padding:9px 10px;border:1px solid var(--border);border-radius:var(--r-sm);font-size:14px" oninput="ST.baData['+bi+'].age=this.value"></div>';
+    html+='<div><label style="font-size:11px;font-weight:700;color:var(--text3);display:block;margin-bottom:4px">性別</label>'
+      +'<select style="width:100%;padding:9px 10px;border:1px solid var(--border);border-radius:var(--r-sm);font-size:14px;-webkit-appearance:none" onchange="ST.baData['+bi+'].gender=this.value">'
+      +'<option value="" '+(ba.gender===''?'selected':'')+'>選択</option>'
+      +'<option value="男性" '+(ba.gender==='男性'?'selected':'')+'>男性</option>'
+      +'<option value="女性" '+(ba.gender==='女性'?'selected':'')+'>女性</option>'
+      +'<option value="その他" '+(ba.gender==='その他'?'selected':'')+'>その他</option>'
+      +'</select></div>';
+    html+='<div><label style="font-size:11px;font-weight:700;color:var(--text3);display:block;margin-bottom:4px">目標</label>'
+      +'<input type="text" value="'+escH(ba.goal)+'" placeholder="例: 減量・体力向上" style="width:100%;padding:9px 10px;border:1px solid var(--border);border-radius:var(--r-sm);font-size:14px" oninput="ST.baData['+bi+'].goal=this.value"></div>';
+    html+='</div>';
+
+    // Phase tabs
+    const activePh=ST.baTab&&ST.baTab[bi]?ST.baTab[bi]:'before';
+    html+='<div style="display:flex;border:1px solid var(--border);border-radius:var(--r-sm);overflow:hidden;margin-bottom:14px">';
+    phases.forEach(ph=>{
+      const isActive=activePh===ph.k;
+      html+='<div style="flex:1;padding:10px 4px;text-align:center;font-size:13px;font-weight:700;cursor:pointer;'
+        +(isActive?'background:'+ph.color+';color:#fff':'color:var(--text2)')
+        +';" onclick="setBaTab('+bi+',\''+ph.k+'\')">'+ph.l+'</div>';
+    });
+    html+='</div>';
+
+    // Current phase data
+    const phObj=phases.find(p=>p.k===activePh);
+    const phData=ba[activePh];
+
+    html+='<div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px">身体データ</div>';
+    bodyM.forEach(m=>{
+      const v=phData[m.k]||'';
+      const bv=ba.before[m.k];const av=ba.after[m.k];
+      const diff=activePh==='after'?diffBa(ba,m.k,m.up):'';
+      html+='<div class="ba-sec"><div style="font-size:13px;font-weight:700;display:flex;justify-content:space-between;align-items:center">'+m.l+'（'+m.u+'） '+diff+'</div>'
+        +'<input type="number" step=".1" class="ba-input" value="'+v+'" placeholder="'+m.ph+'" oninput="setBaVal('+bi+',\''+activePh+'\',\''+m.k+'\',this.value)" style="width:100%;padding:9px 10px;border:1px solid var(--border);border-radius:var(--r-sm);font-size:15px;margin-top:6px"></div>';
+    });
+
+    html+='<div style="font-size:12px;font-weight:700;color:var(--text2);margin:10px 0 8px;padding-top:8px;border-top:1px solid var(--bg2)">BioAge 4項目（歳）<span style="font-size:10px;font-weight:400;color:var(--text3);margin-left:6px">数値が低いほど良好</span></div>';
+    bioM.forEach(m=>{
+      const v=phData[m.k]||'';
+      const diff=activePh==='after'?diffBa(ba,m.k,false):'';
+      html+='<div class="ba-sec"><div style="font-size:13px;font-weight:700;display:flex;justify-content:space-between;align-items:center">'+m.l+' '+diff+'</div>'
+        +'<input type="number" step=".1" class="ba-input" value="'+v+'" placeholder="'+m.ph+'" oninput="setBaVal('+bi+',\''+activePh+'\',\''+m.k+'\',this.value)" style="width:100%;padding:9px 10px;border:1px solid var(--border);border-radius:var(--r-sm);font-size:15px;margin-top:6px"></div>';
+    });
+
+    // Summary row if After tab
+    if(activePh==='after'){
+      html+='<div style="margin-top:12px;padding:10px 12px;background:var(--green-l);border-radius:var(--r-sm);font-size:12px;color:var(--green)"><i class="ti ti-chart-line"></i> AfterタブにはBeforeからの変化が表示されます</div>';
+    }
+
     html+='</div>';
   });
   return html;
 }
 
-/* SCHEDULE */
+function escH(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function setBaTab(bi,ph){if(!ST.baTab)ST.baTab={};ST.baTab[bi]=ph;render();}
+function setBaVal(bi,ph,key,val){ST.baData[bi][ph][key]=val;}
+
 function rSchedule(){
   return '<div style="display:flex;border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:12px;background:var(--card)">'+
     '<div style="flex:1;padding:11px 8px;text-align:center;font-size:13px;cursor:pointer;border-right:1px solid var(--border);'+(ST.schProg==='p1'?'background:var(--purple);color:#fff;font-weight:700':'color:var(--text2);font-weight:600')+';" onclick="schSwitch(\'p1\')">プログラム①<br><span style="font-size:11px;opacity:.8">'+(ST.p1.selected||'未選択')+'</span></div>'+
@@ -465,7 +553,64 @@ function rCert(){
   });
 
   if(certified){html+='<div class="card" style="border:2px solid var(--green);margin-top:8px"><div style="font-size:14px;font-weight:700;color:var(--green);margin-bottom:8px"><i class="ti ti-circle-check"></i> 認定申請が可能です</div><div style="font-size:13px;color:var(--text2);margin-bottom:16px">全条件が揃いました。JHTJapanへ申請してください。</div><button class="btn btng btnfull" style="padding:14px" onclick="ST.modal=\'certjht\';render()"><i class="ti ti-send"></i> JHTJapanへ申請通知を送る</button></div>';}
+  html += rNotes();
   return html;
+}
+
+/* ══════ NOTES (メモ) ══════ */
+const STAR_KEY = 'star3';
+function notesStorageKey(){return 'egym_notes_'+STAR_KEY;}
+function loadNotes(){
+  try{
+    const raw=localStorage.getItem(notesStorageKey());
+    return raw?JSON.parse(raw):[];
+  }catch(e){return [];}
+}
+function saveNotes(notes){
+  try{localStorage.setItem(notesStorageKey(),JSON.stringify(notes));}catch(e){}
+}
+function rNotes(){
+  const notes=loadNotes();
+  let html='<div class="card">';
+  html+='<div class="ctitle">メモ <span style="font-size:11px;color:var(--text3);font-weight:400">'+notes.length+'件</span></div>';
+  html+='<textarea id="new-note-input" placeholder="メモを入力（トレーニング内容、気づき、申請の経緯など）" style="width:100%;min-height:80px;padding:11px;border:1px solid var(--border);border-radius:var(--r-sm);font-size:14px;font-family:inherit;resize:vertical;margin-bottom:10px"></textarea>';
+  html+='<button class="btn btnpur btnfull" style="padding:11px" onclick="addNote()"><i class="ti ti-plus"></i> メモを追加</button>';
+  html+='</div>';
+
+  if(notes.length>0){
+    html+='<div class="card">';
+    notes.slice().reverse().forEach(function(n){
+      html+='<div style="padding:12px 0;border-bottom:1px solid var(--bg2)">'
+        +'<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:6px">'
+        +'<span style="font-size:11px;color:var(--text3);font-weight:700">'+n.date+'</span>'
+        +'<button class="btn btnsm" style="padding:3px 8px" onclick="deleteNote(\''+n.id+'\')"><i class="ti ti-trash" style="font-size:11px"></i></button>'
+        +'</div>'
+        +'<div style="font-size:13px;color:var(--text);line-height:1.7;white-space:pre-wrap">'+escNoteHtml(n.text)+'</div>'
+        +'</div>';
+    });
+    html+='</div>';
+  } else {
+    html+='<div class="card" style="text-align:center;padding:24px 16px;color:var(--text3);font-size:13px">まだメモがありません</div>';
+  }
+  return html;
+}
+function escNoteHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function addNote(){
+  const input=document.getElementById('new-note-input');
+  const text=input.value.trim();
+  if(!text)return;
+  const notes=loadNotes();
+  const now=new Date();
+  const dateStr=now.getFullYear()+'/'+String(now.getMonth()+1).padStart(2,'0')+'/'+String(now.getDate()).padStart(2,'0')+' '+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+  notes.push({id:'n'+Date.now(),text:text,date:dateStr});
+  saveNotes(notes);
+  render();
+}
+function deleteNote(id){
+  if(!confirm('このメモを削除しますか？'))return;
+  const notes=loadNotes().filter(function(n){return n.id!==id;});
+  saveNotes(notes);
+  render();
 }
 
 function toggleCP(cid,p){const c=ST.candidates.find(x=>x.id===cid);if(!c)return;if(p==='p1')c.p1Done=!c.p1Done;else c.p2Done=!c.p2Done;render();}

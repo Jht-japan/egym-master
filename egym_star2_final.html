@@ -1037,8 +1037,8 @@ function rTest(){
             +'<span>'+it.l+(it.s?' ('+it.s+')':'')+'</span></div>';
         }).join('')
       +'<div style="display:flex;flex-direction:column;gap:8px;margin-top:20px">'
-      +'<button class="btn btnp btnfull" style="padding:13px" onclick="go('checklist')"><i class="ti ti-checkbox"></i> チェックリストへ</button>'
-      +'<button class="btn btnfull" style="padding:13px" onclick="go('schedule')"><i class="ti ti-calendar"></i> スケジュールへ</button>'
+      +'<button class="btn btnp btnfull" style="padding:13px" onclick="go(&quot;checklist&quot;)"><i class="ti ti-checkbox"></i> チェックリストへ</button>'
+      +'<button class="btn btnfull" style="padding:13px" onclick="go(&quot;schedule&quot;)"><i class="ti ti-calendar"></i> スケジュールへ</button>'
       +'</div></div>';
   }
 
@@ -1079,7 +1079,7 @@ function rTest(){
         +'<div style="font-size:14px;font-weight:700;margin-bottom:10px;line-height:1.5">'+q.text+'</div>'
         +'<textarea id="ta-'+q.id+'" placeholder="こちらに回答を入力してください..." '
         +'style="width:100%;padding:11px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--card);color:var(--text);font-size:14px;line-height:1.7;resize:vertical;min-height:110px;font-family:inherit" '
-        +'oninput="onTestAnswer(''+q.id+'',this)" onblur="onTestAnswer(''+q.id+'',this)">'+(ans.replace(/</g,'&lt;').replace(/>/g,'&gt;'))+'</textarea>'
+        +'oninput="onTestAnswer(&quot;'+q.id+'&quot;,this)" onblur="onTestAnswer(&quot;'+q.id+'&quot;,this)">'+(ans.replace(/</g,'&lt;').replace(/>/g,'&gt;'))+'</textarea>'
         +'<div style="font-size:11px;color:var(--text3);text-align:right;margin-top:4px" id="cc-'+q.id+'">'+ans.length+' 文字</div>'
         +'</div>';
     });
@@ -1127,28 +1127,11 @@ async function submitTestAI(){
     if(q.scored)scoredQs.push({num:qNum,id:q.id,question:q.text,answer:ST.testAnswers[q.id]||'（未回答）',modelAnswer:ANSWER_KEY[q.id]||''});
   });});
 
-  var prompt='あなたはEGYMマスタートレーナー認定試験の採点者です。
-以下の'+scoredQs.length+'問について、受験者がEGYMのトレーニングシステムを正しく理解しているかを評価してください。
-
-【採点基準】
-- 模範解答と一字一句同じである必要はありません
-- 概念や本質を理解していれば正解とします
-- 各問は0〜10点で採点してください
-- 未回答や非常に短い回答は0点にしてください
-- フィードバックは日本語で1〜2文で具体的に書いてください
-
-';
+  var prompt='あなたはEGYMマスタートレーナー認定試験の採点者です。\n以下の'+scoredQs.length+'問について、受験者がEGYMのトレーニングシステムを正しく理解しているかを評価してください。\n\n【採点基準】\n- 模範解答と一字一句同じである必要はありません\n- 概念や本質を理解していれば正解とします\n- 各問は0〜10点で採点してください\n- 未回答や非常に短い回答は0点にしてください\n- フィードバックは日本語で1〜2文で具体的に書いてください\n\n';
   scoredQs.forEach(function(q){
-    prompt+='---
-問'+q.num+'：'+q.question+'
-模範解答のポイント：'+q.modelAnswer+'
-受験者の回答：'+q.answer+'
-
-';
+    prompt+='---\n問'+q.num+'：'+q.question+'\n模範解答のポイント：'+q.modelAnswer+'\n受験者の回答：'+q.answer+'\n\n';
   });
-  prompt+='---
-以下のJSON形式のみで回答してください（他のテキストは不要）：
-{"scores":[{"id":"q1","score":8,"feedback":"フィードバック"},...],"total_score":75,"overall_comment":"全体的なコメント（2〜3文）"}';
+  prompt+='---\n以下のJSON形式のみで回答してください（他のテキストは不要）：\n{"scores":[{"id":"q1","score":8,"feedback":"フィードバック"},...],"total_score":75,"overall_comment":"全体的なコメント（2〜3文）"}';
 
   try{
     var response=await fetch('https://api.anthropic.com/v1/messages',{
@@ -1266,7 +1249,63 @@ function rCert(){
       <div style="width:26px;height:26px;border-radius:50%;background:var(--green-l);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0">${i+1}</div>
       <div style="font-size:13px;padding-top:3px">${s}</div>
     </div>`).join('')}
-  </div>`}`;
+  </div>`}${rNotes()}`;
+}
+
+/* ══════ NOTES (メモ) ══════ */
+const STAR_KEY = 'star2';
+function notesStorageKey(){return 'egym_notes_'+STAR_KEY;}
+function loadNotes(){
+  try{
+    const raw=localStorage.getItem(notesStorageKey());
+    return raw?JSON.parse(raw):[];
+  }catch(e){return [];}
+}
+function saveNotes(notes){
+  try{localStorage.setItem(notesStorageKey(),JSON.stringify(notes));}catch(e){}
+}
+function rNotes(){
+  const notes=loadNotes();
+  let html='<div class="card">';
+  html+=`<div class="ctitle">メモ <span style="font-size:11px;color:var(--text3);font-weight:400">${notes.length}件</span></div>`;
+  html+='<textarea id="new-note-input" placeholder="メモを入力（トレーニング内容、気づき、申請の経緯など）" style="width:100%;min-height:80px;padding:11px;border:1px solid var(--border);border-radius:var(--r-sm);font-size:14px;font-family:inherit;resize:vertical;margin-bottom:10px"></textarea>';
+  html+='<button class="btn btng btnfull" style="padding:11px"><i class="ti ti-plus"></i> メモを追加</button>'.replace('<button','<button onclick="addNote()"');
+  html+='</div>';
+
+  if(notes.length>0){
+    html+='<div class="card">';
+    notes.slice().reverse().forEach(n=>{
+      html+=`<div style="padding:12px 0;border-bottom:1px solid var(--bg2)">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:6px">
+          <span style="font-size:11px;color:var(--text3);font-weight:700">${n.date}</span>
+          <button class="btn btnsm" style="padding:3px 8px" onclick="deleteNote('${n.id}')"><i class="ti ti-trash" style="font-size:11px"></i></button>
+        </div>
+        <div style="font-size:13px;color:var(--text);line-height:1.7;white-space:pre-wrap">${escNoteHtml(n.text)}</div>
+      </div>`;
+    });
+    html+='</div>';
+  } else {
+    html+='<div class="card" style="text-align:center;padding:24px 16px;color:var(--text3);font-size:13px">まだメモがありません</div>';
+  }
+  return html;
+}
+function escNoteHtml(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function addNote(){
+  const input=document.getElementById('new-note-input');
+  const text=input.value.trim();
+  if(!text)return;
+  const notes=loadNotes();
+  const now=new Date();
+  const dateStr=now.getFullYear()+'/'+String(now.getMonth()+1).padStart(2,'0')+'/'+String(now.getDate()).padStart(2,'0')+' '+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+  notes.push({id:'n'+Date.now(),text,date:dateStr});
+  saveNotes(notes);
+  render();
+}
+function deleteNote(id){
+  if(!confirm('このメモを削除しますか？'))return;
+  const notes=loadNotes().filter(n=>n.id!==id);
+  saveNotes(notes);
+  render();
 }
 
 /* ══════════════════════════════
