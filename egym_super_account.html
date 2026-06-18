@@ -234,6 +234,9 @@ function rFacilities(){
             +'<span style="font-size:11px;color:var(--text3)">CL '+t.clPct+'%</span>'
             +'</div></div>'
             +'<span class="tag '+(t.status==='certified'?'td':'tg')+'">'+(t.status==='certified'?'認定済':'進行中')+'</span>'
+            +(t.status==='certified' && starLevel!=='star3'
+              ? '<button class="btn btnsm" style="margin-left:8px;padding:4px 8px;background:var(--green-l);color:var(--green);border-color:var(--green)" onclick="promoteTrainer(this)" data-tid="'+t.id+'" data-name="'+t.name+'" data-from="'+starLevel+'" data-to="'+(starLevel==='star1'?'star2':'star3')+'" title="昇格させる"><i class="ti ti-arrow-up" style="font-size:12px"></i> 昇格</button>'
+              : '')
             +'<button class="btn btnr btnsm" style="margin-left:8px;padding:4px 8px" onclick="delTrainer(this)" data-fid="'+f.id+'" data-tid="'+t.id+'" data-name="'+t.name+'" title="削除"><i class="ti ti-trash" style="font-size:12px"></i></button>'
             +'</div>';
 
@@ -741,6 +744,43 @@ async function sbDeleteTrainer(trainerId){
 
   var {error} = await _sb.from('trainers').delete().eq('id', trainerId);
   if(error) throw error;
+}
+
+/* ══════════════════════════════
+   PROMOTION (昇格: 同じアカウントのまま role/star_level だけ更新)
+══════════════════════════════ */
+async function promoteTrainer(btn){
+  var trainerId = btn.getAttribute('data-tid');
+  var name = btn.getAttribute('data-name');
+  var fromLevel = btn.getAttribute('data-from');
+  var toLevel = btn.getAttribute('data-to');
+  var toSc = SC[toLevel];
+
+  if(!confirm(name+'さんを'+toSc.label+'に昇格させますか？\n同じログインアカウント（メール・パスワード）のまま、権限だけが切り替わります。'))return;
+
+  try {
+    // 1. Get the trainer's email/user to find their auth user_id
+    var {data: trainerRow, error: getErr} = await _sb.from('trainers').select('email').eq('id', trainerId).single();
+    if(getErr) throw getErr;
+
+    // 2. Update trainers table: reset progress for new level, update star_level
+    var {error: trUpdateErr} = await _sb.from('trainers').update({
+      star_level: toLevel,
+      status: 'active',
+      cl_pct: 0,
+      cert_date: null,
+    }).eq('id', trainerId);
+    if(trUpdateErr) throw trUpdateErr;
+
+    // 3. Update user_roles: change role for this user from fromLevel to toLevel
+    //    (uses the edge function since we need the user's auth id, looked up by email)
+    await callEdgeFunction({ action:'promote_role', email: trainerRow.email, fromRole: fromLevel, toRole: toLevel });
+
+    toast(name+'さんを'+toSc.label+'に昇格させました');
+    await loadAllData();
+  } catch(err){
+    alert('昇格に失敗しました: '+(err.message||''));
+  }
 }
 
 async function sbAssignMentor(menteeId, mentorId){

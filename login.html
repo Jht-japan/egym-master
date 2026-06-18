@@ -39,6 +39,9 @@ input.error{border-color:#C0392B}
 .rb-s2{background:#E5F5EC;color:#1A8A5A}
 .rb-s3{background:#F0EBF8;color:#6B3FA0}
 .footer{margin-top:24px;font-size:12px;color:#9C9A94;text-align:center}
+.role-pick-btn{display:flex;align-items:center;gap:12px;width:100%;padding:14px 16px;border:1.5px solid #D8D5CC;border-radius:10px;background:#fff;font-size:14px;font-weight:600;color:#1A1916;cursor:pointer;font-family:inherit;transition:border-color .15s,background .15s}
+.role-pick-btn:hover{border-color:#1A1916;background:#FAFAF8}
+.role-pick-btn:active{opacity:.7}
 </style>
 </head>
 <body>
@@ -68,6 +71,9 @@ input.error{border-color:#C0392B}
     <button class="btn-login" id="login-btn" onclick="doLogin()">
       <i class="ti ti-login"></i> ログイン
     </button>
+    <div style="text-align:center;margin-top:12px">
+      <a href="#" onclick="openResetModal();return false;" style="font-size:12px;color:#5C5A54;text-decoration:underline">パスワードを忘れた方はこちら</a>
+    </div>
     <div class="role-badges">
       <span class="rb rb-super">JHTJapan</span>
       <span class="rb rb-fac">施設管理者</span>
@@ -76,6 +82,24 @@ input.error{border-color:#C0392B}
       <span class="rb rb-s3">★★★ Star3</span>
     </div>
   </div>
+
+  <div class="card" id="reset-card" style="display:none">
+    <div class="card-title">パスワードをリセット</div>
+    <div style="font-size:13px;color:#5C5A54;margin-bottom:16px;line-height:1.6">登録済みのメールアドレスを入力してください。パスワード再設定用のリンクをメールでお送りします。</div>
+    <div class="err-msg" id="reset-err-msg"></div>
+    <div class="frow">
+      <label class="flabel">メールアドレス</label>
+      <input type="email" id="reset-email" placeholder="example@jhtgroup.jp" autocomplete="email">
+    </div>
+    <button class="btn-login" id="reset-btn" onclick="doResetPassword()">
+      <i class="ti ti-mail"></i> リセットメールを送信
+    </button>
+    <div style="text-align:center;margin-top:12px">
+      <a href="#" onclick="closeResetModal();return false;" style="font-size:12px;color:#5C5A54;text-decoration:underline">ログインに戻る</a>
+    </div>
+  </div>
+
+  <div class="card" id="role-picker-card" style="display:none"></div>
 
   <div class="loading" id="loading">
     <div class="spinner"></div>
@@ -115,6 +139,45 @@ function togglePw(){
   }
 }
 
+function openResetModal(){
+  document.getElementById('login-card').style.display='none';
+  document.getElementById('reset-card').style.display='block';
+  document.getElementById('reset-err-msg').classList.remove('show');
+  var emailVal=document.getElementById('email').value.trim();
+  if(emailVal) document.getElementById('reset-email').value=emailVal;
+}
+function closeResetModal(){
+  document.getElementById('reset-card').style.display='none';
+  document.getElementById('login-card').style.display='block';
+}
+
+async function doResetPassword(){
+  var errEl=document.getElementById('reset-err-msg');
+  errEl.classList.remove('show');
+  var email=document.getElementById('reset-email').value.trim();
+  if(!email){errEl.textContent='メールアドレスを入力してください';errEl.classList.add('show');return;}
+
+  var btn=document.getElementById('reset-btn');
+  btn.disabled=true;
+  btn.innerHTML='<i class="ti ti-loader-2"></i> 送信中...';
+
+  try {
+    var {error} = await _sb.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + '/login.html'
+    });
+    if(error) throw error;
+    document.getElementById('reset-card').innerHTML =
+      '<div class="card-title">メールを送信しました</div>'
+      +'<div style="font-size:13px;color:#5C5A54;line-height:1.7;margin-bottom:16px">'+email+' 宛にパスワード再設定用のリンクを送信しました。メール内のリンクから新しいパスワードを設定してください。</div>'
+      +'<button class="btn-login" onclick="window.location.reload()"><i class="ti ti-arrow-left"></i> ログインに戻る</button>';
+  } catch(err){
+    btn.disabled=false;
+    btn.innerHTML='<i class="ti ti-mail"></i> リセットメールを送信';
+    errEl.textContent=err.message || 'リセットメールの送信に失敗しました';
+    errEl.classList.add('show');
+  }
+}
+
 function setLoading(on){
   document.getElementById('login-card').style.display=on?'none':'block';
   document.getElementById('loading').style.display=on?'block':'none';
@@ -136,32 +199,26 @@ async function doLogin(){
 
     const userId = data.user.id;
 
-    // 2. Get user role
-    const {data: roleData, error: roleError} = await _sb
+    // 2. Get ALL roles for this user (a person can hold multiple roles,
+    //    e.g. facility manager who is also a Star1/2/3 trainer)
+    const {data: rolesData, error: roleError} = await _sb
       .from('user_roles')
       .select('role, facility_id')
-      .eq('user_id', userId)
-      .single();
+      .eq('user_id', userId);
 
-    if(roleError || !roleData){
+    if(roleError || !rolesData || rolesData.length===0){
       throw new Error('権限が設定されていません。管理者にお問い合わせください。');
     }
 
-    const role = roleData.role;
-    const facilityId = roleData.facility_id;
-
-    // 3. Save to sessionStorage
     sessionStorage.setItem('egym_user_id', userId);
     sessionStorage.setItem('egym_user_email', email);
-    sessionStorage.setItem('egym_role', role);
-    if(facilityId) sessionStorage.setItem('egym_facility_id', facilityId);
 
-    // 4. Redirect to correct page
-    const page = ROLE_PAGES[role];
-    if(page){
-      window.location.href = page;
+    if(rolesData.length===1){
+      // Only one role — go straight to it
+      goToRole(rolesData[0]);
     } else {
-      throw new Error('不明な権限です: ' + role);
+      // Multiple roles — show a picker
+      showRolePicker(rolesData);
     }
 
   } catch(err){
@@ -176,6 +233,55 @@ async function doLogin(){
   }
 }
 
+function goToRole(roleObj){
+  sessionStorage.setItem('egym_role', roleObj.role);
+  if(roleObj.facility_id) sessionStorage.setItem('egym_facility_id', roleObj.facility_id);
+  else sessionStorage.removeItem('egym_facility_id');
+  const page = ROLE_PAGES[roleObj.role];
+  if(page){
+    window.location.href = page;
+  } else {
+    showErr('不明な権限です: ' + roleObj.role);
+    setLoading(false);
+  }
+}
+
+const ROLE_LABELS = {
+  'super':'JHTJapan（最高管理者）',
+  'facility':'施設管理者',
+  'star1':'★ Star1',
+  'star2':'★★ Star2',
+  'star3':'★★★ Star3',
+};
+const ROLE_ICONS = {
+  'super':'ti-crown','facility':'ti-building',
+  'star1':'ti-star','star2':'ti-star-half-filled','star3':'ti-stars',
+};
+
+function showRolePicker(rolesData){
+  setLoading(false);
+  document.getElementById('login-card').style.display='none';
+  document.getElementById('reset-card').style.display='none';
+  const picker=document.getElementById('role-picker-card');
+  picker.style.display='block';
+
+  let html = '<div class="card-title">どちらの画面を開きますか？</div>';
+  html += '<div style="font-size:13px;color:#5C5A54;margin-bottom:16px;line-height:1.6">このアカウントは複数の権限を持っています。利用する画面を選択してください。</div>';
+  html += '<div style="display:flex;flex-direction:column;gap:10px">';
+  rolesData.forEach((r, i) => {
+    const label = ROLE_LABELS[r.role] || r.role;
+    const icon = ROLE_ICONS[r.role] || 'ti-user';
+    html += '<button type="button" class="role-pick-btn" onclick="goToRole(window.__rolesCache['+i+'])">'
+      + '<i class="ti '+icon+'" style="font-size:20px"></i>'
+      + '<span>'+label+'</span>'
+      + '<i class="ti ti-chevron-right" style="margin-left:auto;font-size:16px;opacity:.5"></i>'
+      + '</button>';
+  });
+  html += '</div>';
+  picker.innerHTML = html;
+  window.__rolesCache = rolesData;
+}
+
 // Allow Enter key
 document.addEventListener('keydown', function(e){
   if(e.key==='Enter') doLogin();
@@ -186,13 +292,14 @@ document.addEventListener('keydown', function(e){
   const {data} = await _sb.auth.getSession();
   if(data.session){
     const userId = data.session.user.id;
-    const {data: roleData} = await _sb
+    const {data: rolesData} = await _sb
       .from('user_roles')
-      .select('role')
-      .eq('user_id', userId)
-      .single();
-    if(roleData && ROLE_PAGES[roleData.role]){
-      window.location.href = ROLE_PAGES[roleData.role];
+      .select('role, facility_id')
+      .eq('user_id', userId);
+    if(rolesData && rolesData.length===1 && ROLE_PAGES[rolesData[0].role]){
+      goToRole(rolesData[0]);
+    } else if(rolesData && rolesData.length>1){
+      showRolePicker(rolesData);
     }
   }
 })();
