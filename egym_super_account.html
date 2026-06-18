@@ -668,6 +668,16 @@ async function sbAddFacility(name, region, email){
   return data;
 }
 
+// ══════ SAFETY GUARD ══════
+// これらのメールアドレスは、誤って削除されることを絶対に防ぐ
+// (テストで施設管理者メールに自分のJHTJapanメールを使ってしまった等の事故防止)
+var PROTECTED_EMAILS = ['maskey@jhtgroup.jp'];
+
+function isProtectedEmail(email){
+  if(!email) return false;
+  return PROTECTED_EMAILS.indexOf(email.toLowerCase().trim()) >= 0;
+}
+
 async function sbDeleteFacility(facId){
   // 1. Get all trainers in this facility (need their emails to delete login accounts)
   var {data: trainersInFac, error: getErr} = await _sb.from('trainers').select('email').eq('facility_id', facId);
@@ -678,8 +688,16 @@ async function sbDeleteFacility(facId){
   if(facGetErr) throw facGetErr;
 
   // 3. Delete login accounts for all trainers + facility admin
+  //    SAFETY: skip any protected email (e.g. JHTJapan super account)
   var emailsToDelete = (trainersInFac||[]).map(function(t){return t.email;}).filter(Boolean);
   if(facData && facData.admin_email) emailsToDelete.push(facData.admin_email);
+  emailsToDelete = emailsToDelete.filter(function(e){
+    if(isProtectedEmail(e)){
+      console.warn('SAFETY GUARD: skipped deleting protected account:', e);
+      return false;
+    }
+    return true;
+  });
 
   for (var i=0; i<emailsToDelete.length; i++){
     try { await deleteUserAccount(emailsToDelete[i]); }
@@ -714,9 +732,11 @@ async function sbDeleteTrainer(trainerId){
   var {data: trainerData, error: getErr} = await _sb.from('trainers').select('email').eq('id', trainerId).single();
   if(getErr) throw getErr;
 
-  if(trainerData && trainerData.email){
+  if(trainerData && trainerData.email && !isProtectedEmail(trainerData.email)){
     try { await deleteUserAccount(trainerData.email); }
     catch(e){ console.error('Failed to delete login account:', e); }
+  } else if(trainerData && isProtectedEmail(trainerData.email)){
+    console.warn('SAFETY GUARD: skipped deleting protected account:', trainerData.email);
   }
 
   var {error} = await _sb.from('trainers').delete().eq('id', trainerId);
