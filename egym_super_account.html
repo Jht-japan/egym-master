@@ -690,27 +690,43 @@ async function sbDeleteFacility(facId){
   var {data: facData, error: facGetErr} = await _sb.from('facilities').select('admin_email').eq('id', facId).single();
   if(facGetErr) throw facGetErr;
 
-  // 3. Delete login accounts for all trainers + facility admin
-  //    SAFETY: skip any protected email (e.g. JHTJapan super account)
-  var emailsToDelete = (trainersInFac||[]).map(function(t){return t.email;}).filter(Boolean);
-  if(facData && facData.admin_email) emailsToDelete.push(facData.admin_email);
-  emailsToDelete = emailsToDelete.filter(function(e){
+  // 3. Build the list of emails associated with this facility
+  var emailsToCheck = (trainersInFac||[]).map(function(t){return t.email;}).filter(Boolean);
+  if(facData && facData.admin_email) emailsToCheck.push(facData.admin_email);
+  emailsToCheck = emailsToCheck.filter(function(e){
     if(isProtectedEmail(e)){
-      console.warn('SAFETY GUARD: skipped deleting protected account:', e);
+      console.warn('SAFETY GUARD: skipped protected account:', e);
       return false;
     }
     return true;
   });
+  // de-duplicate (e.g. facility admin could be same person as a trainer)
+  emailsToCheck = emailsToCheck.filter(function(e, i){ return emailsToCheck.indexOf(e) === i; });
 
-  for (var i=0; i<emailsToDelete.length; i++){
-    try { await deleteUserAccount(emailsToDelete[i]); }
-    catch(e){ console.error('Failed to delete account for', emailsToDelete[i], e); }
+  // 4. For each email: remove only the user_roles row(s) tied to THIS facility.
+  //    If the person has no roles left afterwards, delete their login account too.
+  //    If they still hold a role elsewhere (another facility, or no facility_id),
+  //    keep their login account intact.
+  for (var i=0; i<emailsToCheck.length; i++){
+    var email = emailsToCheck[i];
+    try {
+      await removeFacilityRoleForEmail(email, facId);
+    } catch(e){
+      console.error('Failed to clean up roles for', email, e);
+    }
   }
 
-  // 4. Delete trainers rows, then facility row
+  // 5. Delete trainers rows, then facility row
   await _sb.from('trainers').delete().eq('facility_id', facId);
   var {error} = await _sb.from('facilities').delete().eq('id', facId);
   if(error) throw error;
+}
+
+async function removeFacilityRoleForEmail(email, facId){
+  // This delegates to the edge function, which knows the user's auth id
+  // and can safely remove just the role tied to this facility, then check
+  // whether any roles remain before deciding to delete the login account.
+  return callEdgeFunction({ action:'remove_facility_role', email: email, facilityId: facId });
 }
 
 async function sbAddTrainer(facilityId, name, email, starLevel){
