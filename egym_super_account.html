@@ -682,31 +682,21 @@ function isProtectedEmail(email){
 }
 
 async function sbDeleteFacility(facId){
-  // 1. Get all trainers in this facility (need their emails to delete login accounts)
   var {data: trainersInFac, error: getErr} = await _sb.from('trainers').select('email').eq('facility_id', facId);
   if(getErr) throw getErr;
 
-  // 2. Get the facility's admin email
   var {data: facData, error: facGetErr} = await _sb.from('facilities').select('admin_email').eq('id', facId).single();
   if(facGetErr) throw facGetErr;
 
-  // 3. Build the list of emails associated with this facility
   var emailsToCheck = (trainersInFac||[]).map(function(t){return t.email;}).filter(Boolean);
   if(facData && facData.admin_email) emailsToCheck.push(facData.admin_email);
-  emailsToCheck = emailsToCheck.filter(function(e){
-    if(isProtectedEmail(e)){
-      console.warn('SAFETY GUARD: skipped protected account:', e);
-      return false;
-    }
-    return true;
-  });
-  // de-duplicate (e.g. facility admin could be same person as a trainer)
   emailsToCheck = emailsToCheck.filter(function(e, i){ return emailsToCheck.indexOf(e) === i; });
 
-  // 4. For each email: remove only the user_roles row(s) tied to THIS facility.
-  //    If the person has no roles left afterwards, delete their login account too.
-  //    If they still hold a role elsewhere (another facility, or no facility_id),
-  //    keep their login account intact.
+  // 重要: ここではprotected emailを除外しない。
+  // 施設に紐づくroleの削除は誰であっても必ず実行する（FK制約のため必須）。
+  // アカウント自体を消さない保護は、Edge Function (remove_facility_role) 側で
+  // 「アカウント削除」の最終ステップだけに適用する。
+
   for (var i=0; i<emailsToCheck.length; i++){
     var email = emailsToCheck[i];
     try {
@@ -716,7 +706,6 @@ async function sbDeleteFacility(facId){
     }
   }
 
-  // 5. Delete trainers rows, then facility row
   await _sb.from('trainers').delete().eq('facility_id', facId);
   var {error} = await _sb.from('facilities').delete().eq('id', facId);
   if(error) throw error;
