@@ -376,7 +376,10 @@ var PROTECTED_EMAILS = ['maskey@jhtgroup.jp'];
 - 複数role対応（選択画面表示）
 - パスワード表示ボタン（目のアイコン）
 - パスワードリセット機能（Supabase `resetPasswordForEmail`）
-- 既存セッション検出で自動遷移
+- 既存セッション検出で自動遷移（**egym_user_id/email を sessionStorage に保存**・監査#5修正済み 2026-07-30）
+- **パスワード設定画面**（2026-07-30 追加）: 招待受諾リンク／パスワード再設定リンクは URL hash が
+  `type=invite|recovery` で戻るため、これを検知して「パスワード設定」フォームを表示 → `auth.updateUser({password})`
+  → role に応じて遷移。招待ユーザーが初回パスワードを設定できるようになった（再設定リンクも同画面で機能）。
 
 ### egym_super_account.html ✅（Supabase接続済み）
 - 施設一覧・詳細表示（Supabaseから読み込み）
@@ -464,9 +467,13 @@ var PROTECTED_EMAILS = ['maskey@jhtgroup.jp'];
 
 ### 🟢 優先度: 低
 
-- **login.html:** 既存セッション自動遷移時に `egym_user_id` / `egym_user_email` を sessionStorage に保存しない（監査#5・未対応）。
 - **`test_results` テーブル未使用:** AI点数は `trainer_progress.test`（JSON）にのみ保持。DB正規化するなら要検討。
 - **Star3 の確認テスト**が「準備中」表示のまま（仕様未確定）。
+- **招待メールの送信元:** 現状 Supabase 標準送信（送信制限あり）。本番前に Resend 等のSMTP設定が必要。
+
+> ✅ **解消済み（2026-07-30）監査#5:** login.html の既存セッション自動遷移で `egym_user_id`/`egym_user_email`
+> を sessionStorage に保存するよう修正。**招待受諾時の「読み込みエラー」**（トレーナー画面が email を取得できず
+> `ログイン情報が見つかりません`）を解消。あわせて招待/再設定リンク用の「パスワード設定」画面を追加（§10 login.html）。
 
 > ✅ **解消済み:** 施設削除時の外部キー制約エラー（`user_roles_facility_id_fkey`）は
 > `file6/supabase/fix-facility-delete-cascade.sql` で修正（SETUP_CHECKLIST step2 で実行）。
