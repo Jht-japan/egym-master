@@ -427,6 +427,11 @@ var PROTECTED_EMAILS = ['maskey@jhtgroup.jp'];
 > `trainer_progress` に存在しない `candidates` 列を送っていたため保存が毎回失敗（PGRST204）していた。
 > 候補者を trainers 実データから読む方式に変え、`candidates` を serialize/hydrate から削除して解消。
 
+### 共通機能: ログアウト ✅（2026-07-30 追加）
+- **全5画面**（super / facility / star1 / star2 / star3）のトップバー右上に「ログアウト」ボタンを追加。
+- 共通関数 `egymLogout()`: `_sb.auth.signOut()` → `sessionStorage.clear()` → `login.html` へ `location.replace`。
+- 追加理由: これまで**どの画面にもログアウトが無く**、テスト時にユーザーを切り替えられなかったため。
+
 ---
 
 ## 11. 既知の問題・未解決事項
