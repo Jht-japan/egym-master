@@ -80,6 +80,12 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 const SUPABASE_URL = "https://gcqqhjeqvnfbgdenflmk.supabase.co";
 const SUPABASE_KEY = "sb_publishable_P9Ze3fOsCIpuhzx4AYednA_Gbxf9OO1";
 const _sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+async function egymLogout(){
+  try{ await _sb.auth.signOut(); }catch(e){}
+  try{ sessionStorage.clear(); }catch(e){}
+  window.location.replace('login.html');
+}
 </script>
 </head>
 <body>
@@ -89,7 +95,10 @@ const _sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
       <div class="av">JHT</div>
       <div><div class="t-name">Johnson Health Tech Japan</div><div class="t-sub">Super Account</div></div>
     </div>
-    <div class="t-badge">最高管理者</div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <div class="t-badge">最高管理者</div>
+      <button onclick="egymLogout()" title="ログアウト" style="display:flex;align-items:center;gap:5px;font-size:11px;padding:5px 11px;background:transparent;border:1px solid #999;border-radius:20px;color:#ccc;font-weight:700;cursor:pointer;white-space:nowrap"><i class="ti ti-logout"></i>ログアウト</button>
+    </div>
   </div>
   <div class="content" id="content"></div>
   <div class="bnav" id="nav"></div>
