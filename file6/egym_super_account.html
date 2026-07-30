@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>EGYM JHTJapan スーパーアカウント</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/3.19.0/iconfont/tabler-icons.min.css">
+<style>
+:root{
+  --bg:#F4F2ED;--bg2:#ECEAE3;--card:#FFF;--border:#D8D5CC;--border2:#C8C5BB;
+  --text:#1A1916;--text2:#5C5A54;--text3:#9C9A94;
+  --blue:#2A6FDB;--blue-l:#E8F0FC;--blue-m:#B8CEEF;
+  --green:#1A8A5A;--green-l:#E5F5EC;--green-m:#9DD4B8;
+  --amber:#C47B14;--amber-l:#FDF3E3;--amber-m:#F0C878;
+  --purple:#6B3FA0;--purple-l:#F0EBF8;--purple-m:#C4A8E0;
+  --red:#C0392B;--red-l:#FDECEA;
+  --nav-h:70px;--top-h:56px;--r:12px;--r-sm:8px;--r-lg:16px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Hiragino Sans','Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.5}
+.app{display:flex;flex-direction:column;height:100vh;height:100dvh}
+.topbar{background:#1A1916;padding:0 14px;height:var(--top-h);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;z-index:10}
+.t-left{display:flex;align-items:center;gap:10px}
+.av{width:36px;height:36px;border-radius:8px;background:#333;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;border:1px solid #555}
+.t-name{font-size:14px;font-weight:700;color:#fff}
+.t-sub{font-size:11px;color:#888}
+.t-badge{font-size:11px;padding:4px 10px;background:#292929;border:1px solid #444;border-radius:20px;color:#ccc;font-weight:700}
+.content{flex:1;overflow-y:auto;padding:12px 14px;background:var(--bg);padding-bottom:calc(var(--nav-h)+12px);-webkit-overflow-scrolling:touch}
+.bnav{height:var(--nav-h);background:var(--card);border-top:1px solid var(--border);display:flex;align-items:stretch;flex-shrink:0;padding-bottom:env(safe-area-inset-bottom);box-shadow:0 -2px 10px rgba(0,0,0,.06)}
+.ni{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;position:relative;border:none;background:transparent;padding:8px 4px}
+.ni.on .ni-icon,.ni.on .ni-lbl{color:#1A1916}
+.ni.on .ni-lbl{font-weight:700}
+.ni-icon{font-size:24px;color:var(--text3);line-height:1}
+.ni-lbl{font-size:13px;color:var(--text3);line-height:1.2;text-align:center}
+.ni-badge{position:absolute;top:5px;right:calc(50% - 18px);min-width:16px;height:16px;padding:0 4px;background:var(--red);border-radius:8px;font-size:9px;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-lg);padding:14px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.ctitle{font-size:13px;font-weight:700;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between}
+.tag{display:inline-block;font-size:10px;padding:3px 8px;border-radius:20px;font-weight:700}
+.td{background:var(--green-l);color:var(--green)}.tp{background:var(--amber-l);color:var(--amber)}
+.tf{background:var(--red-l);color:var(--red)}.tb{background:var(--blue-l);color:var(--blue)}
+.tg{background:var(--bg2);color:var(--text3)}.tpur{background:var(--purple-l);color:var(--purple)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:9px 14px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--card);color:var(--text);font-size:13px;cursor:pointer;font-weight:600;transition:opacity .12s}
+.btn:active{opacity:.65}
+.btnd{background:#1A1916;border-color:#1A1916;color:#fff}
+.btng{background:var(--green);border-color:var(--green);color:#fff}
+.btnr{background:var(--red);border-color:var(--red);color:#fff}
+.btnsm{padding:6px 11px;font-size:11px}
+.btnfull{width:100%}
+.pb{height:5px;background:var(--bg2);border-radius:3px;overflow:hidden;margin-top:6px}
+.pf{height:100%;border-radius:3px;transition:width .4s}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.met{background:var(--bg);border:1px solid var(--border);border-radius:var(--r);padding:11px 8px;text-align:center}
+.mv{font-size:20px;font-weight:700;line-height:1.2;margin-bottom:2px}
+.ml{font-size:10px;color:var(--text3)}
+.fac-row{display:flex;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--bg2);cursor:pointer}
+.fac-row:last-child{border-bottom:none}
+.fac-row:active{background:var(--bg)}
+.fac-av{width:40px;height:40px;border-radius:10px;background:#1A1916;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.trainer-row{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--bg2)}
+.trainer-row:last-child{border-bottom:none}
+.av-sm{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;border:2px solid}
+.step{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--bg2)}
+.step:last-child{border-bottom:none}
+.sdot{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0}
+.s-done{background:var(--green-l);color:var(--green)}.s-prog{background:var(--amber-l);color:var(--amber)}.s-lock{background:var(--bg2);color:var(--text3)}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:flex-end}
+.modal{background:var(--card);border-radius:var(--r-lg) var(--r-lg) 0 0;padding:20px 16px;padding-bottom:calc(20px + env(safe-area-inset-bottom));width:100%;max-height:88vh;overflow-y:auto}
+.modal-handle{width:40px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 18px}
+.flabel{font-size:12px;color:var(--text2);margin-bottom:6px;font-weight:700;display:block}
+.frow{margin-bottom:14px}
+input[type=text],input[type=email],select{padding:11px 12px;border:1px solid var(--border);border-radius:var(--r-sm);background:var(--card);color:var(--text);font-size:15px;width:100%;-webkit-appearance:none}
+select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%239C9A94' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:36px}
+#_toast{position:fixed;bottom:calc(var(--nav-h)+10px);left:50%;transform:translateX(-50%);background:#1A1916;color:#fff;padding:12px 18px;border-radius:var(--r);font-size:13px;z-index:300;display:flex;align-items:center;gap:8px;max-width:88vw;box-shadow:0 4px 20px rgba(0,0,0,.3)}
+::-webkit-scrollbar{width:3px}::-webkit-scrollbar-thumb{background:var(--border2);border-radius:2px}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPABASE_URL = "https://gcqqhjeqvnfbgdenflmk.supabase.co";
+const SUPABASE_KEY = "sb_publishable_P9Ze3fOsCIpuhzx4AYednA_Gbxf9OO1";
+const _sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+</script>
+</head>
+<body>
+<div class="app">
+  <div class="topbar">
+    <div class="t-left">
+      <div class="av">JHT</div>
+      <div><div class="t-name">Johnson Health Tech Japan</div><div class="t-sub">Super Account</div></div>
+    </div>
+    <div class="t-badge">最高管理者</div>
+  </div>
+  <div class="content" id="content"></div>
+  <div class="bnav" id="nav"></div>
+</div>
+<div id="modal-slot"></div>
+<script>
+
+var SC={
+  star1:{bg:'var(--amber-l)',text:'var(--amber)',border:'var(--amber-m)',label:'★ Star1'},
+  star2:{bg:'var(--green-l)',text:'var(--green)',border:'var(--green-m)',label:'★★ Star2'},
+  star3:{bg:'var(--purple-l)',text:'var(--purple)',border:'var(--purple-m)',label:'★★★ Star3'},
+};
+
+var ST={page:'home',modal:null,selectedFac:null};
+
+function allTrainers(){return FACILITIES.flatMap(function(f){return f.trainers;});}
+function certCount(){return allTrainers().filter(function(t){return t.status==='certified';}).length;}
+function starCount(s){return allTrainers().filter(function(t){return t.star===s;}).length;}
+function starCert(s){return allTrainers().filter(function(t){return t.star===s&&t.status==='certified';}).length;}
+
+var NAV=[
+  {k:'home',     i:'ti-home',     l:'ホーム'},
+  {k:'facilities',i:'ti-building', l:'施設管理'},
+  {k:'trainers', i:'ti-users',    l:'全トレーナー'},
+  {k:'reports',  i:'ti-chart-bar',l:'レポート'},
+];
+
+function go(pg){
+  ST.page=pg;ST.modal=null;
+  document.getElementById('nav').innerHTML=NAV.map(function(n){
+    var on=ST.page===n.k;
+    return '<button class="ni '+(on?'on':'')+'" onclick="go(\''+n.k+'\')">'
+      +'<i class="ti '+n.i+' ni-icon"></i>'
+      +'<span class="ni-lbl">'+n.l+'</span></button>';
+  }).join('');
+  render();
+}
+
+function toast(msg){
+  var ex=document.getElementById('_toast');if(ex)ex.remove();
+  var t=document.createElement('div');t.id='_toast';
+  t.innerHTML='<i class="ti ti-info-circle" style="font-size:16px;flex-shrink:0"></i><span>'+msg+'</span>';
+  document.body.appendChild(t);setTimeout(function(){if(t.parentNode)t.remove();},3000);
+}
+
+function render(){
+  document.getElementById('content').scrollTop=0;
+  var fns={home:rHome,facilities:rFacilities,trainers:rTrainers,reports:rReports};
+  document.getElementById('content').innerHTML=(fns[ST.page]||rHome)();
+  document.getElementById('modal-slot').innerHTML=ST.modal?rModal():'';
+}
+
+/* HOME */
+function rHome(){
+  var totalFac=FACILITIES.length;
+  var totalT=allTrainers().length;
+  var totalCert=certCount();
+  var html='';
+  if(LOAD_ERROR){
+    html+='<div style="padding:14px;background:var(--red-l);border:1px solid #e8a9a9;border-radius:var(--r);margin-bottom:14px">'
+      +'<div style="font-size:13px;font-weight:700;color:var(--red);margin-bottom:4px"><i class="ti ti-alert-triangle"></i> データ読み込みエラー</div>'
+      +'<div style="font-size:12px;color:var(--red);word-break:break-all">'+LOAD_ERROR+'</div>'
+      +'<button class="btn btnsm" style="margin-top:8px" onclick="loadAllData()"><i class="ti ti-refresh" style="font-size:12px"></i> 再読み込み</button>'
+      +'</div>';
+  }
+  html+='<div class="g2" style="margin-bottom:10px">'
+    +'<div class="met"><div class="mv">'+totalFac+'</div><div class="ml">施設数</div></div>'
+    +'<div class="met"><div class="mv">'+totalT+'</div><div class="ml">総トレーナー数</div></div>'
+    +'</div>'
+    +'<div class="g3" style="margin-bottom:12px">'
+    +'<div class="met"><div class="mv" style="color:var(--amber)">'+starCount('star1')+'</div><div class="ml">★ Star1</div></div>'
+    +'<div class="met"><div class="mv" style="color:var(--green)">'+starCount('star2')+'</div><div class="ml">★★ Star2</div></div>'
+    +'<div class="met"><div class="mv" style="color:var(--purple)">'+starCount('star3')+'</div><div class="ml">★★★ Star3</div></div>'
+    +'</div>';
+
+  html+='<div class="card"><div class="ctitle">施設一覧 <button class="btn btnsm" onclick="go(\'facilities\')">全て見る →</button></div>';
+  FACILITIES.forEach(function(f){
+    var cert=f.trainers.filter(function(t){return t.status==='certified';}).length;
+    html+='<div class="fac-row" onclick="openFac(\''+f.id+'\')"><div class="fac-av">'+f.name.slice(0,2)+'</div>'
+      +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">'+f.name+'</div>'
+      +'<div style="font-size:11px;color:var(--text3);margin-top:2px">'+f.region+' · '+f.trainers.length+'名 · 認定済: '+cert+'名</div></div>'
+      +'<i class="ti ti-chevron-right" style="color:var(--text3);font-size:16px"></i></div>';
+  });
+  html+='</div>';
+
+  html+='<div class="card"><div class="ctitle">認定状況サマリー</div>';
+  ['star1','star2','star3'].forEach(function(s){
+    var sc=SC[s];var tot=starCount(s);var cert=starCert(s);
+    html+='<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--bg2)">'
+      +'<div style="width:68px;font-size:12px;font-weight:700;color:'+sc.text+'">'+sc.label+'</div>'
+      +'<div class="pb" style="flex:1;margin:0"><div class="pf" style="width:'+(tot>0?Math.round(cert/tot*100):0)+'%;background:'+sc.text+'"></div></div>'
+      +'<span style="font-size:12px;font-weight:700">'+cert+'/'+tot+'名</span>'
+      +'<span class="tag" style="background:'+sc.bg+';color:'+sc.text+'">'+(cert===tot&&tot>0?'全員完了':'進行中')+'</span></div>';
+  });
+  html+='</div>';
+
+  html+='<button class="btn btnd btnfull" style="padding:13px;font-size:14px" onclick="openAddFac()">'
+    +'<i class="ti ti-plus"></i> 新しい施設を追加する</button>';
+  return html;
+}
+
+/* FACILITIES */
+function rFacilities(){
+  var html='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">'
+    +'<div style="font-size:14px;font-weight:700">施設管理（'+FACILITIES.length+'施設）</div>'
+    +'<button class="btn btnd btnsm" onclick="openAddFac()"><i class="ti ti-plus" style="font-size:13px"></i> 施設追加</button></div>';
+
+  if(ST.selectedFac){
+    var f=FACILITIES.find(function(x){return x.id===ST.selectedFac;});
+    if(f){
+      var cert=f.trainers.filter(function(t){return t.status==='certified';}).length;
+      html+='<div class="card" style="border-color:#1A1916">'
+        +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">'
+        +'<button class="btn btnsm" onclick="ST.selectedFac=null;render()"><i class="ti ti-arrow-left" style="font-size:13px"></i></button>'
+        +'<div class="fac-av">'+f.name.slice(0,2)+'</div>'
+        +'<div><div style="font-size:15px;font-weight:700">'+f.name+'</div><div style="font-size:12px;color:var(--text3)">'+f.region+' · 作成: '+f.createdAt+'</div></div>'
+        +'</div>'
+        +'<div class="g3" style="margin-bottom:14px">'
+        +'<div class="met"><div class="mv">'+f.trainers.length+'</div><div class="ml">トレーナー数</div></div>'
+        +'<div class="met"><div class="mv" style="color:var(--green)">'+cert+'</div><div class="ml">認定済み</div></div>'
+        +'<div class="met"><div class="mv" style="color:var(--amber)">'+(f.trainers.length-cert)+'</div><div class="ml">挑戦中</div></div>'
+        +'</div>';
+
+      // Group by star level with mentoring relationship
+      ['star3','star2','star1'].forEach(function(starLevel){
+        var group=f.trainers.filter(function(t){return t.star===starLevel;});
+        if(group.length===0)return;
+        var sc=SC[starLevel];
+        html+='<div style="margin-bottom:14px">'
+          +'<div style="font-size:12px;font-weight:700;color:'+sc.text+';padding:6px 10px;background:'+sc.bg+';border-radius:var(--r-sm);margin-bottom:8px">'+sc.label+' ('+group.length+'名)</div>';
+
+        group.forEach(function(t){
+          // Find who this trainer is mentoring
+          var mentees=f.trainers.filter(function(x){return t.mentoring && t.mentoring.indexOf(x.id)>=0;});
+          html+='<div style="border:1px solid var(--border);border-radius:var(--r);margin-bottom:8px;overflow:hidden">'
+            +'<div class="trainer-row" style="padding:10px 12px">'
+            +'<div class="av-sm" style="background:'+sc.bg+';color:'+sc.text+';border-color:'+sc.border+'">'+t.initials+'</div>'
+            +'<div style="flex:1;min-width:0">'
+            +'<div style="font-size:13px;font-weight:700">'+t.name+'</div>'
+            +'<div style="display:flex;align-items:center;gap:6px;margin-top:3px">'
+            +'<div class="pb" style="width:70px;margin:0"><div class="pf" style="width:'+t.clPct+'%;background:'+sc.text+'"></div></div>'
+            +'<span style="font-size:11px;color:var(--text3)">CL '+t.clPct+'%</span>'
+            +'</div></div>'
+            +'<span class="tag '+(t.status==='certified'?'td':'tg')+'">'+(t.status==='certified'?'認定済':'進行中')+'</span>'
+            +(t.status==='certified' && starLevel!=='star3'
+              ? '<button class="btn btnsm" style="margin-left:8px;padding:4px 8px;background:var(--green-l);color:var(--green);border-color:var(--green)" onclick="promoteTrainer(this)" data-tid="'+t.id+'" data-name="'+t.name+'" data-from="'+starLevel+'" data-to="'+(starLevel==='star1'?'star2':'star3')+'" title="昇格させる"><i class="ti ti-arrow-up" style="font-size:12px"></i> 昇格</button>'
+              : '')
+            +'<button class="btn btnr btnsm" style="margin-left:8px;padding:4px 8px" onclick="delTrainer(this)" data-fid="'+f.id+'" data-tid="'+t.id+'" data-name="'+t.name+'" title="削除"><i class="ti ti-trash" style="font-size:12px"></i></button>'
+            +'</div>';
+
+          // Show mentees
+          if(mentees.length>0){
+            html+='<div style="padding:8px 12px;background:var(--bg);border-top:1px solid var(--bg2)">'
+              +'<div style="font-size:11px;color:var(--text3);margin-bottom:6px"><i class="ti ti-arrow-down-right" style="font-size:12px"></i> 育成中のトレーナー</div>';
+            mentees.forEach(function(m){
+              var msc=SC[m.star];
+              html+='<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--bg2)">'
+                +'<div class="av-sm" style="width:28px;height:28px;font-size:10px;background:'+msc.bg+';color:'+msc.text+';border-color:'+msc.border+'">'+m.initials+'</div>'
+                +'<span style="font-size:12px;flex:1">'+m.name+'</span>'
+                +'<div class="pb" style="width:50px;margin:0"><div class="pf" style="width:'+m.clPct+'%;background:'+msc.text+'"></div></div>'
+                +'<span style="font-size:11px;color:var(--text3)">'+m.clPct+'%</span>'
+                +'<span class="tag '+(m.status==='certified'?'td':'tg')+'" style="font-size:9px">'+(m.status==='certified'?'認定済':'進行中')+'</span>'
+                +'<button class="btn btnsm" style="padding:2px 6px" onclick="unassignMentee(this)" data-fid="'+f.id+'" data-mentorid="'+t.id+'" data-menteeid="'+m.id+'" title="割り当て解除"><i class="ti ti-x" style="font-size:10px"></i></button>'
+                +'</div>';
+            });
+            html+='</div>';
+          }
+          // Assign mentee button (only for star2/star3 — they mentor the level below)
+          if(starLevel==='star2'||starLevel==='star3'){
+            html+='<div style="padding:8px 12px;background:var(--bg);border-top:1px solid var(--bg2)">'
+              +'<button class="btn btnsm btnfull" onclick="openAssignMentee(this)" data-fid="'+f.id+'" data-tid="'+t.id+'" data-starlevel="'+starLevel+'"><i class="ti ti-link" style="font-size:11px"></i> 育成対象を割り当てる</button>'
+              +'</div>';
+          }
+          html+='</div>';
+        });
+        html+='</div>';
+      });
+
+      html+='<div style="display:flex;gap:8px;margin-top:4px">'
+        +'<button class="btn btnd btnsm" style="flex:1" onclick="openAddTrainer(this)" data-fid="'+f.id+'"><i class="ti ti-user-plus" style="font-size:13px"></i> トレーナーを追加</button>'
+        +'<button class="btn btnr btnsm" style="flex:1" onclick="delFacBtn(this)" data-fid="'+f.id+'" data-name="'+f.name+'" data-count="'+f.trainers.length+'"><i class="ti ti-trash" style="font-size:13px"></i> 施設を削除</button>'
+        +'</div>'
+        +'</div>';
+      return html;
+    }
+  }
+
+  html+='<div class="card" style="padding:0;overflow:hidden">';
+  FACILITIES.forEach(function(f){
+    var cert=f.trainers.filter(function(t){return t.status==='certified';}).length;
+    var pct=f.trainers.length>0?Math.round(cert/f.trainers.length*100):0;
+    html+='<div class="fac-row" onclick="selectFac(this)" data-fid="'+f.id+'">'
+      +'<div class="fac-av">'+f.name.slice(0,2)+'</div>'
+      +'<div style="flex:1;min-width:0">'
+      +'<div style="font-size:13px;font-weight:700">'+f.name+'</div>'
+      +'<div style="font-size:11px;color:var(--text3);margin-top:2px">'+f.region+' · '+f.trainers.length+'名</div>'
+      +'<div style="display:flex;align-items:center;gap:6px;margin-top:4px">'
+      +'<div class="pb" style="width:80px;margin:0"><div class="pf" style="width:'+pct+'%;background:#1A1916"></div></div>'
+      +'<span style="font-size:11px;color:var(--text3)">認定 '+cert+'/'+f.trainers.length+'名</span>'
+      +'</div></div>'
+      +'<i class="ti ti-chevron-right" style="color:var(--text3);font-size:16px;flex-shrink:0"></i></div>';
+  });
+  html+='</div>';
+  return html;
+}
+
+function openFac(id){ST.selectedFac=id;go('facilities');}
+
+function openAssignMentee(btn){
+  var fid=btn.getAttribute('data-fid');
+  var tid=btn.getAttribute('data-tid');
+  var starLevel=btn.getAttribute('data-starlevel');
+  ST.modal='assignmentee|'+fid+'|'+tid+'|'+starLevel;
+  render();
+}
+
+async function doAssignMentee(mentorId, menteeId, fid){
+  var f=FACILITIES.find(function(x){return x.id===fid;});
+  if(!f)return;
+  var mentor=f.trainers.find(function(x){return x.id===mentorId;});
+  var mentee=f.trainers.find(function(x){return x.id===menteeId;});
+  if(!mentor||!mentee)return;
+
+  try {
+    await sbAssignMentor(menteeId, mentorId);
+    ST.modal=null;
+    toast(mentee.name+'さんを'+mentor.name+'さんの育成対象に割り当てました');
+    await loadAllData();
+  } catch(err){
+    alert('割り当てに失敗しました: '+(err.message||'既に他のメンターに割り当てられている可能性があります'));
+  }
+}
+
+async function unassignMentee(btn){
+  var fid=btn.getAttribute('data-fid');
+  var mentorId=btn.getAttribute('data-mentorid');
+  var menteeId=btn.getAttribute('data-menteeid');
+  var f=FACILITIES.find(function(x){return x.id===fid;});
+  if(!f)return;
+  var mentee=f.trainers.find(function(x){return x.id===menteeId;});
+  if(!mentee)return;
+  if(!confirm(mentee.name+'さんの育成割り当てを解除しますか？'))return;
+  try {
+    await sbUnassignMentor(menteeId);
+    toast('割り当てを解除しました');
+    await loadAllData();
+  } catch(err){
+    alert('解除に失敗しました: '+(err.message||''));
+  }
+}
+
+
+function selectFac(el){ST.selectedFac=el.getAttribute('data-fid');render();}
+function openAddFac(){ST.modal='addfac';render();}
+
+async function delFacBtn(btn){
+  var facId=btn.getAttribute('data-fid');
+  var name=btn.getAttribute('data-name');
+  var count=btn.getAttribute('data-count');
+  if(!confirm(name+'を削除しますか？\nトレーナー'+count+'名のデータも削除されます。\nこの操作は取り消せません。'))return;
+  try {
+    await sbDeleteFacility(facId);
+    ST.selectedFac=null;
+    toast(name+'を削除しました');
+    await loadAllData();
+  } catch(err){
+    alert('削除に失敗しました: '+(err.message||''));
+  }
+}
+
+
+/* ALL TRAINERS */
+function rTrainers(){
+  var all=allTrainers();
+  var html='<div style="font-size:14px;font-weight:700;margin-bottom:12px">全トレーナー（'+all.length+'名）</div>';
+  ['star3','star2','star1'].forEach(function(s){
+    var list=all.filter(function(t){return t.star===s;});
+    if(list.length===0)return;
+    var sc=SC[s];var cert=list.filter(function(t){return t.status==='certified';}).length;
+    html+='<div class="card"><div class="ctitle" style="color:'+sc.text+'">'+sc.label+' <span style="font-size:12px;color:var(--text3);font-weight:400">'+list.length+'名 / 認定済 '+cert+'名</span></div>';
+    list.forEach(function(t){
+      var fac=FACILITIES.find(function(f){return f.trainers.find(function(x){return x.id===t.id;});});
+      html+='<div class="trainer-row"><div class="av-sm" style="background:'+sc.bg+';color:'+sc.text+';border-color:'+sc.border+'">'+t.initials+'</div>'
+        +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">'+t.name+'</div>'
+        +'<div style="font-size:11px;color:var(--text3);margin-top:2px">'+(fac?fac.name:'—')+'</div>'
+        +'<div style="display:flex;align-items:center;gap:6px;margin-top:3px">'
+        +'<div class="pb" style="width:60px;margin:0"><div class="pf" style="width:'+t.clPct+'%;background:'+sc.text+'"></div></div>'
+        +'<span style="font-size:11px;color:var(--text3)">CL '+t.clPct+'%</span>'
+        +'</div></div>'
+        +'<span class="tag '+(t.status==='certified'?'td':'tg')+'">'+(t.status==='certified'?'認定済':'進行中')+'</span></div>';
+    });
+    html+='</div>';
+  });
+  return html;
+}
+
+/* REPORTS */
+function rReports(){
+  var total=allTrainers().length;var cert=certCount();
+  var html='<div style="font-size:14px;font-weight:700;margin-bottom:12px">全体レポート</div>';
+
+  html+='<div class="card" style="text-align:center;padding:20px 14px;margin-bottom:12px">'
+    +'<div style="font-size:48px;font-weight:700;color:#1A1916">'+Math.round(cert/total*100)+'%</div>'
+    +'<div style="font-size:13px;color:var(--text3);margin-top:4px">全体認定率（'+cert+'/'+total+'名）</div>'
+    +'<div class="pb" style="height:10px;margin-top:10px"><div class="pf" style="width:'+Math.round(cert/total*100)+'%;background:#1A1916"></div></div>'
+    +'</div>';
+
+  html+='<div class="card"><div class="ctitle">施設別 認定状況</div>';
+  FACILITIES.forEach(function(f){
+    var c=f.trainers.filter(function(t){return t.status==='certified';}).length;
+    var pct=Math.round(c/f.trainers.length*100);
+    html+='<div style="margin-bottom:12px">'
+      +'<div style="display:flex;justify-content:space-between;margin-bottom:4px">'
+      +'<span style="font-size:13px;font-weight:700">'+f.name+'</span>'
+      +'<span style="font-size:12px;color:var(--text3)">'+c+'/'+f.trainers.length+'名（'+pct+'%）</span></div>'
+      +'<div class="pb" style="height:8px"><div class="pf" style="width:'+pct+'%;background:#1A1916"></div></div>'
+      +'</div>';
+  });
+  html+='</div>';
+
+  html+='<div class="card"><div class="ctitle">レベル別 認定状況</div>';
+  ['star3','star2','star1'].forEach(function(s){
+    var sc=SC[s];var tot=starCount(s);var c=starCert(s);
+    html+='<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--bg2)">'
+      +'<div style="width:72px;font-size:12px;font-weight:700;color:'+sc.text+'">'+sc.label+'</div>'
+      +'<div class="pb" style="flex:1;margin:0"><div class="pf" style="width:'+(tot>0?Math.round(c/tot*100):0)+'%;background:'+sc.text+'"></div></div>'
+      +'<span style="font-size:12px;font-weight:700">'+c+'/'+tot+'名</span></div>';
+  });
+  html+='</div>';
+  return html;
+}
+
+/* MODAL */
+function rModal(){
+  if(ST.modal==='addfac'){
+    return '<div class="modal-bg" onclick="if(event.target===this){ST.modal=null;render()}">'
+      +'<div class="modal"><div class="modal-handle"></div>'
+      +'<div style="font-size:17px;font-weight:700;margin-bottom:4px">新しい施設を追加</div>'
+      +'<div style="font-size:12px;color:var(--text3);margin-bottom:16px">施設を追加すると施設アカウントへの招待メールが送信されます</div>'
+      +'<div class="frow"><label class="flabel">施設名 *</label><input type="text" id="fac-name" placeholder="例: 金山施設"></div>'
+      +'<div class="frow"><label class="flabel">地域</label><input type="text" id="fac-region" placeholder="例: 名古屋"></div>'
+      +'<div class="frow"><label class="flabel">施設管理者メールアドレス *</label><input type="email" id="fac-email" placeholder="facility@egym.jp"></div>'
+      +'<div style="padding:12px;background:var(--bg);border-radius:var(--r-sm);font-size:12px;color:var(--text2);margin-bottom:18px;line-height:1.6">'
+      +'<i class="ti ti-info-circle"></i> 施設アカウントが作成され、管理者にログイン用メールが送信されます。施設管理者はその後Star1/2/3のトレーナーを招待できます。</div>'
+      +'<div style="display:flex;gap:10px">'
+      +'<button class="btn" style="flex:1" onclick="ST.modal=null;render()">キャンセル</button>'
+      +'<button class="btn btnd" style="flex:1" onclick="doAddFac()"><i class="ti ti-plus"></i> 施設を追加する</button>'
+      +'</div></div></div>';
+  }
+  if(ST.modal && ST.modal.startsWith('addtrainer|')){
+    var facId=ST.modal.split('|')[1];
+    var html2='<div class="modal-bg" onclick="if(event.target===this){ST.modal=null;render()}">';
+    html2+='<div class="modal"><div class="modal-handle"></div>';
+    html2+='<div style="font-size:17px;font-weight:700;margin-bottom:4px">トレーナーを追加</div>';
+    html2+='<div style="font-size:12px;color:var(--text3);margin-bottom:16px">トレーナーを招待してStar権限を付与します</div>';
+    html2+='<div class="frow"><label class="flabel">氏名 *</label><input type="text" id="tr-name" placeholder="例: 田中 太郎"></div>';
+    html2+='<div class="frow"><label class="flabel">メールアドレス *</label><input type="email" id="tr-email" placeholder="trainer@egym.jp"></div>';
+    html2+='<div class="frow"><label class="flabel">権限レベル *</label>';
+    html2+='<select id="tr-star">';
+    html2+='<option value="star1">★ スター1</option>';
+    html2+='<option value="star2">★★ スター2</option>';
+    html2+='<option value="star3">★★★ スター3</option>';
+    html2+='</select></div>';
+    html2+='<div style="padding:12px;background:var(--bg);border-radius:var(--r-sm);font-size:12px;color:var(--text2);margin-bottom:18px;line-height:1.6">';
+    html2+='<i class="ti ti-info-circle"></i> 招待メールが送信されます。</div>';
+    html2+='<div style="display:flex;gap:10px">';
+    html2+='<button class="btn" style="flex:1" onclick="ST.modal=null;render()">キャンセル</button>';
+    html2+='<button class="btn btnd" style="flex:1" id="btn-do-add-tr" onclick="doAddTrainerModal()"><i class="ti ti-user-plus"></i> 追加する</button>';
+    html2+='</div></div></div>';
+    return html2;
+  }
+  if(ST.modal && ST.modal.startsWith('assignmentee|')){
+    var parts=ST.modal.split('|');
+    var fid=parts[1],mentorId=parts[2],starLevel=parts[3];
+    var f=FACILITIES.find(function(x){return x.id===fid;});
+    var mentor=f?f.trainers.find(function(x){return x.id===mentorId;}):null;
+    var targetLevel=starLevel==='star2'?'star1':'star2';
+    var targetSc=SC[targetLevel];
+    var candidates=f?f.trainers.filter(function(x){return x.star===targetLevel;}):[];
+
+    var html3='<div class="modal-bg" onclick="if(event.target===this){ST.modal=null;render()}">';
+    html3+='<div class="modal"><div class="modal-handle"></div>';
+    html3+='<div style="font-size:17px;font-weight:700;margin-bottom:4px">育成対象を割り当てる</div>';
+    html3+='<div style="font-size:12px;color:var(--text3);margin-bottom:16px">'+(mentor?mentor.name:'')+'さんが育成する'+targetSc.label+'トレーナーを選んでください</div>';
+
+    if(candidates.length===0){
+      html3+='<div style="padding:20px;text-align:center;color:var(--text3);font-size:13px;background:var(--bg);border-radius:var(--r-sm);margin-bottom:16px">この施設に'+targetSc.label+'のトレーナーがいません</div>';
+    } else {
+      html3+='<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;max-height:300px;overflow-y:auto">';
+      candidates.forEach(function(c){
+        var taken=!!c.mentoredBy;
+        var takenBy=taken?f.trainers.find(function(x){return x.id===c.mentoredBy;}):null;
+        html3+='<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid '+(taken?'var(--border)':'var(--border2)')+';border-radius:var(--r-sm);'+(taken?'opacity:.55':'')+'">'
+          +'<div class="av-sm" style="background:'+targetSc.bg+';color:'+targetSc.text+';border-color:'+targetSc.border+'">'+c.initials+'</div>'
+          +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">'+c.name+'</div>'
+          +'<div style="font-size:11px;color:var(--text3)">'+(taken?'既に'+(takenBy?takenBy.name:'他のトレーナー')+'の育成対象です':'未割り当て')+'</div></div>'
+          +(taken
+            ?'<span class="tag tg">割当済</span>'
+            :'<button class="btn btnd btnsm" onclick="doAssignMentee(\''+mentorId+'\',\''+c.id+'\',\''+fid+'\')">割り当てる</button>')
+          +'</div>';
+      });
+      html3+='</div>';
+    }
+
+    html3+='<div style="padding:10px 12px;background:var(--bg);border-radius:var(--r-sm);font-size:11px;color:var(--text2);margin-bottom:16px;line-height:1.6"><i class="ti ti-info-circle"></i> 1人のトレーナーは1人のメンターにのみ割り当てられます。既に割り当て済みのトレーナーは選べません。</div>';
+    html3+='<button class="btn btnfull" onclick="ST.modal=null;render()">閉じる</button>';
+    html3+='</div></div>';
+    return html3;
+  }
+  return '';
+}
+
+function doAddTrainerModal(){
+  var facId=ST.modal.split('|')[1];
+  doAddTrainer(facId);
+}
+async function doAddTrainer(facId){
+  var name=document.getElementById('tr-name').value.trim();
+  var email=document.getElementById('tr-email').value.trim();
+  var star=document.getElementById('tr-star').value;
+  if(!name||!email){alert('氏名とメールアドレスを入力してください');return;}
+  if(!email.includes('@')){alert('正しいメールアドレスを入力してください');return;}
+  var f=FACILITIES.find(function(x){return x.id===facId;});
+  if(!f)return;
+  var sc=SC[star];
+  try {
+    await sbAddTrainer(facId, name, email, star);
+    ST.modal=null;
+    toast(name+'さんへ招待メールを送信しました（'+sc.label+'）');
+    await loadAllData();
+  } catch(err){
+    alert('追加に失敗しました: '+(err.message||''));
+  }
+}
+
+async function delTrainer(btn){
+  var tId=btn.getAttribute('data-tid');
+  var name=btn.getAttribute('data-name');
+  if(!confirm(name+'を削除しますか？'))return;
+  try {
+    await sbDeleteTrainer(tId);
+    toast(name+'を削除しました');
+    await loadAllData();
+  } catch(err){
+    alert('削除に失敗しました: '+(err.message||''));
+  }
+}
+function openAddTrainer(btn){
+  var facId=btn.getAttribute('data-fid');
+  ST.modal='addtrainer|'+facId;render();
+}
+
+async function doAddFac(){
+  var name=document.getElementById('fac-name').value.trim();
+  var region=document.getElementById('fac-region').value.trim();
+  var email=document.getElementById('fac-email').value.trim();
+  if(!name||!email){alert('施設名と施設管理者メールアドレスを入力してください');return;}
+  if(!email.includes('@')){alert('正しいメールアドレスを入力してください');return;}
+  try {
+    await sbAddFacility(name, region, email);
+    ST.modal=null;
+    toast(name+'を追加しました。施設管理者へ招待メールを送信しました。');
+    await loadAllData();
+  } catch(err){
+    alert('施設の追加に失敗しました: '+(err.message||''));
+  }
+}
+
+/* ══════════════════════════════
+   SUPABASE DATA LAYER
+══════════════════════════════ */
+var FACILITIES = [];
+var LOADING = true;
+var LOAD_ERROR = null;
+
+async function loadAllData(){
+  LOADING=true; LOAD_ERROR=null;
+  renderLoading();
+  try {
+    // 1. Load facilities
+    var {data: facData, error: facErr} = await _sb.from('facilities').select('*').order('created_at');
+    if(facErr) throw facErr;
+
+    // 2. Load trainers
+    var {data: trData, error: trErr} = await _sb.from('trainers').select('*').order('created_at');
+    if(trErr) throw trErr;
+
+    // 3. Build FACILITIES structure with nested trainers
+    FACILITIES = (facData||[]).map(function(f){
+      var trainers = (trData||[]).filter(function(t){return t.facility_id===f.id;}).map(function(t){
+        return {
+          id: t.id,
+          name: t.name,
+          initials: (t.name||'').replace(/\s/g,'').slice(0,2),
+          star: t.star_level,
+          status: t.status,
+          clPct: t.cl_pct||0,
+          certDate: t.cert_date,
+          email: t.email,
+          mentoredBy: t.mentored_by,
+          mentoring: (trData||[]).filter(function(x){return x.mentored_by===t.id;}).map(function(x){return x.id;}),
+        };
+      });
+      return {
+        id: f.id,
+        name: f.name,
+        region: f.region||'未設定',
+        status: f.status,
+        createdAt: f.created_at ? new Date(f.created_at).toLocaleDateString('ja-JP') : '',
+        adminEmail: f.admin_email,
+        trainers: trainers,
+      };
+    });
+
+    LOADING=false;
+  } catch(err){
+    LOADING=false;
+    var detail = (err && (err.message || err.error_description || err.details || err.hint)) || JSON.stringify(err);
+    LOAD_ERROR = detail || '読み込みエラーが発生しました';
+    console.error('loadAllData error detail:', detail, 'full object:', JSON.stringify(err));
+  }
+  go(ST.page||'home');
+}
+
+function renderLoading(){
+  document.getElementById('content').innerHTML =
+    '<div style="text-align:center;padding:80px 20px">'
+    +'<div style="width:40px;height:40px;border:3px solid var(--bg2);border-top-color:#1A1916;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px"></div>'
+    +'<div style="font-size:14px;color:var(--text2)">データを読み込み中...</div>'
+    +'</div><style>@keyframes spin{to{transform:rotate(360deg)}}</style>';
+}
+
+/* ══════════════════════════════
+   EDGE FUNCTION (招待メール送信)
+══════════════════════════════ */
+const EDGE_FUNCTION_URL = 'https://gcqqhjeqvnfbgdenflmk.supabase.co/functions/v1/bright-endpoint';
+
+async function callEdgeFunction(payload){
+  var res = await fetch(EDGE_FUNCTION_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + SUPABASE_KEY,
+      'apikey': SUPABASE_KEY,
+    },
+    body: JSON.stringify(payload),
+  });
+  var json = await res.json();
+  if(!res.ok || json.error){
+    throw new Error(json.error || '処理に失敗しました');
+  }
+  return json;
+}
+
+async function inviteUser(email, name, role, facilityId){
+  return callEdgeFunction({ action:'invite', email: email, name: name, role: role, facilityId: facilityId || null });
+}
+
+async function deleteUserAccount(email){
+  return callEdgeFunction({ action:'delete_user', email: email });
+}
+
+/* ══════════════════════════════
+   SUPABASE WRITE HELPERS
+══════════════════════════════ */
+async function sbAddFacility(name, region, email){
+  var {data, error} = await _sb.from('facilities').insert({
+    name: name, region: region||null, admin_email: email||null, status:'active'
+  }).select().single();
+  if(error) throw error;
+
+  // Send invite email + create login account for facility admin
+  try {
+    await inviteUser(email, name, 'facility', data.id);
+  } catch(inviteErr){
+    console.error('Invite failed:', inviteErr);
+    throw new Error('施設は作成されましたが、招待メールの送信に失敗しました: '+inviteErr.message);
+  }
+  return data;
+}
+
+// ══════ SAFETY GUARD ══════
+// これらのメールアドレスは、誤って削除されることを絶対に防ぐ
+// (テストで施設管理者メールに自分のJHTJapanメールを使ってしまった等の事故防止)
+var PROTECTED_EMAILS = ['maskey@jhtgroup.jp'];
+
+function isProtectedEmail(email){
+  if(!email) return false;
+  return PROTECTED_EMAILS.indexOf(email.toLowerCase().trim()) >= 0;
+}
+
+async function sbDeleteFacility(facId){
+  // 1. Get all trainers in this facility (need their emails to delete login accounts)
+  var {data: trainersInFac, error: getErr} = await _sb.from('trainers').select('email').eq('facility_id', facId);
+  if(getErr) throw getErr;
+
+  // 2. Get the facility's admin email
+  var {data: facData, error: facGetErr} = await _sb.from('facilities').select('admin_email').eq('id', facId).single();
+  if(facGetErr) throw facGetErr;
+
+  // 3. Build the list of emails associated with this facility
+  var emailsToCheck = (trainersInFac||[]).map(function(t){return t.email;}).filter(Boolean);
+  if(facData && facData.admin_email) emailsToCheck.push(facData.admin_email);
+  emailsToCheck = emailsToCheck.filter(function(e){
+    if(isProtectedEmail(e)){
+      console.warn('SAFETY GUARD: skipped protected account:', e);
+      return false;
+    }
+    return true;
+  });
+  // de-duplicate (e.g. facility admin could be same person as a trainer)
+  emailsToCheck = emailsToCheck.filter(function(e, i){ return emailsToCheck.indexOf(e) === i; });
+
+  // 4. For each email: remove only the user_roles row(s) tied to THIS facility.
+  //    If the person has no roles left afterwards, delete their login account too.
+  //    If they still hold a role elsewhere (another facility, or no facility_id),
+  //    keep their login account intact.
+  for (var i=0; i<emailsToCheck.length; i++){
+    var email = emailsToCheck[i];
+    try {
+      await removeFacilityRoleForEmail(email, facId);
+    } catch(e){
+      console.error('Failed to clean up roles for', email, e);
+    }
+  }
+
+  // 5. Delete trainers rows, then facility row
+  await _sb.from('trainers').delete().eq('facility_id', facId);
+  var {error} = await _sb.from('facilities').delete().eq('id', facId);
+  if(error) throw error;
+}
+
+async function removeFacilityRoleForEmail(email, facId){
+  // This delegates to the edge function, which knows the user's auth id
+  // and can safely remove just the role tied to this facility, then check
+  // whether any roles remain before deciding to delete the login account.
+  return callEdgeFunction({ action:'remove_facility_role', email: email, facilityId: facId });
+}
+
+async function sbAddTrainer(facilityId, name, email, starLevel){
+  var {data, error} = await _sb.from('trainers').insert({
+    facility_id: facilityId, name: name, email: email, star_level: starLevel,
+    status:'active', cl_pct:0
+  }).select().single();
+  if(error) throw error;
+
+  // Send invite email + create login account for trainer
+  try {
+    await inviteUser(email, name, starLevel, facilityId);
+  } catch(inviteErr){
+    console.error('Invite failed:', inviteErr);
+    throw new Error('トレーナーは追加されましたが、招待メールの送信に失敗しました: '+inviteErr.message);
+  }
+  return data;
+}
+
+async function sbDeleteTrainer(trainerId){
+  // Get the trainer's email first so we can delete their login account too
+  var {data: trainerData, error: getErr} = await _sb.from('trainers').select('email').eq('id', trainerId).single();
+  if(getErr) throw getErr;
+
+  if(trainerData && trainerData.email && !isProtectedEmail(trainerData.email)){
+    try { await deleteUserAccount(trainerData.email); }
+    catch(e){ console.error('Failed to delete login account:', e); }
+  } else if(trainerData && isProtectedEmail(trainerData.email)){
+    console.warn('SAFETY GUARD: skipped deleting protected account:', trainerData.email);
+  }
+
+  var {error} = await _sb.from('trainers').delete().eq('id', trainerId);
+  if(error) throw error;
+}
+
+/* ══════════════════════════════
+   PROMOTION (昇格: 同じアカウントのまま role/star_level だけ更新)
+══════════════════════════════ */
+async function promoteTrainer(btn){
+  var trainerId = btn.getAttribute('data-tid');
+  var name = btn.getAttribute('data-name');
+  var fromLevel = btn.getAttribute('data-from');
+  var toLevel = btn.getAttribute('data-to');
+  var toSc = SC[toLevel];
+
+  if(!confirm(name+'さんを'+toSc.label+'に昇格させますか？\n同じログインアカウント（メール・パスワード）のまま、権限だけが切り替わります。'))return;
+
+  try {
+    // 1. Get the trainer's email/user to find their auth user_id
+    var {data: trainerRow, error: getErr} = await _sb.from('trainers').select('email').eq('id', trainerId).single();
+    if(getErr) throw getErr;
+
+    // 2. Update trainers table: reset progress for new level, update star_level
+    var {error: trUpdateErr} = await _sb.from('trainers').update({
+      star_level: toLevel,
+      status: 'active',
+      cl_pct: 0,
+      cert_date: null,
+    }).eq('id', trainerId);
+    if(trUpdateErr) throw trUpdateErr;
+
+    // 3. Update user_roles: change role for this user from fromLevel to toLevel
+    //    (uses the edge function since we need the user's auth id, looked up by email)
+    await callEdgeFunction({ action:'promote_role', email: trainerRow.email, fromRole: fromLevel, toRole: toLevel });
+
+    toast(name+'さんを'+toSc.label+'に昇格させました');
+    await loadAllData();
+  } catch(err){
+    alert('昇格に失敗しました: '+(err.message||''));
+  }
+}
+
+async function sbAssignMentor(menteeId, mentorId){
+  // RULE CHECK: mentee must not already have a mentor
+  var {data: existing, error: checkErr} = await _sb.from('trainers').select('mentored_by,name').eq('id', menteeId).single();
+  if(checkErr) throw checkErr;
+  if(existing && existing.mentored_by){
+    throw new Error('このトレーナーは既に他のメンターに割り当てられています');
+  }
+  var {error} = await _sb.from('trainers').update({mentored_by: mentorId}).eq('id', menteeId);
+  if(error) throw error;
+}
+
+async function sbUnassignMentor(menteeId){
+  var {error} = await _sb.from('trainers').update({mentored_by: null}).eq('id', menteeId);
+  if(error) throw error;
+}
+
+go('home');
+loadAllData();
+</script>
+</body>
+</html>

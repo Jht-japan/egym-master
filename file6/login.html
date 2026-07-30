@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>EGYM マスタートレーナー ログイン</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/3.19.0/iconfont/tabler-icons.min.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:#F4F2ED;font-family:'Hiragino Sans','Hiragino Kaku Gothic ProN','Noto Sans JP',sans-serif;font-size:14px}
+.wrap{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 16px}
+.logo{text-align:center;margin-bottom:32px}
+.logo-icon{width:72px;height:72px;background:#1A1916;border-radius:16px;display:flex;align-items:center;justify-content:center;margin:0 auto 14px;font-size:28px;color:#fff}
+.logo-title{font-size:20px;font-weight:700;color:#1A1916;margin-bottom:4px}
+.logo-sub{font-size:13px;color:#9C9A94}
+.card{background:#fff;border:1px solid #D8D5CC;border-radius:16px;padding:24px 20px;width:100%;max-width:400px;box-shadow:0 2px 12px rgba(0,0,0,.08)}
+.card-title{font-size:16px;font-weight:700;margin-bottom:20px;color:#1A1916}
+.frow{margin-bottom:16px}
+.flabel{font-size:12px;font-weight:700;color:#5C5A54;margin-bottom:6px;display:block}
+input{width:100%;padding:12px 14px;border:1.5px solid #D8D5CC;border-radius:8px;font-size:15px;color:#1A1916;background:#fff;transition:border-color .15s;-webkit-appearance:none;font-family:inherit}
+input:focus{outline:none;border-color:#1A1916}
+input.error{border-color:#C0392B}
+.pw-wrap{position:relative}
+.pw-eye{position:absolute;right:12px;top:50%;transform:translateY(-50%);cursor:pointer;color:#9C9A94;font-size:18px;background:none;border:none}
+.btn-login{width:100%;padding:14px;background:#1A1916;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:700;cursor:pointer;margin-top:8px;transition:opacity .15s;font-family:inherit}
+.btn-login:active{opacity:.75}
+.btn-login:disabled{opacity:.5;cursor:not-allowed}
+.err-msg{background:#FDECEA;border:1px solid #e8a9a9;border-radius:8px;padding:10px 12px;font-size:13px;color:#C0392B;margin-bottom:14px;display:none;line-height:1.5}
+.err-msg.show{display:block}
+.loading{display:none;text-align:center;padding:20px}
+.spinner{width:32px;height:32px;border:3px solid #E0E0E0;border-top-color:#1A1916;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 10px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.role-badges{display:flex;flex-wrap:wrap;gap:6px;margin-top:20px;justify-content:center}
+.rb{font-size:11px;padding:4px 10px;border-radius:20px;font-weight:700}
+.rb-super{background:#F0EBF8;color:#6B3FA0}
+.rb-fac{background:#E8F0FC;color:#2A6FDB}
+.rb-s1{background:#FDF3E3;color:#C47B14}
+.rb-s2{background:#E5F5EC;color:#1A8A5A}
+.rb-s3{background:#F0EBF8;color:#6B3FA0}
+.footer{margin-top:24px;font-size:12px;color:#9C9A94;text-align:center}
+.role-pick-btn{display:flex;align-items:center;gap:12px;width:100%;padding:14px 16px;border:1.5px solid #D8D5CC;border-radius:10px;background:#fff;font-size:14px;font-weight:600;color:#1A1916;cursor:pointer;font-family:inherit;transition:border-color .15s,background .15s}
+.role-pick-btn:hover{border-color:#1A1916;background:#FAFAF8}
+.role-pick-btn:active{opacity:.7}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="logo">
+    <div class="logo-icon">★</div>
+    <div class="logo-title">EGYM マスタートレーナー</div>
+    <div class="logo-sub">Johnson Health Tech Japan</div>
+  </div>
+
+  <div class="card" id="login-card">
+    <div class="card-title">ログイン</div>
+    <div class="err-msg" id="err-msg"></div>
+    <div class="frow">
+      <label class="flabel">メールアドレス</label>
+      <input type="email" id="email" placeholder="example@jhtgroup.jp" autocomplete="email">
+    </div>
+    <div class="frow">
+      <label class="flabel">パスワード</label>
+      <div class="pw-wrap">
+        <input type="password" id="password" placeholder="パスワードを入力" autocomplete="current-password">
+        <button class="pw-eye" onclick="togglePw()" type="button">
+          <i class="ti ti-eye" id="eye-icon"></i>
+        </button>
+      </div>
+    </div>
+    <button class="btn-login" id="login-btn" onclick="doLogin()">
+      <i class="ti ti-login"></i> ログイン
+    </button>
+    <div style="text-align:center;margin-top:12px">
+      <a href="#" onclick="openResetModal();return false;" style="font-size:12px;color:#5C5A54;text-decoration:underline">パスワードを忘れた方はこちら</a>
+    </div>
+    <div class="role-badges">
+      <span class="rb rb-super">JHTJapan</span>
+      <span class="rb rb-fac">施設管理者</span>
+      <span class="rb rb-s1">★ Star1</span>
+      <span class="rb rb-s2">★★ Star2</span>
+      <span class="rb rb-s3">★★★ Star3</span>
+    </div>
+  </div>
+
+  <div class="card" id="reset-card" style="display:none">
+    <div class="card-title">パスワードをリセット</div>
+    <div style="font-size:13px;color:#5C5A54;margin-bottom:16px;line-height:1.6">登録済みのメールアドレスを入力してください。パスワード再設定用のリンクをメールでお送りします。</div>
+    <div class="err-msg" id="reset-err-msg"></div>
+    <div class="frow">
+      <label class="flabel">メールアドレス</label>
+      <input type="email" id="reset-email" placeholder="example@jhtgroup.jp" autocomplete="email">
+    </div>
+    <button class="btn-login" id="reset-btn" onclick="doResetPassword()">
+      <i class="ti ti-mail"></i> リセットメールを送信
+    </button>
+    <div style="text-align:center;margin-top:12px">
+      <a href="#" onclick="closeResetModal();return false;" style="font-size:12px;color:#5C5A54;text-decoration:underline">ログインに戻る</a>
+    </div>
+  </div>
+
+  <div class="card" id="role-picker-card" style="display:none"></div>
+
+  <div class="loading" id="loading">
+    <div class="spinner"></div>
+    <div style="font-size:13px;color:#5C5A54">ログイン中...</div>
+  </div>
+
+  <div class="footer">権限に応じて自動的に画面が切り替わります</div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://gcqqhjeqvnfbgdenflmk.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_P9Ze3fOsCIpuhzx4AYednA_Gbxf9OO1';
+const _sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// Page routing based on role
+const ROLE_PAGES = {
+  'super':    'egym_super_account.html',
+  'facility': 'egym_facility_app.html',
+  'star1':    'egym_star1_app.html',
+  'star2':    'egym_star2_final.html',
+  'star3':    'egym_star3_app.html',
+};
+
+function showErr(msg){
+  const el=document.getElementById('err-msg');
+  el.textContent=msg;el.classList.add('show');
+}
+function hideErr(){document.getElementById('err-msg').classList.remove('show');}
+
+function togglePw(){
+  const inp=document.getElementById('password');
+  const ico=document.getElementById('eye-icon');
+  if(inp.type==='password'){
+    inp.type='text';ico.className='ti ti-eye-off';
+  } else {
+    inp.type='password';ico.className='ti ti-eye';
+  }
+}
+
+function openResetModal(){
+  document.getElementById('login-card').style.display='none';
+  document.getElementById('reset-card').style.display='block';
+  document.getElementById('reset-err-msg').classList.remove('show');
+  var emailVal=document.getElementById('email').value.trim();
+  if(emailVal) document.getElementById('reset-email').value=emailVal;
+}
+function closeResetModal(){
+  document.getElementById('reset-card').style.display='none';
+  document.getElementById('login-card').style.display='block';
+}
+
+async function doResetPassword(){
+  var errEl=document.getElementById('reset-err-msg');
+  errEl.classList.remove('show');
+  var email=document.getElementById('reset-email').value.trim();
+  if(!email){errEl.textContent='メールアドレスを入力してください';errEl.classList.add('show');return;}
+
+  var btn=document.getElementById('reset-btn');
+  btn.disabled=true;
+  btn.innerHTML='<i class="ti ti-loader-2"></i> 送信中...';
+
+  try {
+    var {error} = await _sb.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + '/login.html'
+    });
+    if(error) throw error;
+    document.getElementById('reset-card').innerHTML =
+      '<div class="card-title">メールを送信しました</div>'
+      +'<div style="font-size:13px;color:#5C5A54;line-height:1.7;margin-bottom:16px">'+email+' 宛にパスワード再設定用のリンクを送信しました。メール内のリンクから新しいパスワードを設定してください。</div>'
+      +'<button class="btn-login" onclick="window.location.reload()"><i class="ti ti-arrow-left"></i> ログインに戻る</button>';
+  } catch(err){
+    btn.disabled=false;
+    btn.innerHTML='<i class="ti ti-mail"></i> リセットメールを送信';
+    errEl.textContent=err.message || 'リセットメールの送信に失敗しました';
+    errEl.classList.add('show');
+  }
+}
+
+function setLoading(on){
+  document.getElementById('login-card').style.display=on?'none':'block';
+  document.getElementById('loading').style.display=on?'block':'none';
+}
+
+async function doLogin(){
+  hideErr();
+  const email=document.getElementById('email').value.trim();
+  const password=document.getElementById('password').value;
+  if(!email||!password){showErr('メールアドレスとパスワードを入力してください');return;}
+
+  const btn=document.getElementById('login-btn');
+  btn.disabled=true;setLoading(true);
+
+  try {
+    // 1. Login with Supabase Auth
+    const {data, error} = await _sb.auth.signInWithPassword({email, password});
+    if(error) throw error;
+
+    const userId = data.user.id;
+
+    // 2. Get ALL roles for this user (a person can hold multiple roles,
+    //    e.g. facility manager who is also a Star1/2/3 trainer)
+    const {data: rolesData, error: roleError} = await _sb
+      .from('user_roles')
+      .select('role, facility_id')
+      .eq('user_id', userId);
+
+    if(roleError || !rolesData || rolesData.length===0){
+      throw new Error('権限が設定されていません。管理者にお問い合わせください。');
+    }
+
+    sessionStorage.setItem('egym_user_id', userId);
+    sessionStorage.setItem('egym_user_email', email);
+
+    if(rolesData.length===1){
+      // Only one role — go straight to it
+      goToRole(rolesData[0]);
+    } else {
+      // Multiple roles — show a picker
+      showRolePicker(rolesData);
+    }
+
+  } catch(err){
+    setLoading(false);
+    btn.disabled=false;
+    const msg = err.message || 'ログインに失敗しました';
+    if(msg.includes('Invalid login')||msg.includes('invalid')){
+      showErr('メールアドレスまたはパスワードが正しくありません');
+    } else {
+      showErr(msg);
+    }
+  }
+}
+
+function goToRole(roleObj){
+  sessionStorage.setItem('egym_role', roleObj.role);
+  if(roleObj.facility_id) sessionStorage.setItem('egym_facility_id', roleObj.facility_id);
+  else sessionStorage.removeItem('egym_facility_id');
+  const page = ROLE_PAGES[roleObj.role];
+  if(page){
+    window.location.href = page;
+  } else {
+    showErr('不明な権限です: ' + roleObj.role);
+    setLoading(false);
+  }
+}
+
+const ROLE_LABELS = {
+  'super':'JHTJapan（最高管理者）',
+  'facility':'施設管理者',
+  'star1':'★ Star1',
+  'star2':'★★ Star2',
+  'star3':'★★★ Star3',
+};
+const ROLE_ICONS = {
+  'super':'ti-crown','facility':'ti-building',
+  'star1':'ti-star','star2':'ti-star-half-filled','star3':'ti-stars',
+};
+
+function showRolePicker(rolesData){
+  setLoading(false);
+  document.getElementById('login-card').style.display='none';
+  document.getElementById('reset-card').style.display='none';
+  const picker=document.getElementById('role-picker-card');
+  picker.style.display='block';
+
+  let html = '<div class="card-title">どちらの画面を開きますか？</div>';
+  html += '<div style="font-size:13px;color:#5C5A54;margin-bottom:16px;line-height:1.6">このアカウントは複数の権限を持っています。利用する画面を選択してください。</div>';
+  html += '<div style="display:flex;flex-direction:column;gap:10px">';
+  rolesData.forEach((r, i) => {
+    const label = ROLE_LABELS[r.role] || r.role;
+    const icon = ROLE_ICONS[r.role] || 'ti-user';
+    html += '<button type="button" class="role-pick-btn" onclick="goToRole(window.__rolesCache['+i+'])">'
+      + '<i class="ti '+icon+'" style="font-size:20px"></i>'
+      + '<span>'+label+'</span>'
+      + '<i class="ti ti-chevron-right" style="margin-left:auto;font-size:16px;opacity:.5"></i>'
+      + '</button>';
+  });
+  html += '</div>';
+  picker.innerHTML = html;
+  window.__rolesCache = rolesData;
+}
+
+// Allow Enter key
+document.addEventListener('keydown', function(e){
+  if(e.key==='Enter') doLogin();
+});
+
+// Check if already logged in
+(async function(){
+  const {data} = await _sb.auth.getSession();
+  if(data.session){
+    const userId = data.session.user.id;
+    const {data: rolesData} = await _sb
+      .from('user_roles')
+      .select('role, facility_id')
+      .eq('user_id', userId);
+    if(rolesData && rolesData.length===1 && ROLE_PAGES[rolesData[0].role]){
+      goToRole(rolesData[0]);
+    } else if(rolesData && rolesData.length>1){
+      showRolePicker(rolesData);
+    }
+  }
+})();
+</script>
+</body>
+</html>
