@@ -1,0 +1,12 @@
+# Old June versions — do not edit or track (canonical is file6)
+/file1/
+/file2/
+/file3/
+/file4/
+/file5/
+
+# Zip backups
+*.zip
+
+# Editor/tooling
+.claude/
