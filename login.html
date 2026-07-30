@@ -99,6 +99,24 @@ input.error{border-color:#C0392B}
     </div>
   </div>
 
+  <div class="card" id="setpw-card" style="display:none">
+    <div class="card-title">パスワードを設定</div>
+    <div style="font-size:13px;color:#5C5A54;margin-bottom:16px;line-height:1.6">アカウントを有効にするため、新しいパスワードを設定してください。（6文字以上）次回からはこのパスワードでログインできます。</div>
+    <div class="err-msg" id="setpw-err-msg"></div>
+    <div class="frow">
+      <label class="flabel">新しいパスワード</label>
+      <div class="pw-wrap">
+        <input type="password" id="setpw-pw" placeholder="6文字以上" autocomplete="new-password">
+        <button class="pw-eye" onclick="toggleSetPw()" type="button"><i class="ti ti-eye" id="setpw-eye"></i></button>
+      </div>
+    </div>
+    <div class="frow">
+      <label class="flabel">新しいパスワード（確認）</label>
+      <input type="password" id="setpw-pw2" placeholder="もう一度入力" autocomplete="new-password">
+    </div>
+    <button class="btn-login" id="setpw-btn" onclick="doSetPassword()"><i class="ti ti-lock-check"></i> パスワードを設定してログイン</button>
+  </div>
+
   <div class="card" id="role-picker-card" style="display:none"></div>
 
   <div class="loading" id="loading">
@@ -287,9 +305,76 @@ document.addEventListener('keydown', function(e){
   if(e.key==='Enter') doLogin();
 });
 
-// Check if already logged in (also handles invite-acceptance, which lands
-// here with an existing session but no password-form submit).
+// ---- Set-password flow (invite acceptance & password reset) ----
+// Captured synchronously before the SDK processes/clears the URL hash.
+var AUTH_URL_TYPE = (function(){
+  try{ return new URLSearchParams((window.location.hash||'').replace(/^#/,'')).get('type') || ''; }catch(e){ return ''; }
+})();
+
+function toggleSetPw(){
+  var inp=document.getElementById('setpw-pw'), ico=document.getElementById('setpw-eye');
+  if(inp.type==='password'){ inp.type='text'; ico.className='ti ti-eye-off'; }
+  else { inp.type='password'; ico.className='ti ti-eye'; }
+}
+function showSetPwErr(msg){ var el=document.getElementById('setpw-err-msg'); el.textContent=msg; el.classList.add('show'); }
+function showSetPassword(){
+  document.getElementById('login-card').style.display='none';
+  document.getElementById('reset-card').style.display='none';
+  document.getElementById('loading').style.display='none';
+  document.getElementById('setpw-card').style.display='block';
+}
+// Poll for the session the SDK establishes from the invite/recovery URL.
+function waitForSession(maxMs){
+  return new Promise(function(resolve){
+    var waited=0, step=150;
+    (function check(){
+      _sb.auth.getSession().then(function(r){
+        if(r.data && r.data.session){ resolve(r.data.session); }
+        else if(waited>=maxMs){ resolve(null); }
+        else { waited+=step; setTimeout(check, step); }
+      });
+    })();
+  });
+}
+async function doSetPassword(){
+  var errEl=document.getElementById('setpw-err-msg'); errEl.classList.remove('show');
+  var pw=document.getElementById('setpw-pw').value, pw2=document.getElementById('setpw-pw2').value;
+  if(!pw || pw.length<6){ showSetPwErr('パスワードは6文字以上で入力してください'); return; }
+  if(pw!==pw2){ showSetPwErr('パスワードが一致しません'); return; }
+  var btn=document.getElementById('setpw-btn');
+  btn.disabled=true; btn.innerHTML='<i class="ti ti-loader-2"></i> 設定中...';
+  try{
+    var {data:upd, error} = await _sb.auth.updateUser({ password: pw });
+    if(error) throw error;
+    var userId = upd.user.id, email = upd.user.email;
+    try{ history.replaceState(null,'',window.location.pathname); }catch(e){}
+    var {data: rolesData} = await _sb.from('user_roles').select('role, facility_id').eq('user_id', userId);
+    if(rolesData && rolesData.length>=1){
+      sessionStorage.setItem('egym_user_id', userId);
+      sessionStorage.setItem('egym_user_email', email || '');
+    }
+    if(rolesData && rolesData.length===1 && ROLE_PAGES[rolesData[0].role]){
+      goToRole(rolesData[0]);
+    } else if(rolesData && rolesData.length>1){
+      showRolePicker(rolesData);
+    } else {
+      btn.disabled=false; btn.innerHTML='<i class="ti ti-lock-check"></i> パスワードを設定してログイン';
+      showSetPwErr('パスワードは設定されましたが、権限が設定されていません。管理者にお問い合わせください。');
+    }
+  }catch(err){
+    btn.disabled=false; btn.innerHTML='<i class="ti ti-lock-check"></i> パスワードを設定してログイン';
+    showSetPwErr(err.message || 'パスワードの設定に失敗しました');
+  }
+}
+
+// Check if already logged in (also handles invite-acceptance & password reset,
+// which land here with an existing session but no password-form submit).
 (async function(){
+  // Invite or password-reset link → let the user set a password first.
+  if(AUTH_URL_TYPE==='invite' || AUTH_URL_TYPE==='recovery'){
+    const sess = await waitForSession(4000);
+    if(sess){ showSetPassword(); return; }
+  }
   const {data} = await _sb.auth.getSession();
   if(data.session){
     const userId = data.session.user.id;
