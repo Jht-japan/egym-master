@@ -287,7 +287,8 @@ document.addEventListener('keydown', function(e){
   if(e.key==='Enter') doLogin();
 });
 
-// Check if already logged in
+// Check if already logged in (also handles invite-acceptance, which lands
+// here with an existing session but no password-form submit).
 (async function(){
   const {data} = await _sb.auth.getSession();
   if(data.session){
@@ -296,6 +297,11 @@ document.addEventListener('keydown', function(e){
       .from('user_roles')
       .select('role, facility_id')
       .eq('user_id', userId);
+    if(rolesData && rolesData.length>=1){
+      // Persist identity so the destination screen can load its data.
+      sessionStorage.setItem('egym_user_id', userId);
+      sessionStorage.setItem('egym_user_email', data.session.user.email || '');
+    }
     if(rolesData && rolesData.length===1 && ROLE_PAGES[rolesData[0].role]){
       goToRole(rolesData[0]);
     } else if(rolesData && rolesData.length>1){
