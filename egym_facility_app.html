@@ -71,6 +71,12 @@ select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/
 const SUPABASE_URL = "https://gcqqhjeqvnfbgdenflmk.supabase.co";
 const SUPABASE_KEY = "sb_publishable_P9Ze3fOsCIpuhzx4AYednA_Gbxf9OO1";
 const _sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+async function egymLogout(){
+  try{ await _sb.auth.signOut(); }catch(e){}
+  try{ sessionStorage.clear(); }catch(e){}
+  window.location.replace('login.html');
+}
 </script>
 </head>
 <body>
@@ -80,21 +86,18 @@ const _sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
       <div class="av">八事</div>
       <div><div class="t-name">八事施設</div><div class="t-fac">Facility Account</div></div>
     </div>
-    <div class="t-badge">施設管理者</div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <div class="t-badge">施設管理者</div>
+      <button onclick="egymLogout()" title="ログアウト" style="display:flex;align-items:center;gap:5px;font-size:11px;padding:5px 11px;background:transparent;border:1px solid #999;border-radius:20px;color:#ccc;font-weight:700;cursor:pointer;white-space:nowrap"><i class="ti ti-logout"></i>ログアウト</button>
+    </div>
   </div>
   <div class="content" id="content"></div>
   <div class="bnav" id="nav"></div>
 </div>
 <div id="modal-slot"></div>
 <script>
-var TRAINERS = [
-  {id:'t1',name:'中間 涼子',initials:'中涼',star:'star2',status:'active',   clPct:72, progDone:true, testPass:false,certReq:false,certDate:null},
-  {id:'t2',name:'山本 健太',initials:'山健',star:'star1',status:'active',   clPct:100,progDone:true, testPass:false,certReq:true, certDate:null},
-  {id:'t3',name:'田中 直子',initials:'田直',star:'star1',status:'certified',clPct:100,progDone:true, testPass:true, certReq:false,certDate:'2024/10/20'},
-  {id:'t4',name:'佐々木 舞',initials:'佐舞',star:'star2',status:'certified',clPct:100,progDone:true, testPass:true, certReq:false,certDate:'2024/11/05'},
-  {id:'t5',name:'加藤 雄介',initials:'加雄',star:'star3',status:'active',   clPct:45, progDone:false,testPass:false,certReq:false,certDate:null},
-  {id:'t6',name:'伊藤 翔',  initials:'伊翔',star:'star1',status:'active',   clPct:30, progDone:false,testPass:false,certReq:false,certDate:null},
-];
+var TRAINERS = [];
+var FAC_ID = null;
 
 var SC = {
   star1:{bg:'var(--amber-l)',text:'var(--amber)',border:'var(--amber-m)',label:'★ Star1'},
@@ -257,26 +260,33 @@ function rRequests(){
   return html;
 }
 
-function approveCert(id){
+async function approveCert(id){
   var t=TRAINERS.find(function(x){return x.id===id;});if(!t)return;
-  t.certReq=false;t.status='certified';t.certDate=new Date().toLocaleDateString('ja-JP');
-  toast(t.name+'さんを認定しました。JHTJapanへ通知しました。');go('requests');
+  try{
+    var up=await _sb.from('trainers').update({status:'certified', cert_date:new Date().toLocaleDateString('ja-JP')}).eq('id',id);
+    if(up.error) throw up.error;
+    try{ await _sb.from('cert_requests').update({status:'approved'}).eq('trainer_id',id).eq('status','pending'); }catch(e){}
+    toast(t.name+'さんを認定しました。JHTJapanへ通知しました。');
+    await loadAllData();
+  }catch(err){ alert('認定に失敗しました: '+(err.message||'')); }
 }
-function rejectCert(id){
+async function rejectCert(id){
   var t=TRAINERS.find(function(x){return x.id===id;});if(!t)return;
-  t.certReq=false;
-  toast(t.name+'さんの申請を却下しました。');go('requests');
+  try{ await _sb.from('cert_requests').update({status:'rejected'}).eq('trainer_id',id).eq('status','pending'); }catch(e){}
+  toast(t.name+'さんの申請を却下しました。');
+  await loadAllData();
 }
 
 function rReports(){
   var total=TRAINERS.length;
   var certified=TRAINERS.filter(function(t){return t.status==='certified';}).length;
+  var certPct=total>0?Math.round(certified/total*100):0;
   var html='<div style="font-size:14px;font-weight:700;margin-bottom:12px">施設レポート</div>'
     +'<div class="card"><div class="ctitle">認定率</div>'
     +'<div style="text-align:center;padding:14px 0">'
-    +'<div style="font-size:48px;font-weight:700;color:var(--green)">'+Math.round(certified/total*100)+'%</div>'
+    +'<div style="font-size:48px;font-weight:700;color:var(--green)">'+certPct+'%</div>'
     +'<div style="font-size:13px;color:var(--text3);margin-top:4px">'+certified+'/'+total+'名 認定済み</div>'
-    +'</div><div class="pb" style="height:10px"><div class="pf" style="width:'+Math.round(certified/total*100)+'%;background:var(--green)"></div></div></div>';
+    +'</div><div class="pb" style="height:10px"><div class="pf" style="width:'+certPct+'%;background:var(--green)"></div></div></div>';
 
   ['star1','star2','star3'].forEach(function(s){
     var list=TRAINERS.filter(function(t){return t.star===s;});
@@ -319,18 +329,92 @@ function rModal(){
   return '';
 }
 
-function doInvite(){
+async function doInvite(){
   var name=document.getElementById('inv-name').value.trim();
   var email=document.getElementById('inv-email').value.trim();
   var star=document.getElementById('inv-star').value;
   if(!name||!email){alert('氏名とメールアドレスを入力してください');return;}
   if(!email.includes('@')){alert('正しいメールアドレスを入力してください');return;}
-  var initials=name.replace(/\s/g,'').slice(0,2);
-  TRAINERS.push({id:'t'+Date.now(),name:name,initials:initials,star:star,status:'active',clPct:0,progDone:false,testPass:false,certReq:false,certDate:null});
-  ST.modal=null; toast(name+'さんへ招待メールを送信しました'); go('trainers');
+  if(!FAC_ID){alert('施設情報が読み込まれていません');return;}
+  try{
+    var ins=await _sb.from('trainers').insert({facility_id:FAC_ID, name:name, email:email, star_level:star, status:'active', cl_pct:0}).select().single();
+    if(ins.error) throw ins.error;
+    try{ await inviteUser(email, name, star, FAC_ID); }
+    catch(inviteErr){ console.error('Invite email failed:', inviteErr); toast('トレーナーは追加されましたが、招待メール送信に失敗しました'); }
+    ST.modal=null; toast(name+'さんへ招待メールを送信しました');
+    await loadAllData();
+  }catch(err){ alert('追加に失敗しました: '+(err.message||'')); }
 }
 
-go('home');
+/* ══════════════════════════════
+   SUPABASE データ読み込み
+══════════════════════════════ */
+const EDGE_FUNCTION_URL = 'https://gcqqhjeqvnfbgdenflmk.supabase.co/functions/v1/bright-endpoint';
+async function callEdgeFunction(payload){
+  var res = await fetch(EDGE_FUNCTION_URL, {
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+SUPABASE_KEY,'apikey':SUPABASE_KEY},
+    body:JSON.stringify(payload),
+  });
+  var json = await res.json();
+  if(!res.ok || json.error){ throw new Error(json.error || '処理に失敗しました'); }
+  return json;
+}
+async function inviteUser(email, name, role, facilityId){
+  return callEdgeFunction({ action:'invite', email:email, name:name, role:role, facilityId:facilityId||null });
+}
+
+function updateFacIdentity(fac){
+  var nm=fac.name||'施設';
+  var avEl=document.querySelector('.topbar .av'); if(avEl) avEl.textContent=nm.slice(0,2);
+  var nmEl=document.querySelector('.topbar .t-name'); if(nmEl) nmEl.textContent=nm;
+}
+function renderStartError(msg){
+  document.getElementById('content').innerHTML='<div style="padding:40px 20px;text-align:center">'
+    +'<i class="ti ti-alert-triangle" style="font-size:40px;color:var(--red);display:block;margin-bottom:12px"></i>'
+    +'<div style="font-size:15px;font-weight:700;margin-bottom:8px">読み込みエラー</div>'
+    +'<div style="font-size:13px;color:var(--text2);margin-bottom:20px;word-break:break-all">'+msg+'</div>'
+    +'<button class="btn btnd btnfull" style="max-width:240px;margin:0 auto;padding:12px" onclick="window.location.href=\'login.html\'"><i class="ti ti-login"></i> ログインへ戻る</button>'
+    +'</div>';
+}
+function renderLoadingScreen(){
+  document.getElementById('content').innerHTML='<div style="text-align:center;padding:80px 20px">'
+    +'<div style="width:40px;height:40px;border:3px solid var(--bg2);border-top-color:#1A1916;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px"></div>'
+    +'<div style="font-size:14px;color:var(--text2)">データを読み込み中...</div>'
+    +'</div><style>@keyframes spin{to{transform:rotate(360deg)}}</style>';
+}
+
+async function loadAllData(){
+  try{
+    var facId=sessionStorage.getItem('egym_facility_id');
+    if(!facId){ renderStartError('施設情報が見つかりません。ログインし直してください。'); return; }
+    FAC_ID=facId;
+    var rf=await _sb.from('facilities').select('*').eq('id',facId).maybeSingle();
+    if(rf.error) throw rf.error;
+    if(rf.data) updateFacIdentity(rf.data);
+    var rt=await _sb.from('trainers').select('*').eq('facility_id',facId).order('created_at');
+    if(rt.error) throw rt.error;
+    var pendingIds={};
+    try{
+      var rc=await _sb.from('cert_requests').select('trainer_id,status').eq('facility_id',facId).eq('status','pending');
+      if(!rc.error && rc.data) rc.data.forEach(function(r){ pendingIds[r.trainer_id]=true; });
+    }catch(e){}
+    TRAINERS=(rt.data||[]).map(function(t){
+      return {
+        id:t.id, name:t.name||'', initials:(t.name||'').replace(/\s/g,'').slice(0,2),
+        star:t.star_level, status:t.status,
+        clPct:t.cl_pct||0, progDone:!!t.prog1_done, testPass:t.status==='certified',
+        certReq:!!pendingIds[t.id], certDate:t.cert_date||null,
+      };
+    });
+    go(ST.page||'home');
+  }catch(err){
+    renderStartError('読み込みに失敗しました: '+(err.message||err));
+  }
+}
+
+renderLoadingScreen();
+loadAllData();
 </script>
 </body>
 </html>

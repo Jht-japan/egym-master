@@ -118,6 +118,12 @@ input[type=number]{padding:11px 12px;border:1px solid var(--border);border-radiu
 const SUPABASE_URL = "https://gcqqhjeqvnfbgdenflmk.supabase.co";
 const SUPABASE_KEY = "sb_publishable_P9Ze3fOsCIpuhzx4AYednA_Gbxf9OO1";
 const _sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+async function egymLogout(){
+  try{ await _sb.auth.signOut(); }catch(e){}
+  try{ sessionStorage.clear(); }catch(e){}
+  window.location.replace('login.html');
+}
 const STAR_KEY = 'star1';
 </script>
 </head>
@@ -128,7 +134,10 @@ const STAR_KEY = 'star1';
       <div class="av">三知</div>
       <div><div class="t-name">三田 知障</div><div class="t-fac">八事施設</div></div>
     </div>
-    <div class="t-badge">★ スター1挑戦中</div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <div class="t-badge">★ スター1挑戦中</div>
+      <button onclick="egymLogout()" title="ログアウト" style="display:flex;align-items:center;gap:5px;font-size:11px;padding:5px 11px;background:transparent;border:1px solid #ccc;border-radius:20px;color:#666;font-weight:700;cursor:pointer;white-space:nowrap"><i class="ti ti-logout"></i>ログアウト</button>
+    </div>
   </div>
   <div class="content" id="content"></div>
   <div class="bnav" id="nav"></div>
@@ -285,7 +294,7 @@ function rHome(){
     +'<div class="card"><div class="ctitle">認定までの手順</div>'
     +'<div class="step"><div class="sdot '+(clComplete()?'s-done':'s-prog')+'"><i class="ti '+(clComplete()?'ti-check':'ti-checkbox')+'" style="font-size:13px"></i></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">チェックリストを全て完了する</div><div style="font-size:11px;color:var(--text3);margin-top:3px">'+done+'/'+total+'項目完了（'+p+'%）</div></div><span class="tag '+(clComplete()?'td':'tp')+'">'+(clComplete()?'完了':'進行中')+'</span></div>'
     +'<div class="step"><div class="sdot '+(progDone()?'s-done':'s-prog')+'"><i class="ti '+(progDone()?'ti-check':'ti-calendar')+'" style="font-size:13px"></i></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">ベーシックプログラムを完了する</div><div style="font-size:11px;color:var(--text3);margin-top:3px">'+dp+'/4フェーズ完了 · '+ts+'/24セッション記録済</div></div><span class="tag '+(progDone()?'td':'tp')+'">'+(progDone()?'完了':'進行中')+'</span></div>'
-    +'<div class="step"><div class="sdot s-lock"><i class="ti ti-award" style="font-size:13px"></i></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">スター2トレーナーによる認定</div><div style="font-size:11px;color:var(--text3);margin-top:3px">担当スター2が認定ボタンを押すと完了</div></div><span class="tag tg">待機中</span></div>'
+    +'<div class="step"><div class="sdot '+(SELF.status==='certified'?'s-done':'s-lock')+'"><i class="ti '+(SELF.status==='certified'?'ti-check':'ti-award')+'" style="font-size:13px"></i></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">スター2トレーナーによる認定</div><div style="font-size:11px;color:var(--text3);margin-top:3px">担当スター2が認定ボタンを押すと完了</div></div><span class="tag '+(SELF.status==='certified'?'td':'tg')+'">'+(SELF.status==='certified'?'完了':'待機中')+'</span></div>'
     +'</div>'
     +'<div class="g2" style="margin-bottom:12px">'
     +'<div class="card" style="margin-bottom:0"><div style="font-size:12px;font-weight:700;margin-bottom:8px">チェックリスト</div>'
@@ -324,7 +333,7 @@ function rChecklist(){
   });
   return html;
 }
-function toggleCl(id){ ST.cl[id]=!ST.cl[id]; render(); }
+function toggleCl(id){ ST.cl[id]=!ST.cl[id]; render(); saveP(); }
 function toggleSec(id){ ST.secOpen[id]=!ST.secOpen[id]; render(); }
 
 /* PROGRAM */
@@ -416,8 +425,8 @@ function buildCal(pi){
   return html;
 }
 
-function setMethod(pi,v){ ST.prog.phases[pi].method=v; }
-function setNote(pi,v){ ST.prog.phases[pi].note=v; }
+function setMethod(pi,v){ ST.prog.phases[pi].method=v; saveP(); }
+function setNote(pi,v){ ST.prog.phases[pi].note=v; saveP(); }
 function openCal(pi,si){
   if(ST.cal.show&&ST.cal.pi===pi&&ST.cal.si===si){ ST.cal.show=false; }
   else{ ST.cal.show=true; ST.cal.pi=pi; ST.cal.si=si; }
@@ -435,7 +444,7 @@ function pickDate(y,m,d){
   ST.prog.phases[pi].sessions[si]={y,m,d};
   const next=si<5?si+1:null;
   if(next!==null){ ST.cal.si=next; } else { ST.cal.show=false; }
-  render();
+  render(); saveP();
 }
 function togglePhase(pi){
   ST.prog.phases.forEach((ph,i)=>{ ph.open=(i===pi)?!ph.open:false; });
@@ -444,23 +453,24 @@ function togglePhase(pi){
 function clearPhase(pi){
   const ph=ST.prog.phases[pi];
   ph.method=''; ph.note=''; ph.sessions=Array(6).fill(null); ph.done=false;
-  ST.cal.show=false; render();
+  ST.cal.show=false; render(); saveP();
 }
 function markDone(pi){
   if(ST.prog.phases[pi].sessions.filter(Boolean).length<6){ alert('6回のセッション日をすべて設定してから完了にしてください'); return; }
   ST.prog.phases[pi].done=true; ST.prog.phases[pi].open=false;
   const next=ST.prog.phases[pi+1]; if(next){ next.open=true; }
-  ST.cal.show=false; render();
+  ST.cal.show=false; render(); saveP();
 }
 
 /* CERT */
 function rCert(){
-  const certified=allDone();
+  const ready=allDone();
+  const certified=(SELF.status==='certified');
   let html='<div class="card" style="text-align:center;padding:28px 16px">'
     +'<div style="width:92px;height:92px;border-radius:50%;background:'+(certified?'var(--amber-l)':'var(--bg2)')+';border:3px solid '+(certified?'var(--amber-m)':'var(--border)')+';display:flex;align-items:center;justify-content:center;margin:0 auto 16px;'+(certified?'':'opacity:0.35;filter:grayscale(1)')+'"><i class="ti ti-award" style="font-size:46px;color:'+(certified?'var(--amber)':'var(--text3)')+'"></i></div>'
     +'<div style="font-size:17px;font-weight:700;margin-bottom:4px">'+(certified?'スター1 認定バッジ解除！':'スター1 認定バッジ')+'</div>'
     +'<div style="font-size:12px;color:var(--text2);margin-bottom:'+(certified?14:4)+'px">'+(certified?'EGYM Certified Trainer':'下記の条件を全て満たすと解除されます')+'</div>'
-    +(certified?'<div style="display:inline-block;padding:7px 22px;background:var(--amber-l);border:1px solid var(--amber-m);border-radius:20px;font-size:13px;color:var(--amber);font-weight:700">認定番号: EGYM-CT1-2024-088</div>':'')
+    +(certified?'<div style="display:inline-block;padding:7px 22px;background:var(--amber-l);border:1px solid var(--amber-m);border-radius:20px;font-size:13px;color:var(--amber);font-weight:700">認定日: '+(SELF.cert_date||'—')+'</div>':'')
     +'</div>';
 
   html+='<div class="card"><div class="ctitle">認定条件</div>'
@@ -469,7 +479,9 @@ function rCert(){
     +'</div>';
 
   if(certified){
-    html+='<div class="card" style="border:2px solid var(--green)"><div style="font-size:14px;font-weight:700;color:var(--green);margin-bottom:8px"><i class="ti ti-circle-check"></i> 認定申請が可能です</div><div style="font-size:13px;color:var(--text2);margin-bottom:16px">担当スター2トレーナーに認定申請を行ってください。認定後にバッジとノベルティが授与されます。</div><button class="btn btng btnfull" style="padding:14px;font-size:14px" onclick="ST.certModal=true;render()"><i class="ti ti-send"></i> スター2トレーナーへ申請通知を送る</button></div>';
+    html+='<div class="card" style="border:2px solid var(--green);text-align:center;padding:22px 16px"><i class="ti ti-rosette-discount-check" style="font-size:34px;color:var(--green);display:block;margin-bottom:8px"></i><div style="font-size:15px;font-weight:700;color:var(--green);margin-bottom:4px">スター1に認定されました</div><div style="font-size:12px;color:var(--text2)">'+(SELF.mentor_name?('担当スター2「'+SELF.mentor_name+'」により認定'):'担当スター2により認定')+(SELF.cert_date?(' · '+SELF.cert_date):'')+'</div></div>';
+  } else if(ready){
+    html+='<div class="card" style="border:2px solid var(--green)"><div style="font-size:14px;font-weight:700;color:var(--green);margin-bottom:8px"><i class="ti ti-circle-check"></i> 全条件を達成しました</div><div style="font-size:13px;color:var(--text2);margin-bottom:16px">担当スター2トレーナー'+(SELF.mentor_name?('（'+SELF.mentor_name+'）'):'')+'があなたの進捗を確認し、認定ボタンを押すと認定完了です。</div><div style="display:flex;gap:10px"><button class="btn btnfull" style="padding:13px" onclick="refreshStatus()"><i class="ti ti-refresh"></i> 状態を更新</button><button class="btn btng btnfull" style="padding:13px" onclick="ST.certModal=true;render()"><i class="ti ti-send"></i> 申請通知</button></div></div>';
   } else {
     html+='<div class="card" style="background:var(--bg)"><div style="font-size:14px;font-weight:700;margin-bottom:12px">スター1認定の流れ</div>'
       +['チェックリスト（オンボーディング・マシンセットアップ・理解度）を全項目完了する','ベーシックプログラム4フェーズ・24セッションを完了する','担当スター2トレーナーへ申請通知を送る','スター2が認定ボタンを押すと認定完了','バッジとノベルティが授与される'].map((s,i)=>'<div style="display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--bg2)"><div style="width:26px;height:26px;border-radius:50%;background:var(--amber-l);color:var(--amber);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0">'+(i+1)+'</div><div style="font-size:13px;padding-top:3px">'+s+'</div></div>').join('')
@@ -526,21 +538,147 @@ function addNote(){
   var dateStr=now.getFullYear()+'/'+String(now.getMonth()+1).padStart(2,'0')+'/'+String(now.getDate()).padStart(2,'0')+' '+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
   notes.push({id:'n'+Date.now(),text:text,date:dateStr});
   saveNotes(notes);
-  render();
+  render(); saveP();
 }
 function deleteNote(id){
   if(!confirm('このメモを削除しますか？'))return;
   var notes=loadNotes().filter(function(n){return n.id!==id;});
   saveNotes(notes);
-  render();
+  render(); saveP();
 }
 
 function rCertModal(){
-  return '<div class="modal-bg" onclick="if(event.target===this){ST.certModal=false;render()}"><div class="modal"><div class="modal-handle"></div><div style="font-size:17px;font-weight:700;margin-bottom:4px">認定申請を送る</div><div style="font-size:12px;color:var(--text3);margin-bottom:16px">担当スター2トレーナーに申請通知が送られます</div><div style="display:flex;align-items:center;gap:12px;padding:14px;background:var(--bg);border-radius:var(--r-sm);margin-bottom:16px"><div style="width:44px;height:44px;border-radius:50%;background:var(--green-l);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;border:2px solid var(--green-m)">中涼</div><div><div style="font-size:14px;font-weight:700">中間 涼子</div><div style="font-size:12px;color:var(--text3)">担当スター2トレーナー · 八事施設</div></div></div><div style="padding:12px;background:var(--green-l);border-radius:var(--r-sm);font-size:12px;color:var(--green);margin-bottom:18px;line-height:1.6"><i class="ti ti-info-circle"></i> 申請後、スター2トレーナーが確認して認定ボタンを押すと認定完了です。</div><div style="display:flex;gap:10px"><button class="btn" style="flex:1" onclick="ST.certModal=false;render()">キャンセル</button><button class="btn btng" style="flex:1" onclick="sendCert()"><i class="ti ti-send"></i> 送信する</button></div></div></div>';
+  var mn=SELF.mentor_name||'担当スター2トレーナー';
+  var mi=(SELF.mentor_name||'★2').replace(/\s/g,'').slice(0,2);
+  return '<div class="modal-bg" onclick="if(event.target===this){ST.certModal=false;render()}"><div class="modal"><div class="modal-handle"></div><div style="font-size:17px;font-weight:700;margin-bottom:4px">認定申請を送る</div><div style="font-size:12px;color:var(--text3);margin-bottom:16px">担当スター2トレーナーに申請通知が送られます</div><div style="display:flex;align-items:center;gap:12px;padding:14px;background:var(--bg);border-radius:var(--r-sm);margin-bottom:16px"><div style="width:44px;height:44px;border-radius:50%;background:var(--green-l);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;border:2px solid var(--green-m)">'+mi+'</div><div><div style="font-size:14px;font-weight:700">'+mn+'</div><div style="font-size:12px;color:var(--text3)">担当スター2トレーナー</div></div></div><div style="padding:12px;background:var(--green-l);border-radius:var(--r-sm);font-size:12px;color:var(--green);margin-bottom:18px;line-height:1.6"><i class="ti ti-info-circle"></i> 申請後、スター2トレーナーが確認して認定ボタンを押すと認定完了です。</div><div style="display:flex;gap:10px"><button class="btn" style="flex:1" onclick="ST.certModal=false;render()">キャンセル</button><button class="btn btng" style="flex:1" onclick="sendCert()"><i class="ti ti-send"></i> 送信する</button></div></div></div>';
 }
-function sendCert(){ ST.certModal=false; render(); toast('中間 涼子（スター2）へ認定申請通知を送信しました'); }
+function sendCert(){ ST.certModal=false; render(); toast((SELF.mentor_name||'担当スター2')+'へ認定申請通知を送信しました'); }
+async function refreshStatus(){
+  if(!TRAINER_ID) return;
+  toast('最新の状態を確認中…');
+  try{
+    var r=await _sb.from('trainers').select('status,cert_date').eq('id',TRAINER_ID).maybeSingle();
+    if(r.data){ SELF.status=r.data.status||'active'; SELF.cert_date=r.data.cert_date||null; }
+    render();
+    toast(SELF.status==='certified'?'スター1に認定されています！':'まだ認定されていません');
+  }catch(e){ toast('状態の取得に失敗しました'); }
+}
 
-go('home');
+/* ══════════════════════════════
+   SUPABASE 同期（クラウド保存）
+══════════════════════════════ */
+var TRAINER_ID=null;
+var _saveTimer=null;
+// 実データ: 自分の認定状況（担当スター2が認定するとstatus='certified'になる）
+var SELF={status:'active', cert_date:null, mentor_name:''};
+
+function syncInd(txt){
+  var el=document.getElementById('_sync');
+  if(!el){el=document.createElement('div');el.id='_sync';el.style.cssText='position:fixed;top:8px;right:8px;background:rgba(26,25,22,.85);color:#fff;font-size:11px;padding:4px 10px;border-radius:12px;z-index:400;transition:opacity .3s';document.body.appendChild(el);}
+  el.textContent=txt; el.style.opacity='1';
+  clearTimeout(el._t); el._t=setTimeout(function(){el.style.opacity='0';},1500);
+}
+
+function renderLoadingScreen(){
+  document.getElementById('content').innerHTML='<div style="text-align:center;padding:80px 20px">'
+    +'<div style="width:40px;height:40px;border:3px solid var(--bg2);border-top-color:var(--amber);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px"></div>'
+    +'<div style="font-size:14px;color:var(--text2)">データを読み込み中...</div>'
+    +'</div><style>@keyframes spin{to{transform:rotate(360deg)}}</style>';
+}
+function renderStartError(msg){
+  document.getElementById('content').innerHTML='<div style="padding:40px 20px;text-align:center">'
+    +'<i class="ti ti-alert-triangle" style="font-size:40px;color:var(--red);display:block;margin-bottom:12px"></i>'
+    +'<div style="font-size:15px;font-weight:700;margin-bottom:8px">読み込みエラー</div>'
+    +'<div style="font-size:13px;color:var(--text2);margin-bottom:20px;word-break:break-all">'+msg+'</div>'
+    +'<button class="btn btna btnfull" style="max-width:240px;margin:0 auto;padding:12px" onclick="window.location.href=\'login.html\'"><i class="ti ti-login"></i> ログインへ戻る</button>'
+    +'</div>';
+}
+
+function updateIdentity(tr, facName){
+  var nm=tr.name||'';
+  var initials=nm.replace(/\s/g,'').slice(0,2)||'--';
+  var avEl=document.querySelector('.topbar .av'); if(avEl) avEl.textContent=initials;
+  var nmEl=document.querySelector('.topbar .t-name'); if(nmEl) nmEl.textContent=nm||'トレーナー';
+  var facEl=document.querySelector('.topbar .t-fac'); if(facEl&&facName) facEl.textContent=facName;
+}
+
+function hydrate(prog){
+  if(!prog) return;
+  if(prog.checklist){ Object.keys(ST.cl).forEach(function(k){ if(k in prog.checklist) ST.cl[k]=!!prog.checklist[k]; }); }
+  if(prog.programs && Array.isArray(prog.programs.phases)){
+    prog.programs.phases.forEach(function(sp,i){
+      var ph=ST.prog.phases[i]; if(!ph) return;
+      ph.method=sp.method||''; ph.note=sp.note||''; ph.done=!!sp.done;
+      ph.sessions=Array.isArray(sp.sessions)?sp.sessions.slice(0,6):Array(6).fill(null);
+      while(ph.sessions.length<6) ph.sessions.push(null);
+    });
+  }
+  if(Array.isArray(prog.notes)){ try{ localStorage.setItem(notesStorageKey(), JSON.stringify(prog.notes)); }catch(e){} }
+}
+
+function serializeProgress(){
+  return {
+    checklist: ST.cl,
+    programs: { phases: ST.prog.phases.map(function(ph){ return {method:ph.method,note:ph.note,done:ph.done,sessions:ph.sessions}; }) },
+    notes: loadNotes(),
+  };
+}
+
+async function loadProgress(){
+  try{
+    var email=sessionStorage.getItem('egym_user_email');
+    if(!email){ renderStartError('ログイン情報が見つかりません。ログインし直してください。'); return false; }
+    var r1=await _sb.from('trainers').select('*').eq('email',email).eq('star_level',STAR_KEY);
+    if(r1.error) throw r1.error;
+    if(!r1.data || r1.data.length===0){ renderStartError('トレーナー情報が見つかりません（'+email+'）。管理者にお問い合わせください。'); return false; }
+    var tr=r1.data[0];
+    TRAINER_ID=tr.id;
+    SELF.status=tr.status||'active';
+    SELF.cert_date=tr.cert_date||null;
+    // 担当スター2（メンター）の名前を取得
+    if(tr.mentored_by){
+      var rm=await _sb.from('trainers').select('name').eq('id',tr.mentored_by).maybeSingle();
+      if(rm.data) SELF.mentor_name=rm.data.name;
+    }
+    var facName='';
+    if(tr.facility_id){
+      var rf=await _sb.from('facilities').select('name').eq('id',tr.facility_id).maybeSingle();
+      if(rf.data) facName=rf.data.name;
+    }
+    updateIdentity(tr, facName);
+    var r2=await _sb.from('trainer_progress').select('*').eq('trainer_id',TRAINER_ID).maybeSingle();
+    if(r2.error){ console.warn('trainer_progress read failed (table not created yet?):', r2.error.message); }
+    else { hydrate(r2.data); }
+    return true;
+  }catch(err){
+    renderStartError('読み込みに失敗しました: '+(err.message||err));
+    return false;
+  }
+}
+
+function saveP(){
+  if(!TRAINER_ID) return;
+  syncInd('保存中…');
+  clearTimeout(_saveTimer);
+  _saveTimer=setTimeout(async function(){
+    try{
+      var payload=serializeProgress();
+      payload.trainer_id=TRAINER_ID;
+      payload.updated_at=new Date().toISOString();
+      var up=await _sb.from('trainer_progress').upsert(payload,{onConflict:'trainer_id'});
+      if(up.error) throw up.error;
+      await _sb.from('trainers').update({ cl_pct: clPct(), prog1_done: progDone() }).eq('id',TRAINER_ID);
+      syncInd('保存しました');
+    }catch(err){ console.error('save failed', err); syncInd('保存に失敗'); }
+  },700);
+}
+
+async function initApp(){
+  renderLoadingScreen();
+  var ok=await loadProgress();
+  if(ok) go('home');
+}
+initApp();
 </script>
 </body>
 </html>
