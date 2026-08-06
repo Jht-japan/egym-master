@@ -68,9 +68,14 @@
   - `index.html` / `login.html` / `egym_super_account.html` / `egym_facility_app.html` /
     `egym_star1_app.html` / `egym_star2_final.html` / `egym_star3_app.html`
   - ※ `index.html` はルート（`/`）にアクセスされた際に自動で `login.html` へ転送するページ。これが無いとサイトのトップURLでログイン画面が表示されません。
+- [ ] **Vercel の Root Directory を `file6` に設定**（重要）。
+  - リポジトリ内では HTML 7ファイルは `file6/` 配下にあります。Vercel が既定（リポジトリ直下）を配信すると **404 になる**ため、配信元フォルダを `file6` に指定します。
+  - 手順: Vercel ダッシュボード → 対象プロジェクト → **Settings** → **Build & Deployment**（または **General**）→ **Root Directory** → `file6` を入力 → **Save**。→ 次回デプロイから反映。
+  - ※ これは初回のみの設定。以降は `file6` 配下の変更が自動デプロイされます。
 - [ ] 確認: 数分後に `https://egym-master.vercel.app/` が更新される（Vercel が自動デプロイ）。ルートURLを開くとログイン画面が表示される。
 
 > 💡 直近の改修（メンター引き継ぎ機能・全画面ログアウト等）を反映するため、この公開が必要です。
+> ⚠️ **Root Directory = `file6` が未設定だとサイトが 404 になります。** アップロード後にトップURLが開けない場合は、まずこの設定を確認してください。
 
 ---
 
@@ -148,6 +153,7 @@
 | Star2/3 の育成タブに候補者が出ない | super の「育成対象の割り当て（mentored_by）」で担当を設定（新規招待は自動設定）。 |
 | AI採点が動かない | `grade-test` が Deployed か／`ANTHROPIC_API_KEY` が登録済みか／旧版なら再デプロイ。 |
 | サイトが数分たっても更新されない | GitHub main への push を確認／Vercel のデプロイ状況を確認。 |
+| トップURLが 404 になる | Vercel の **Root Directory** が `file6` になっているか確認（HTMLは `file6/` 配下にあるため）。 |
 
 ---
 
