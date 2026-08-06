@@ -17,6 +17,14 @@
 --   Supabase → SQL Editor に貼り付けて Run（1回だけ）。
 --   ★適用後は必ず各ロールで動作確認（末尾の「動作確認」参照）。
 --   もし何か動かなくなったら、末尾の「ロールバック」を実行すれば元の全許可に戻せる。
+--
+-- 判断①（RLS厳格化後の書き込み経路）の対応方針: ★option B で解決（2026-08-04）
+--   認定・招待はクライアントから直接 trainers を書くため、ロール別に必要最小限の
+--   INSERT/UPDATE/SELECT を許可する。無条件の全許可ではなく、以下に厳密にスコープする:
+--     ・Star2 → 自施設の Star1 候補者のみ 招待(insert)／認定(update)／閲覧(select)
+--     ・Star3 → 自施設の Star2 候補者のみ 招待(insert)／閲覧(select)（★認定はしない＝監視のみ）
+--     ・いずれも「mentored_by=自分」かつ「自分の施設」の行に限定（他人の候補者は不可）
+--   Edge Function 経由（option A）へ将来移す場合も、これらの許可を外すだけで両立する。
 -- ============================================================
 
 
@@ -50,6 +58,14 @@ create or replace function public.my_trainer_ids()
 returns setof uuid language sql stable security definer set search_path = ''
 as $$ select id from public.trainers
       where public.current_email() <> '' and lower(email) = public.current_email() $$;
+
+-- ログイン中ユーザーが指定 role を持つか（複数ロール対応・メンター判定に使用）
+create or replace function public.has_role(r text)
+returns boolean language sql stable security definer set search_path = ''
+as $$ select exists(
+  select 1 from public.user_roles
+  where user_id = auth.uid() and role = r
+) $$;
 
 
 -- ─────────────────────────────────────────────
@@ -107,11 +123,28 @@ create policy tr_select on public.trainers for select to authenticated
     public.is_super()
     or public.is_facility_admin(facility_id)
     or lower(email) = public.current_email()
+    -- 自分が育成中の候補者（メンティー）を閲覧できる（Star2→Star1 / Star3→Star2 の育成タブ）
+    or mentored_by in (select public.my_trainer_ids())
   );
 
 drop policy if exists tr_insert on public.trainers;
 create policy tr_insert on public.trainers for insert to authenticated
-  with check ( public.is_super() or public.is_facility_admin(facility_id) );
+  with check (
+    public.is_super()
+    or public.is_facility_admin(facility_id)
+    -- Star2 が自施設に Star1 候補者を招待（自分をメンターに設定した行のみ）
+    or (
+      star_level = 'star1' and public.has_role('star2')
+      and mentored_by in (select public.my_trainer_ids())
+      and facility_id in (select public.my_facility_ids())
+    )
+    -- Star3 が自施設に Star2 候補者を招待（自分をメンターに設定した行のみ）
+    or (
+      star_level = 'star2' and public.has_role('star3')
+      and mentored_by in (select public.my_trainer_ids())
+      and facility_id in (select public.my_facility_ids())
+    )
+  );
 
 drop policy if exists tr_update on public.trainers;
 create policy tr_update on public.trainers for update to authenticated
@@ -119,11 +152,16 @@ create policy tr_update on public.trainers for update to authenticated
     public.is_super()
     or public.is_facility_admin(facility_id)
     or lower(email) = public.current_email()
+    -- Star2 が自分の Star1 候補者を認定できる（star1 のみ＝Star3は監視のみを維持）
+    or ( star_level = 'star1' and public.has_role('star2')
+         and mentored_by in (select public.my_trainer_ids()) )
   )
   with check (
     public.is_super()
     or public.is_facility_admin(facility_id)
     or lower(email) = public.current_email()
+    or ( star_level = 'star1' and public.has_role('star2')
+         and mentored_by in (select public.my_trainer_ids()) )
   );
 
 drop policy if exists tr_delete on public.trainers;
@@ -165,7 +203,12 @@ create policy tp_update on public.trainer_progress for update to authenticated
 -- ─────────────────────────────────────────────
 drop policy if exists cr_select on public.cert_requests;
 create policy cr_select on public.cert_requests for select to authenticated
-  using ( public.is_super() or public.is_facility_admin(facility_id) );
+  using (
+    public.is_super()
+    or public.is_facility_admin(facility_id)
+    -- 申請者本人が自分の申請状況を確認できる
+    or trainer_id in (select public.my_trainer_ids())
+  );
 
 drop policy if exists cr_insert on public.cert_requests;
 create policy cr_insert on public.cert_requests for insert to authenticated
@@ -195,6 +238,10 @@ create policy inv_select on public.invitations for select to authenticated
 --   ・facility:  自施設トレーナー一覧・招待・認定申請の承認/却下
 --   ・star1/2/3: 自分の名前が表示される・チェック/進捗が保存され再読込で残る
 --                star2: テスト採点、施設への申請通知
+--   ・★star2:   「スター1育成」タブに候補者が表示される／Star1を招待できる／
+--                条件達成後「スター1認定」で Star1.status='certified' が書ける
+--   ・★star3:   「スター2育成」タブに候補者が表示される／Star2を招待できる／
+--                Star2の認定ボタンは無い（監視のみ＝仕様どおり）
 -- ============================================================
 
 -- ============================================================

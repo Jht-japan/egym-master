@@ -223,7 +223,9 @@ function rTrainers(){
       +'<div style="flex-shrink:0;text-align:right">'
       +'<span class="tag '+(t.status==='certified'?'td':t.certReq?'tf':allDone?'tb':'tg')+'">'+(t.status==='certified'?'認定済':t.certReq?'申請中':allDone?'認定可':'進行中')+'</span>'
       +(t.certDate?'<div style="font-size:10px;color:var(--text3);margin-top:3px">'+t.certDate+'</div>':'')
-      +'</div></div>';
+      +'</div>'
+      +'<button class="btn btnsm" title="削除" onclick="delTrainer(\''+t.id+'\')" style="flex-shrink:0;margin-left:8px;padding:6px 8px;color:var(--red)"><i class="ti ti-trash" style="font-size:14px"></i></button>'
+      +'</div>';
   });
   if(list.length===0) html+='<div style="padding:24px;text-align:center;color:var(--text3);font-size:13px">トレーナーがいません</div>';
   html+='</div>';
@@ -364,6 +366,26 @@ async function inviteUser(email, name, role, facilityId){
   return callEdgeFunction({ action:'invite', email:email, name:name, role:role, facilityId:facilityId||null });
 }
 
+// ---- Trainer deletion (removes login account + roles, like super) ----
+var PROTECTED_EMAILS = ['maskey@jhtgroup.jp'];
+function isProtectedEmail(email){ return PROTECTED_EMAILS.indexOf((email||'').toLowerCase())!==-1; }
+async function deleteUserAccount(email){ return callEdgeFunction({ action:'delete_user', email:email }); }
+async function delTrainer(id){
+  var t=TRAINERS.find(function(x){return x.id===id;}); if(!t) return;
+  if(isProtectedEmail(t.email)){ alert('この管理者アカウントは削除できません'); return; }
+  if(!confirm(t.name+'さんを削除しますか？\nログインアカウントも削除され、元に戻せません。')) return;
+  try{
+    if(t.email){
+      try{ await deleteUserAccount(t.email); }
+      catch(e){ console.error('Failed to delete login account:', e); }
+    }
+    var del=await _sb.from('trainers').delete().eq('id', id);
+    if(del.error) throw del.error;
+    toast(t.name+'さんを削除しました');
+    await loadAllData();
+  }catch(err){ alert('削除に失敗しました: '+(err.message||'')); }
+}
+
 function updateFacIdentity(fac){
   var nm=fac.name||'施設';
   var avEl=document.querySelector('.topbar .av'); if(avEl) avEl.textContent=nm.slice(0,2);
@@ -405,6 +427,7 @@ async function loadAllData(){
         star:t.star_level, status:t.status,
         clPct:t.cl_pct||0, progDone:!!t.prog1_done, testPass:t.status==='certified',
         certReq:!!pendingIds[t.id], certDate:t.cert_date||null,
+        email:t.email||'',
       };
     });
     go(ST.page||'home');

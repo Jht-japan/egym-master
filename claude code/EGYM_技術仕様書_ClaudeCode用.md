@@ -393,6 +393,15 @@ var PROTECTED_EMAILS = ['maskey@jhtgroup.jp'];
 - 認定状況サマリー表示
 - PROTECTED_EMAILS安全ガード
 - 施設削除の外部キー制約エラー → `fix-facility-delete-cascade.sql` で解消（SETUP_CHECKLIST step2）
+- **メンター引き継ぎ機能**（2026-07-31 追加、仕様: `file6/SPEC_メンター引き継ぎ.md`）:
+  - Star3の**直接追加は廃止**（追加ドロップダウンから star3 を削除）。Star3は昇格ボタン経由のみ。
+  - **削除時の強制引き継ぎ**: 育成中の候補者を持つStar2/Star3を削除しようとすると、引き継ぎモーダルで
+    各候補者を別の適格メンター（同施設・認定済みの上位レベル）へ再割当してからでないと削除できない。
+  - **メンター変更（自主引き継ぎ）**: 育成ツリーの各候補者行から、別の適格メンターへ移譲できる。
+  - **孤立（orphan）の可視化**: メンターが削除済みで宙に浮いた候補者を、ホーム警告バナー＋施設詳細
+    「要メンター割当」カードで表示し、割当で解消できる。
+  - 新規関数: `sbReassignMentor` / `eligibleMentorsFor` / `openReassign` / `doReassign` /
+    `openHandoff` / `doHandoffDelete`。loadAllData に `orphaned` / `mentoredByLive` を追加。
 
 ### egym_facility_app.html ✅（Supabase接続済み）
 - 施設情報表示
@@ -441,11 +450,18 @@ var PROTECTED_EMAILS = ['maskey@jhtgroup.jp'];
 
 ### 🔴 優先度: 高（翌日ここから — 判断事項）
 
-#### 判断①: RLS厳格化後の書き込み経路
-- 認定・招待は現在**クライアントから直接 `trainers` を書き込む**（super の insert / facility の approveCert と同じパターン）。
-- `tighten-rls.sql` を適用すると `trainers` への書き込みがロール制限され、**認定/招待が失敗する可能性**。
-- 選択肢: **(A)** 書き込みを Edge Function（service role）経由に移す（安全・推奨、実装量あり）／ **(B)** `tighten-rls.sql` 側で該当ロールに UPDATE/INSERT を許可。
-- **方針:** まず allow-all で全機能テスト → その後どちらで恒久対応するか決定。
+#### 判断①: RLS厳格化後の書き込み経路 → ✅ 決定・実装済み（2026-08-04, option B）
+- 認定・招待は**クライアントから直接 `trainers` を書き込む**（super の insert / facility の approveCert と同じパターン）。
+- 当初の `tighten-rls.sql` は super/facility のみ書き込み可で、**Star2/Star3 の招待(insert)・Star2のStar1認定(update)・候補者一覧(select)が失敗する**状態だった。
+- **決定: option B（RLSポリシーで該当経路をロール別・最小限に許可）を採用。** `tighten-rls.sql` を更新済み:
+  - 補助関数 `has_role(text)` を追加。
+  - `tr_select`: `mentored_by=自分` の候補者を閲覧可（育成タブ）。
+  - `tr_insert`: Star2→自施設のStar1 / Star3→自施設のStar2 のみ（`mentored_by=自分` かつ `facility_id=自施設`）。
+  - `tr_update`: Star2 が **star1 の自候補者のみ** 認定可（★Star3はStar2を認定しない＝監視のみを維持）。
+  - `cr_select`: 申請者本人が自分の申請状況を閲覧可。
+  - いずれも「他人の候補者・他施設」は不可に厳密スコープ。無条件の全許可ではない。
+- 将来 option A（Edge Function 経由）へ移す場合も、これらの許可を外すだけで両立する。
+- **残: オーナーの実機E2Eで各ロール（特にStar2招待→認定、Star3招待→監視）を再テストして確認。**
 
 #### 判断②: Star3 は Star2 を「直接認定」するか？ → ✅ 決定済み（2026-07-30）
 - **決定: 「監視のみ」で確定。Star3 は Star2 を直接認定しない**（Star2認定は施設管理者が実施）。
@@ -471,6 +487,10 @@ var PROTECTED_EMAILS = ['maskey@jhtgroup.jp'];
 - **Star3 の確認テスト**が「準備中」表示のまま（仕様未確定）。
 - **招待メールの送信元:** 現状 Supabase 標準送信（送信制限あり）。本番前に Resend 等のSMTP設定が必要。
 
+> ✅ **解消済み（2026-07-31）Orphan バグ:** メンター（Star2/Star3）削除時に配下候補者の `mentored_by` が
+> 削除済みidを指したまま宙に浮く問題を解消。削除時は強制引き継ぎ、既存の孤立はUIで可視化・再割当できる。
+> 仕様: `file6/SPEC_メンター引き継ぎ.md`（§10 egym_super_account.html 参照）。
+
 > ✅ **解消済み（2026-07-30）監査#5:** login.html の既存セッション自動遷移で `egym_user_id`/`egym_user_email`
 > を sessionStorage に保存するよう修正。**招待受諾時の「読み込みエラー」**（トレーナー画面が email を取得できず
 > `ログイン情報が見つかりません`）を解消。あわせて招待/再設定リンク用の「パスワード設定」画面を追加（§10 login.html）。
@@ -484,9 +504,9 @@ var PROTECTED_EMAILS = ['maskey@jhtgroup.jp'];
 ## 12. 次のステップ（優先順位）
 
 1. **オーナーが実機テスト**（`SETUP_CHECKLIST.md` step1〜5）→ クラウド保存＆育成ハンドシェイクの動作確認。
-2. **判断①（RLS書き込み経路）** を決めて恒久対応（Edge Function経由 or ポリシー緩和）。
-3. **判断②（Star3直接認定の要否）** をオーナーに確認。
-4. **RLSポリシー厳格化**（`tighten-rls.sql` 適用・SETUP_CHECKLIST step6）→ ロール別に再テスト。
+2. ~~判断①（RLS書き込み経路）~~ ✅ **決定・実装済み（option B / `tighten-rls.sql` 更新）。** 適用後に要再テスト。
+3. ~~判断②（Star3直接認定の要否）~~ ✅ **決定済み（監視のみ）。**
+4. **RLSポリシー厳格化**（`tighten-rls.sql` 適用・SETUP_CHECKLIST step6）→ ロール別に再テスト（特にStar2/Star3）。
 5. 動作OKなら file6 の HTML を GitHub にアップロード → Vercel 反映（SETUP_CHECKLIST step4）。
 6. （任意）login.html の sessionStorage 保存漏れ修正、`test_results` 連携。
 7. **SMTP設定**（Resend等）でメール送信制限を解消（本番前）。
@@ -534,4 +554,4 @@ alter table facilities add column if not exists status text default 'active';
 
 ---
 
-*最終更新: 2026年7月30日（file6 の 2026-07-29 作業ログを反映）*
+*最終更新: 2026年8月4日（判断① RLS書き込み経路を option B で実装・`tighten-rls.sql` 更新）*
