@@ -8,5 +8,8 @@
 # Zip backups
 *.zip
 
+# Word documents (customer-facing reports — keep local only)
+*.docx
+
 # Editor/tooling
 .claude/
