@@ -164,6 +164,14 @@ function rHome(){
       +'<button class="btn btnsm" style="margin-top:8px" onclick="loadAllData()"><i class="ti ti-refresh" style="font-size:12px"></i> 再読み込み</button>'
       +'</div>';
   }
+  var orphanCount=allTrainers().filter(function(t){return t.orphaned;}).length;
+  if(orphanCount>0){
+    html+='<div style="padding:14px;background:var(--red-l);border:1px solid #e8a9a9;border-radius:var(--r);margin-bottom:14px">'
+      +'<div style="font-size:13px;font-weight:700;color:var(--red);margin-bottom:4px"><i class="ti ti-user-exclamation"></i> メンター未設定の候補者が'+orphanCount+'名います</div>'
+      +'<div style="font-size:12px;color:var(--red);margin-bottom:8px">担当メンターが削除されたため、育成の引き継ぎが必要です。</div>'
+      +'<button class="btn btnsm" onclick="go(\'facilities\')"><i class="ti ti-arrow-right" style="font-size:12px"></i> 施設管理で対応</button>'
+      +'</div>';
+  }
   html+='<div class="g2" style="margin-bottom:10px">'
     +'<div class="met"><div class="mv">'+totalFac+'</div><div class="ml">施設数</div></div>'
     +'<div class="met"><div class="mv">'+totalT+'</div><div class="ml">総トレーナー数</div></div>'
@@ -222,6 +230,25 @@ function rFacilities(){
         +'<div class="met"><div class="mv" style="color:var(--amber)">'+(f.trainers.length-cert)+'</div><div class="ml">挑戦中</div></div>'
         +'</div>';
 
+      // ⚠ 要メンター割当: orphaned (mentor deleted) or unassigned Star1/Star2 in this facility
+      var needMentor=f.trainers.filter(function(t){
+        return (t.star==='star1'||t.star==='star2') && (t.orphaned || t.mentoredBy==null);
+      });
+      if(needMentor.length>0){
+        html+='<div class="card" style="border-color:#e8a9a9;background:var(--red-l);margin-bottom:14px">'
+          +'<div style="font-size:13px;font-weight:700;color:var(--red);margin-bottom:8px"><i class="ti ti-user-exclamation"></i> 要メンター割当 ('+needMentor.length+'名)</div>';
+        needMentor.forEach(function(t){
+          var sc=SC[t.star];
+          html+='<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid #e8c5c5">'
+            +'<div class="av-sm" style="background:'+sc.bg+';color:'+sc.text+';border-color:'+sc.border+'">'+t.initials+'</div>'
+            +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">'+t.name+'</div>'
+            +'<div style="font-size:11px;color:var(--text3)">'+sc.label+' · '+(t.orphaned?'<span style="color:var(--red)">メンター削除済み（孤立）</span>':'未割当')+'</div></div>'
+            +'<button class="btn btnd btnsm" onclick="openReassign(\''+f.id+'\',\''+t.id+'\')"><i class="ti ti-link" style="font-size:11px"></i> メンター割当</button>'
+            +'</div>';
+        });
+        html+='</div>';
+      }
+
       // Group by star level with mentoring relationship
       ['star3','star2','star1'].forEach(function(starLevel){
         var group=f.trainers.filter(function(t){return t.star===starLevel;});
@@ -261,6 +288,7 @@ function rFacilities(){
                 +'<div class="pb" style="width:50px;margin:0"><div class="pf" style="width:'+m.clPct+'%;background:'+msc.text+'"></div></div>'
                 +'<span style="font-size:11px;color:var(--text3)">'+m.clPct+'%</span>'
                 +'<span class="tag '+(m.status==='certified'?'td':'tg')+'" style="font-size:9px">'+(m.status==='certified'?'認定済':'進行中')+'</span>'
+                +'<button class="btn btnsm" style="padding:2px 6px" onclick="openReassign(\''+f.id+'\',\''+m.id+'\')" title="メンター変更"><i class="ti ti-switch-horizontal" style="font-size:10px"></i></button>'
                 +'<button class="btn btnsm" style="padding:2px 6px" onclick="unassignMentee(this)" data-fid="'+f.id+'" data-mentorid="'+t.id+'" data-menteeid="'+m.id+'" title="割り当て解除"><i class="ti ti-x" style="font-size:10px"></i></button>'
                 +'</div>';
             });
@@ -460,8 +488,8 @@ function rModal(){
     html2+='<select id="tr-star">';
     html2+='<option value="star1">★ スター1</option>';
     html2+='<option value="star2">★★ スター2</option>';
-    html2+='<option value="star3">★★★ スター3</option>';
     html2+='</select></div>';
+    html2+='<div style="padding:8px 12px;background:var(--bg);border-radius:var(--r-sm);font-size:11px;color:var(--text3);margin:-6px 0 12px;line-height:1.5"><i class="ti ti-info-circle"></i> スター3はテスト完了後にオーナーが「昇格」で認定します（直接追加はできません）。</div>';
     html2+='<div style="padding:12px;background:var(--bg);border-radius:var(--r-sm);font-size:12px;color:var(--text2);margin-bottom:18px;line-height:1.6">';
     html2+='<i class="ti ti-info-circle"></i> 招待メールが送信されます。</div>';
     html2+='<div style="display:flex;gap:10px">';
@@ -508,6 +536,85 @@ function rModal(){
     html3+='</div></div>';
     return html3;
   }
+
+  // ── Reassign modal (メンター変更 / 孤立・未割当の割当) ──
+  if(ST.modal && ST.modal.startsWith('reassign|')){
+    var rp=ST.modal.split('|');
+    var rfid=rp[1], rmid=rp[2];
+    var rf=FACILITIES.find(function(x){return x.id===rfid;});
+    var mentee=rf?rf.trainers.find(function(x){return x.id===rmid;}):null;
+    var h='<div class="modal-bg" onclick="if(event.target===this){ST.modal=null;render()}">';
+    h+='<div class="modal"><div class="modal-handle"></div>';
+    h+='<div style="font-size:17px;font-weight:700;margin-bottom:4px">メンターを割り当てる</div>';
+    if(mentee){
+      var msc=SC[mentee.star];
+      h+='<div style="font-size:12px;color:var(--text3);margin-bottom:16px">'+mentee.name+'さん（'+msc.label+'）の担当メンターを選んでください</div>';
+      var mentors=eligibleMentorsFor(mentee, rf);
+      if(mentors.length===0){
+        h+='<div style="padding:20px;text-align:center;color:var(--text3);font-size:13px;background:var(--bg);border-radius:var(--r-sm);margin-bottom:16px">この施設に認定済みの'+reqLevelLabel(mentee)+'トレーナーがいません。<br>先に上位トレーナーを認定してください。</div>';
+      } else {
+        h+='<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;max-height:300px;overflow-y:auto">';
+        mentors.forEach(function(mt){
+          var sc=SC[mt.star];
+          h+='<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--border2);border-radius:var(--r-sm)">'
+            +'<div class="av-sm" style="background:'+sc.bg+';color:'+sc.text+';border-color:'+sc.border+'">'+mt.initials+'</div>'
+            +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">'+mt.name+'</div>'
+            +'<div style="font-size:11px;color:var(--text3)">'+sc.label+' · 認定済</div></div>'
+            +'<button class="btn btnd btnsm" onclick="doReassign(\''+mentee.id+'\',\''+mt.id+'\',\''+rfid+'\')">割り当てる</button>'
+            +'</div>';
+        });
+        h+='</div>';
+      }
+    }
+    h+='<button class="btn btnfull" onclick="ST.modal=null;render()">閉じる</button>';
+    h+='</div></div>';
+    return h;
+  }
+
+  // ── Delete hand-off modal (削除前の強制引き継ぎ) ──
+  if(ST.modal && ST.modal.startsWith('handoff|')){
+    var hp=ST.modal.split('|');
+    var hfid=hp[1], htid=hp[2];
+    var hf=FACILITIES.find(function(x){return x.id===hfid;});
+    var dep=hf?hf.trainers.find(function(x){return x.id===htid;}):null;
+    var hMentees=hf?hf.trainers.filter(function(x){return x.mentoredBy===htid;}):[];
+    var blocked=false;
+    var h2='<div class="modal-bg" onclick="if(event.target===this){ST.modal=null;render()}">';
+    h2+='<div class="modal"><div class="modal-handle"></div>';
+    h2+='<div style="font-size:17px;font-weight:700;margin-bottom:4px">削除前に候補者を引き継ぎ</div>';
+    h2+='<div style="font-size:12px;color:var(--text3);margin-bottom:16px">'+(dep?dep.name:'')+'さんが育成中の候補者を、別のメンターへ引き継いでから削除します。</div>';
+    h2+='<div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;max-height:320px;overflow-y:auto">';
+    hMentees.forEach(function(m){
+      var sc=SC[m.star];
+      var opts=eligibleMentorsFor(m, hf);
+      h2+='<div style="padding:10px 12px;border:1px solid '+(opts.length===0?'#e8a9a9':'var(--border2)')+';border-radius:var(--r-sm)">'
+        +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">'
+        +'<div class="av-sm" style="background:'+sc.bg+';color:'+sc.text+';border-color:'+sc.border+'">'+m.initials+'</div>'
+        +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">'+m.name+'</div>'
+        +'<div style="font-size:11px;color:var(--text3)">'+sc.label+(m.status==='certified'?' · 認定済':'')+'</div></div></div>';
+      if(opts.length===0){
+        blocked=true;
+        h2+='<div style="font-size:11px;color:var(--red);line-height:1.5"><i class="ti ti-alert-triangle"></i> 引き継ぎ先の認定済み'+reqLevelLabel(m)+'がいません。先に上位トレーナーを認定してください。</div>';
+      } else {
+        h2+='<select id="ho-'+m.id+'" style="width:100%;padding:8px 10px;border:1px solid var(--border2);border-radius:var(--r-sm);font-size:13px">';
+        h2+='<option value="">— 新しいメンターを選択 —</option>';
+        opts.forEach(function(o){ h2+='<option value="'+o.id+'">'+o.name+'（'+SC[o.star].label+'）</option>'; });
+        h2+='</select>';
+      }
+      h2+='</div>';
+    });
+    h2+='</div>';
+    h2+='<div style="display:flex;gap:10px">';
+    h2+='<button class="btn" style="flex:1" onclick="ST.modal=null;render()">キャンセル</button>';
+    if(blocked){
+      h2+='<button class="btn" style="flex:1;opacity:.5;cursor:not-allowed" disabled>削除できません</button>';
+    } else {
+      h2+='<button class="btn btnr" style="flex:1" onclick="doHandoffDelete(\''+hfid+'\',\''+htid+'\')"><i class="ti ti-trash"></i> 引き継いで削除</button>';
+    }
+    h2+='</div></div></div>';
+    return h2;
+  }
+
   return '';
 }
 
@@ -536,7 +643,12 @@ async function doAddTrainer(facId){
 
 async function delTrainer(btn){
   var tId=btn.getAttribute('data-tid');
+  var fId=btn.getAttribute('data-fid');
   var name=btn.getAttribute('data-name');
+  // If this trainer is mentoring anyone, force a hand-off before deleting (orphan prevention).
+  var f=FACILITIES.find(function(x){return x.id===fId;});
+  var mentees=f?f.trainers.filter(function(x){return x.mentoredBy===tId;}):[];
+  if(mentees.length>0){ openHandoff(fId, tId); return; }
   if(!confirm(name+'を削除しますか？'))return;
   try {
     await sbDeleteTrainer(tId);
@@ -586,6 +698,10 @@ async function loadAllData(){
     var {data: trData, error: trErr} = await _sb.from('trainers').select('*').order('created_at');
     if(trErr) throw trErr;
 
+    // Set of all live trainer ids (used to detect orphaned mentored_by references)
+    var liveIds = {};
+    (trData||[]).forEach(function(t){ liveIds[t.id]=true; });
+
     // 3. Build FACILITIES structure with nested trainers
     FACILITIES = (facData||[]).map(function(f){
       var trainers = (trData||[]).filter(function(t){return t.facility_id===f.id;}).map(function(t){
@@ -599,6 +715,9 @@ async function loadAllData(){
           certDate: t.cert_date,
           email: t.email,
           mentoredBy: t.mentored_by,
+          // mentoredByLive: mentor exists; orphaned: had a mentor that was deleted
+          mentoredByLive: !!t.mentored_by && !!liveIds[t.mentored_by],
+          orphaned: !!t.mentored_by && !liveIds[t.mentored_by],
           mentoring: (trData||[]).filter(function(x){return x.mentored_by===t.id;}).map(function(x){return x.id;}),
         };
       });
@@ -822,6 +941,73 @@ async function sbAssignMentor(menteeId, mentorId){
 async function sbUnassignMentor(menteeId){
   var {error} = await _sb.from('trainers').update({mentored_by: null}).eq('id', menteeId);
   if(error) throw error;
+}
+
+// Reassign an already-mentored mentee to a new mentor (no "already has mentor" guard).
+// Used by voluntary hand-off, orphan cleanup, and delete hand-off.
+async function sbReassignMentor(menteeId, newMentorId){
+  var {error} = await _sb.from('trainers').update({mentored_by: newMentorId}).eq('id', menteeId);
+  if(error) throw error;
+}
+
+/* ══════════════════════════════
+   MENTOR HAND-OFF (引き継ぎ)
+══════════════════════════════ */
+// Eligible new mentors for a mentee: same facility, correct upper level, certified,
+// excluding the mentee's current mentor. (star1→certified star2 / star2→certified star3)
+function eligibleMentorsFor(mentee, fac){
+  var reqLevel = mentee.star==='star1' ? 'star2' : (mentee.star==='star2' ? 'star3' : null);
+  if(!reqLevel || !fac) return [];
+  return fac.trainers.filter(function(x){
+    return x.star===reqLevel && x.status==='certified' && x.id!==mentee.mentoredBy;
+  });
+}
+function reqLevelLabel(mentee){
+  return mentee.star==='star1' ? SC.star2.label : (mentee.star==='star2' ? SC.star3.label : '');
+}
+
+// --- Reassign modal (flow A: 変更 / flow C: 孤立・未割当の割当) ---
+function openReassign(fid, menteeId){ ST.modal='reassign|'+fid+'|'+menteeId; render(); }
+async function doReassign(menteeId, newMentorId, fid){
+  var f=FACILITIES.find(function(x){return x.id===fid;});
+  var mentee=f?f.trainers.find(function(x){return x.id===menteeId;}):null;
+  var mentor=f?f.trainers.find(function(x){return x.id===newMentorId;}):null;
+  try {
+    await sbReassignMentor(menteeId, newMentorId);
+    ST.modal=null;
+    toast((mentee?mentee.name:'候補者')+'さんを'+(mentor?mentor.name:'')+'さんへ引き継ぎました');
+    await loadAllData();
+  } catch(err){
+    alert('引き継ぎに失敗しました: '+(err.message||''));
+  }
+}
+
+// --- Delete hand-off modal (flow B) ---
+function openHandoff(fid, tid){ ST.modal='handoff|'+fid+'|'+tid; render(); }
+async function doHandoffDelete(fid, tid){
+  var f=FACILITIES.find(function(x){return x.id===fid;});
+  if(!f)return;
+  var mentor=f.trainers.find(function(x){return x.id===tid;});
+  var mentees=f.trainers.filter(function(x){return x.mentoredBy===tid;});
+  // Collect the chosen new mentor for each mentee from the selects.
+  var picks=[];
+  for(var i=0;i<mentees.length;i++){
+    var sel=document.getElementById('ho-'+mentees[i].id);
+    var val=sel?sel.value:'';
+    if(!val){ alert('全ての候補者に新しいメンターを選んでください'); return; }
+    picks.push({menteeId:mentees[i].id, newMentorId:val});
+  }
+  try {
+    for(var j=0;j<picks.length;j++){
+      await sbReassignMentor(picks[j].menteeId, picks[j].newMentorId);
+    }
+    await sbDeleteTrainer(tid);
+    ST.modal=null;
+    toast((mentor?mentor.name:'トレーナー')+'さんの候補者を引き継ぎ、削除しました');
+    await loadAllData();
+  } catch(err){
+    alert('引き継ぎ・削除に失敗しました: '+(err.message||''));
+  }
 }
 
 go('home');
