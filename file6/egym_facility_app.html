@@ -224,6 +224,9 @@ function rTrainers(){
       +'<span class="tag '+(t.status==='certified'?'td':t.certReq?'tf':allDone?'tb':'tg')+'">'+(t.status==='certified'?'認定済':t.certReq?'申請中':allDone?'認定可':'進行中')+'</span>'
       +(t.certDate?'<div style="font-size:10px;color:var(--text3);margin-top:3px">'+t.certDate+'</div>':'')
       +'</div>'
+      +((t.status==='certified'&&(t.star==='star1'||t.star==='star2'))
+        ?'<button class="btn btnsm" title="昇格" onclick="promoteTrainer(\''+t.id+'\')" style="flex-shrink:0;margin-left:8px;padding:6px 8px;background:var(--green-l);color:var(--green);border-color:var(--green-m)"><i class="ti ti-arrow-up" style="font-size:14px"></i></button>'
+        :'')
       +'<button class="btn btnsm" title="削除" onclick="delTrainer(\''+t.id+'\')" style="flex-shrink:0;margin-left:8px;padding:6px 8px;color:var(--red)"><i class="ti ti-trash" style="font-size:14px"></i></button>'
       +'</div>';
   });
@@ -277,6 +280,34 @@ async function rejectCert(id){
   try{ await _sb.from('cert_requests').update({status:'rejected'}).eq('trainer_id',id).eq('status','pending'); }catch(e){}
   toast(t.name+'さんの申請を却下しました。');
   await loadAllData();
+}
+
+/* 昇格（同じアカウントのまま star_level / role を1段上げる）
+   新規ジムで、施設が認定したトレーナーを上位メンターに引き上げてチェーンを構築するために使用。*/
+async function promoteTrainer(id){
+  var t=TRAINERS.find(function(x){return x.id===id;});if(!t)return;
+  if(t.status!=='certified'){ alert('認定済みのトレーナーのみ昇格できます'); return; }
+  var toLevel = t.star==='star1'?'star2':(t.star==='star2'?'star3':null);
+  if(!toLevel){ alert('このトレーナーは昇格できません'); return; }
+  var toSc = SC[toLevel];
+  if(!confirm(t.name+'さんを'+toSc.label+'に昇格させますか？\n同じログインアカウント（メール・パスワード）のまま、権限だけが切り替わります。\n新しいレベルの進捗はリセットされます。')) return;
+  try{
+    // 1. trainers テーブル: レベル更新＋新レベルの進捗をリセット
+    var up=await _sb.from('trainers').update({
+      star_level: toLevel,
+      status: 'active',
+      cl_pct: 0,
+      cert_date: null,
+    }).eq('id', id);
+    if(up.error) throw up.error;
+    // 2. user_roles: メールから auth user を引いて role を切替（Edge Function 経由）
+    if(t.email){
+      try{ await callEdgeFunction({ action:'promote_role', email:t.email, fromRole:t.star, toRole:toLevel }); }
+      catch(e){ console.error('promote_role failed:', e); toast('レベルは更新しましたが権限切替に失敗しました: '+(e.message||'')); }
+    }
+    toast(t.name+'さんを'+toSc.label+'に昇格させました');
+    await loadAllData();
+  }catch(err){ alert('昇格に失敗しました: '+(err.message||'')); }
 }
 
 function rReports(){
@@ -427,7 +458,7 @@ async function loadAllData(){
         star:t.star_level, status:t.status,
         clPct:t.cl_pct||0, progDone:!!t.prog1_done, testPass:t.status==='certified',
         certReq:!!pendingIds[t.id], certDate:t.cert_date||null,
-        email:t.email||'',
+        email:t.email||'', mentoredBy:t.mentored_by||null,
       };
     });
     go(ST.page||'home');

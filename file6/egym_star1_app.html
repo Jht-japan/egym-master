@@ -478,13 +478,25 @@ function rCert(){
     +'<div class="step"><div class="sdot '+(progDone()?'s-done':'s-prog')+'"><i class="ti '+(progDone()?'ti-check':'ti-calendar')+'" style="font-size:13px"></i></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">ベーシックプログラム 全フェーズ完了</div><div style="font-size:11px;color:var(--text3);margin-top:3px">'+donePh()+'/4フェーズ · '+totalSess()+'/24セッション</div></div><span class="tag '+(progDone()?'td':'tp')+'">'+(progDone()?'完了':'未完了')+'</span></div>'
     +'</div>';
 
+  // メンター（担当スター2）が居る場合は従来のハンドシェイク、
+  // 居ない場合（新規ジム等）は施設管理者へフォールバック。
+  var hasMentor=!!SELF.mentored_by;
+  var approverLabel=hasMentor?'担当スター2トレーナー':'施設管理者';
   if(certified){
-    html+='<div class="card" style="border:2px solid var(--green);text-align:center;padding:22px 16px"><i class="ti ti-rosette-discount-check" style="font-size:34px;color:var(--green);display:block;margin-bottom:8px"></i><div style="font-size:15px;font-weight:700;color:var(--green);margin-bottom:4px">スター1に認定されました</div><div style="font-size:12px;color:var(--text2)">'+(SELF.mentor_name?('担当スター2「'+SELF.mentor_name+'」により認定'):'担当スター2により認定')+(SELF.cert_date?(' · '+SELF.cert_date):'')+'</div></div>';
+    html+='<div class="card" style="border:2px solid var(--green);text-align:center;padding:22px 16px"><i class="ti ti-rosette-discount-check" style="font-size:34px;color:var(--green);display:block;margin-bottom:8px"></i><div style="font-size:15px;font-weight:700;color:var(--green);margin-bottom:4px">スター1に認定されました</div><div style="font-size:12px;color:var(--text2)">'+(hasMentor?(SELF.mentor_name?('担当スター2「'+SELF.mentor_name+'」により認定'):'担当スター2により認定'):'施設管理者により認定')+(SELF.cert_date?(' · '+SELF.cert_date):'')+'</div></div>';
   } else if(ready){
-    html+='<div class="card" style="border:2px solid var(--green)"><div style="font-size:14px;font-weight:700;color:var(--green);margin-bottom:8px"><i class="ti ti-circle-check"></i> 全条件を達成しました</div><div style="font-size:13px;color:var(--text2);margin-bottom:16px">担当スター2トレーナー'+(SELF.mentor_name?('（'+SELF.mentor_name+'）'):'')+'があなたの進捗を確認し、認定ボタンを押すと認定完了です。</div><div style="display:flex;gap:10px"><button class="btn btnfull" style="padding:13px" onclick="refreshStatus()"><i class="ti ti-refresh"></i> 状態を更新</button><button class="btn btng btnfull" style="padding:13px" onclick="ST.certModal=true;render()"><i class="ti ti-send"></i> 申請通知</button></div></div>';
+    var readyMsg=hasMentor
+      ?('担当スター2トレーナー'+(SELF.mentor_name?('（'+SELF.mentor_name+'）'):'')+'があなたの進捗を確認し、認定ボタンを押すと認定完了です。')
+      :'担当スター2が未割当のため、施設管理者があなたの進捗を確認し、認定します。下のボタンで施設へ申請通知を送ってください。';
+    html+='<div class="card" style="border:2px solid var(--green)"><div style="font-size:14px;font-weight:700;color:var(--green);margin-bottom:8px"><i class="ti ti-circle-check"></i> 全条件を達成しました</div><div style="font-size:13px;color:var(--text2);margin-bottom:16px">'+readyMsg+'</div>'
+      +(SELF.cert_req_sent?'<div style="padding:10px 12px;background:var(--green-l);border-radius:var(--r-sm);font-size:12px;color:var(--green);font-weight:700;margin-bottom:10px"><i class="ti ti-mail-check"></i> 施設へ申請通知を送信済みです</div>':'')
+      +'<div style="display:flex;gap:10px"><button class="btn btnfull" style="padding:13px" onclick="refreshStatus()"><i class="ti ti-refresh"></i> 状態を更新</button><button class="btn btng btnfull" style="padding:13px" onclick="ST.certModal=true;render()"><i class="ti ti-send"></i> 申請通知</button></div></div>';
   } else {
+    var flowSteps=hasMentor
+      ?['チェックリスト（オンボーディング・マシンセットアップ・理解度）を全項目完了する','ベーシックプログラム4フェーズ・24セッションを完了する','担当スター2トレーナーへ申請通知を送る','スター2が認定ボタンを押すと認定完了','バッジとノベルティが授与される']
+      :['チェックリスト（オンボーディング・マシンセットアップ・理解度）を全項目完了する','ベーシックプログラム4フェーズ・24セッションを完了する','施設管理者へ申請通知を送る','施設管理者が認定ボタンを押すと認定完了','バッジとノベルティが授与される'];
     html+='<div class="card" style="background:var(--bg)"><div style="font-size:14px;font-weight:700;margin-bottom:12px">スター1認定の流れ</div>'
-      +['チェックリスト（オンボーディング・マシンセットアップ・理解度）を全項目完了する','ベーシックプログラム4フェーズ・24セッションを完了する','担当スター2トレーナーへ申請通知を送る','スター2が認定ボタンを押すと認定完了','バッジとノベルティが授与される'].map((s,i)=>'<div style="display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--bg2)"><div style="width:26px;height:26px;border-radius:50%;background:var(--amber-l);color:var(--amber);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0">'+(i+1)+'</div><div style="font-size:13px;padding-top:3px">'+s+'</div></div>').join('')
+      +flowSteps.map((s,i)=>'<div style="display:flex;align-items:flex-start;gap:12px;padding:10px 0;border-bottom:1px solid var(--bg2)"><div style="width:26px;height:26px;border-radius:50%;background:var(--amber-l);color:var(--amber);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0">'+(i+1)+'</div><div style="font-size:13px;padding-top:3px">'+s+'</div></div>').join('')
       +'</div>';
   }
   html += rNotes();
@@ -548,11 +560,44 @@ function deleteNote(id){
 }
 
 function rCertModal(){
-  var mn=SELF.mentor_name||'担当スター2トレーナー';
-  var mi=(SELF.mentor_name||'★2').replace(/\s/g,'').slice(0,2);
-  return '<div class="modal-bg" onclick="if(event.target===this){ST.certModal=false;render()}"><div class="modal"><div class="modal-handle"></div><div style="font-size:17px;font-weight:700;margin-bottom:4px">認定申請を送る</div><div style="font-size:12px;color:var(--text3);margin-bottom:16px">担当スター2トレーナーに申請通知が送られます</div><div style="display:flex;align-items:center;gap:12px;padding:14px;background:var(--bg);border-radius:var(--r-sm);margin-bottom:16px"><div style="width:44px;height:44px;border-radius:50%;background:var(--green-l);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;border:2px solid var(--green-m)">'+mi+'</div><div><div style="font-size:14px;font-weight:700">'+mn+'</div><div style="font-size:12px;color:var(--text3)">担当スター2トレーナー</div></div></div><div style="padding:12px;background:var(--green-l);border-radius:var(--r-sm);font-size:12px;color:var(--green);margin-bottom:18px;line-height:1.6"><i class="ti ti-info-circle"></i> 申請後、スター2トレーナーが確認して認定ボタンを押すと認定完了です。</div><div style="display:flex;gap:10px"><button class="btn" style="flex:1" onclick="ST.certModal=false;render()">キャンセル</button><button class="btn btng" style="flex:1" onclick="sendCert()"><i class="ti ti-send"></i> 送信する</button></div></div></div>';
+  var hasMentor=!!SELF.mentored_by;
+  var mn=hasMentor?(SELF.mentor_name||'担当スター2トレーナー'):'施設管理者';
+  var roleLabel=hasMentor?'担当スター2トレーナー':'施設管理者';
+  var mi=hasMentor?((SELF.mentor_name||'★2').replace(/\s/g,'').slice(0,2)):'施設';
+  var infoMsg=hasMentor
+    ?'申請後、スター2トレーナーが確認して認定ボタンを押すと認定完了です。'
+    :'担当スター2が未割当のため、施設管理者へ申請します。施設管理者が確認して認定します。';
+  return '<div class="modal-bg" onclick="if(event.target===this){ST.certModal=false;render()}"><div class="modal"><div class="modal-handle"></div><div style="font-size:17px;font-weight:700;margin-bottom:4px">認定申請を送る</div><div style="font-size:12px;color:var(--text3);margin-bottom:16px">'+roleLabel+'に申請通知が送られます</div><div style="display:flex;align-items:center;gap:12px;padding:14px;background:var(--bg);border-radius:var(--r-sm);margin-bottom:16px"><div style="width:44px;height:44px;border-radius:50%;background:var(--green-l);color:var(--green);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;border:2px solid var(--green-m)">'+mi+'</div><div><div style="font-size:14px;font-weight:700">'+mn+'</div><div style="font-size:12px;color:var(--text3)">'+roleLabel+'</div></div></div><div style="padding:12px;background:var(--green-l);border-radius:var(--r-sm);font-size:12px;color:var(--green);margin-bottom:18px;line-height:1.6"><i class="ti ti-info-circle"></i> '+infoMsg+'</div><div style="display:flex;gap:10px"><button class="btn" style="flex:1" onclick="ST.certModal=false;render()">キャンセル</button><button class="btn btng" style="flex:1" onclick="sendCert()"><i class="ti ti-send"></i> 送信する</button></div></div></div>';
 }
-function sendCert(){ ST.certModal=false; render(); toast((SELF.mentor_name||'担当スター2')+'へ認定申請通知を送信しました'); }
+async function sendCert(){
+  ST.certModal=false;
+  // メンター有り: 従来どおり通知のみ（スター2がハンドシェイクで認定）。
+  if(SELF.mentored_by){
+    render();
+    toast((SELF.mentor_name||'担当スター2')+'へ認定申請通知を送信しました');
+    return;
+  }
+  // メンター無し（新規ジム等）: 施設アカウントへ実際の認定申請を登録。
+  if(!TRAINER_ID||!SELF.facility_id){
+    render();
+    alert('施設情報が取得できません。ログインし直してください。');
+    return;
+  }
+  try{
+    // 重複申請を避ける（既に pending があれば再送しない）。
+    var ex=await _sb.from('cert_requests').select('id').eq('trainer_id',TRAINER_ID).eq('status','pending').limit(1);
+    if(!(ex.data && ex.data.length>0)){
+      var ins=await _sb.from('cert_requests').insert({trainer_id:TRAINER_ID, facility_id:SELF.facility_id, status:'pending'});
+      if(ins.error) throw ins.error;
+    }
+    SELF.cert_req_sent=true;
+    render();
+    toast('施設アカウントへ申請通知を送信しました');
+  }catch(err){
+    render();
+    alert('申請の送信に失敗しました: '+(err.message||''));
+  }
+}
 async function refreshStatus(){
   if(!TRAINER_ID) return;
   toast('最新の状態を確認中…');
@@ -570,7 +615,7 @@ async function refreshStatus(){
 var TRAINER_ID=null;
 var _saveTimer=null;
 // 実データ: 自分の認定状況（担当スター2が認定するとstatus='certified'になる）
-var SELF={status:'active', cert_date:null, mentor_name:''};
+var SELF={status:'active', cert_date:null, mentor_name:'', mentored_by:null, facility_id:null, cert_req_sent:false};
 
 function syncInd(txt){
   var el=document.getElementById('_sync');
@@ -635,10 +680,19 @@ async function loadProgress(){
     TRAINER_ID=tr.id;
     SELF.status=tr.status||'active';
     SELF.cert_date=tr.cert_date||null;
+    SELF.mentored_by=tr.mentored_by||null;
+    SELF.facility_id=tr.facility_id||null;
     // 担当スター2（メンター）の名前を取得
     if(tr.mentored_by){
       var rm=await _sb.from('trainers').select('name').eq('id',tr.mentored_by).maybeSingle();
       if(rm.data) SELF.mentor_name=rm.data.name;
+    }
+    // メンター未割当（新規ジム等）の場合、既に施設へ申請済みかを確認
+    if(!tr.mentored_by){
+      try{
+        var rq=await _sb.from('cert_requests').select('id').eq('trainer_id',TRAINER_ID).eq('status','pending').limit(1);
+        if(!rq.error && rq.data && rq.data.length>0) SELF.cert_req_sent=true;
+      }catch(e){}
     }
     var facName='';
     if(tr.facility_id){

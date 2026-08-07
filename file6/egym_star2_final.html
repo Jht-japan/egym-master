@@ -1171,12 +1171,17 @@ function rCert(){
       <span class="tag ${it.ok?'td':'tp'}" style="flex-shrink:0;margin-left:8px">${it.ok?'完了':'未完了'}</span>
     </div>`).join('')}
   </div>
-  ${certified?`
+  ${certified?(MENTORED_BY?`
   <div class="card" style="border:2px solid var(--green)">
     <div style="font-size:15px;font-weight:700;color:var(--green);margin-bottom:8px"><i class="ti ti-circle-check"></i> 認定申請が可能です</div>
-    <div style="font-size:13px;color:var(--text2);margin-bottom:16px">全条件が満たされました。施設アカウントへ申請するとJHTJapanへ通知されます。</div>
-    <button class="btn btng btnfull" style="padding:14px;font-size:15px" onclick="applyToFacility()"><i class="ti ti-send"></i> 施設アカウントへ申請通知を送る</button>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:16px">全条件が満たされました。担当スター3トレーナー${MENTOR_NAME?('（'+MENTOR_NAME+'）'):''}が進捗を確認し、認定ボタンを押すと認定完了です。</div>
+    <button class="btn btng btnfull" style="padding:14px;font-size:15px" onclick="notifyMentor()"><i class="ti ti-send"></i> 担当スター3へ申請通知を送る</button>
   </div>`:`
+  <div class="card" style="border:2px solid var(--green)">
+    <div style="font-size:15px;font-weight:700;color:var(--green);margin-bottom:8px"><i class="ti ti-circle-check"></i> 認定申請が可能です</div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:16px">担当スター3が未割当のため、施設アカウントへ申請します。全条件が満たされました。施設アカウントへ申請するとJHTJapanへ通知されます。</div>
+    <button class="btn btng btnfull" style="padding:14px;font-size:15px" onclick="applyToFacility()"><i class="ti ti-send"></i> 施設アカウントへ申請通知を送る</button>
+  </div>`):`
   <div class="card">
     <div style="font-size:13px;font-weight:700;color:var(--text2);margin-bottom:10px">未達成の条件</div>
     ${conds.filter(c=>!c.ok).map(c=>`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:12px;color:var(--text2)"><i class="ti ti-circle-dot" style="color:var(--amber);font-size:14px"></i>${c.l}</div>`).join('')}
@@ -1245,6 +1250,8 @@ function deleteNote(id){
 ══════════════════════════════ */
 var TRAINER_ID=null;
 var FACILITY_ID=null;
+var MENTORED_BY=null;   // 担当スター3（メンター）の trainer id。未割当なら null。
+var MENTOR_NAME='';     // 担当スター3の氏名（表示用）。
 var _saveTimer=null;
 
 const EDGE_FUNCTION_URL='https://gcqqhjeqvnfbgdenflmk.supabase.co/functions/v1/bright-endpoint';
@@ -1272,6 +1279,10 @@ async function loadCandidates(){
   });
 }
 
+// 担当スター3が居る場合はハンドシェイク通知のみ（スター3が認定する）。
+function notifyMentor(){
+  toast((MENTOR_NAME||'担当スター3')+'へ認定申請通知を送信しました');
+}
 async function applyToFacility(){
   if(!TRAINER_ID||!FACILITY_ID){ alert('施設情報が取得できません。ログインし直してください。'); return; }
   try{
@@ -1357,6 +1368,12 @@ async function loadProgress(){
     var tr=r1.data[0];
     TRAINER_ID=tr.id;
     FACILITY_ID=tr.facility_id||null;
+    MENTORED_BY=tr.mentored_by||null;
+    MENTOR_NAME='';
+    if(tr.mentored_by){
+      var rm=await _sb.from('trainers').select('name').eq('id',tr.mentored_by).maybeSingle();
+      if(rm.data) MENTOR_NAME=rm.data.name||'';
+    }
     var facName='';
     if(tr.facility_id){ var rf=await _sb.from('facilities').select('name').eq('id',tr.facility_id).maybeSingle(); if(rf.data) facName=rf.data.name; }
     updateIdentity(tr, facName);
