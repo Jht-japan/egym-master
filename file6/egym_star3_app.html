@@ -545,10 +545,12 @@ function rCert(){
 
   ST.candidates.forEach(c=>{
     const pct=c.cl_pct||0;const isCert=c.status==='certified';
+    const ready=pct===100&&c.prog1_done&&c.prog2_done;
+    const canCert=ready&&!isCert;
     html+='<div class="s2-card '+(isCert?'cert-s2':'')+'">'+
       '<div class="s2-head"><div class="av-sm" style="background:'+(isCert?'var(--green-l)':'var(--blue-l)')+';color:'+(isCert?'var(--green)':'var(--blue)')+';border-color:'+(isCert?'var(--green-m)':'var(--blue-m)')+'">'+c.initials+'</div>'+
       '<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:700">'+c.name+'</div><div style="font-size:11px;color:var(--text3)">'+c.email+' · 招待: '+c.addedAt+'</div></div>'+
-      '<span class="tag '+(isCert?'td':'tp')+'">'+(isCert?'認定済み':'育成中')+'</span></div>'+
+      '<span class="tag '+(isCert?'td':ready?'tb':'tp')+'">'+(isCert?'認定済み':ready?'認定可':'育成中')+'</span></div>'+
       // CL progress（実データ）
       '<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;margin-bottom:5px"><span style="font-size:12px;font-weight:700">チェックリスト</span><span style="font-size:12px;color:var(--text3)">'+pct+'%</span></div><div class="pb" style="height:7px"><div class="pf pfb" style="width:'+pct+'%"></div></div></div>'+
       // Condition tiles（実データ・閲覧のみ）
@@ -558,7 +560,9 @@ function rCert(){
       '</div>'+
       (isCert
         ?'<div style="margin-top:12px;padding:8px;background:var(--green-l);border-radius:var(--r-sm);font-size:12px;color:var(--green);font-weight:700;text-align:center"><i class="ti ti-shield-check"></i> スター2認定済み'+(c.certifiedAt?(' '+c.certifiedAt):'')+'</div>'
-        :'<div style="margin-top:12px;padding:8px;background:var(--bg);border-radius:var(--r-sm);font-size:11px;color:var(--text3);text-align:center"><i class="ti ti-info-circle"></i> スター2の認定は施設管理者が申請承認で行います</div>'
+        :canCert
+          ?'<button class="btn btnpur btnsm" style="width:100%;margin-top:12px;padding:11px" onclick="ST.modal=\'certify:'+c.id+'\';render()"><i class="ti ti-award" style="font-size:13px"></i> スター2認定</button>'
+          :'<div style="margin-top:12px;padding:8px;background:var(--bg);border-radius:var(--r-sm);font-size:11px;color:var(--text3);text-align:center"><i class="ti ti-info-circle"></i> チェックリスト100%＋プログラム①②完了で認定できます</div>'
       )+
       '</div>';
   });
@@ -634,11 +638,28 @@ function deleteNote(id){
   render();
 }
 
-// スター2の進捗・認定状況はSupabaseの実データを表示（閲覧のみ）。
-// スター2の認定は施設管理者が認定申請の承認で行うため、スター3側に認定・シミュレート操作はありません。
+// スター3が担当する（mentored_by=自分の）スター2候補者を、条件達成後に直接認定できる。
+// 担当スター3が未割当のスター2は、施設アカウントが認定申請の承認で認定する（フォールバック）。
 
 /* MODAL */
 function rModal(){
+  if(ST.modal&&ST.modal.indexOf('certify:')===0){
+    var cid=ST.modal.split(':')[1];
+    var c=ST.candidates.find(function(x){return x.id===cid;});
+    if(!c) return '';
+    return '<div class="modal-bg" onclick="if(event.target===this){ST.modal=null;render()}"><div class="modal"><div class="modal-handle"></div>'+
+      '<div style="font-size:17px;font-weight:700;margin-bottom:4px">スター2を認定する</div>'+
+      '<div style="font-size:12px;color:var(--text3);margin-bottom:16px">この認定はJHTJapanへ通知されます</div>'+
+      '<div style="display:flex;align-items:center;gap:12px;padding:14px;background:var(--bg);border-radius:var(--r-sm);margin-bottom:14px"><div style="width:44px;height:44px;border-radius:50%;background:var(--purple-l);color:var(--purple);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;border:2px solid var(--purple-m)">'+c.initials+'</div><div><div style="font-size:15px;font-weight:700">'+c.name+'</div><div style="font-size:12px;color:var(--text3)">'+c.email+'</div></div></div>'+
+      '<div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">'+
+      '<div style="display:flex;justify-content:space-between;padding:10px 12px;background:var(--green-l);border-radius:var(--r-sm)"><span style="font-size:13px;font-weight:700">チェックリスト</span><span class="tag td">'+(c.cl_pct||0)+'% 完了</span></div>'+
+      '<div style="display:flex;justify-content:space-between;padding:10px 12px;background:'+(c.prog1_done?'var(--green-l)':'var(--red-l)')+';border-radius:var(--r-sm)"><span style="font-size:13px;font-weight:700">プログラム①</span><span class="tag '+(c.prog1_done?'td':'tf')+'">'+(c.prog1_done?'完了':'未完了')+'</span></div>'+
+      '<div style="display:flex;justify-content:space-between;padding:10px 12px;background:'+(c.prog2_done?'var(--green-l)':'var(--red-l)')+';border-radius:var(--r-sm)"><span style="font-size:13px;font-weight:700">プログラム②</span><span class="tag '+(c.prog2_done?'td':'tf')+'">'+(c.prog2_done?'完了':'未完了')+'</span></div>'+
+      '</div>'+
+      '<div style="padding:12px;background:var(--amber-l);border-radius:var(--r-sm);font-size:12px;color:var(--amber);margin-bottom:18px;line-height:1.6"><i class="ti ti-alert-triangle"></i> 認定後は取り消せません。候補者が全条件を満たしていることを確認してから認定してください。</div>'+
+      '<div style="display:flex;gap:10px"><button class="btn" style="flex:1" onclick="ST.modal=null;render()">キャンセル</button><button class="btn btnpur" style="flex:1;padding:13px" onclick="doCertify(\''+cid+'\')"><i class="ti ti-award"></i> 認定する</button></div>'+
+      '</div></div>';
+  }
   if(ST.modal==='invite'){
     return '<div class="modal-bg" onclick="if(event.target===this){ST.modal=null;render()}"><div class="modal"><div class="modal-handle"></div>'+
       '<div style="font-size:17px;font-weight:700;margin-bottom:4px">スター2候補者を招待</div>'+
@@ -678,6 +699,21 @@ async function doInvite(){
   }catch(err){ alert('招待に失敗しました: '+(err.message||'')); }
 }
 function sendJHT(){ST.modal=null;render();toast('JHTJapanへスター3認定申請を送信しました');}
+
+// 担当するスター2候補者を認定（ハンドシェイク）。
+async function doCertify(cid){
+  var c=ST.candidates.find(function(x){return x.id===cid;});if(!c)return;
+  var today=new Date().toISOString().slice(0,10);
+  try{
+    var up=await _sb.from('trainers').update({status:'certified',cert_date:today}).eq('id',cid);
+    if(up.error) throw up.error;
+    try{ await _sb.from('cert_requests').update({status:'approved'}).eq('trainer_id',cid).eq('status','pending'); }catch(e){}
+    ST.modal=null;
+    await loadCandidates();
+    toast(c.name+'さんをスター2として認定しました');
+    render();
+  }catch(err){ alert('認定に失敗しました: '+(err.message||'')); }
+}
 
 /* ══════════════════════════════
    SUPABASE 同期（クラウド保存）

@@ -152,8 +152,11 @@ create policy tr_update on public.trainers for update to authenticated
     public.is_super()
     or public.is_facility_admin(facility_id)
     or lower(email) = public.current_email()
-    -- Star2 が自分の Star1 候補者を認定できる（star1 のみ＝Star3は監視のみを維持）
+    -- Star2 が自分の Star1 候補者を認定できる
     or ( star_level = 'star1' and public.has_role('star2')
+         and mentored_by in (select public.my_trainer_ids()) )
+    -- Star3 が自分の Star2 候補者を認定できる（担当割当がある場合のハンドシェイク）
+    or ( star_level = 'star2' and public.has_role('star3')
          and mentored_by in (select public.my_trainer_ids()) )
   )
   with check (
@@ -161,6 +164,8 @@ create policy tr_update on public.trainers for update to authenticated
     or public.is_facility_admin(facility_id)
     or lower(email) = public.current_email()
     or ( star_level = 'star1' and public.has_role('star2')
+         and mentored_by in (select public.my_trainer_ids()) )
+    or ( star_level = 'star2' and public.has_role('star3')
          and mentored_by in (select public.my_trainer_ids()) )
   );
 
@@ -235,13 +240,14 @@ create policy inv_select on public.invitations for select to authenticated
 -- ============================================================
 -- 動作確認（適用後、各ロールでログインして確認すること）
 --   ・super:     施設/トレーナーの一覧表示・追加・削除・昇格・育成割当
---   ・facility:  自施設トレーナー一覧・招待・認定申請の承認/却下
+--   ・facility:  自施設トレーナー一覧・招待・認定申請の承認/却下・認定済みの昇格
 --   ・star1/2/3: 自分の名前が表示される・チェック/進捗が保存され再読込で残る
 --                star2: テスト採点、施設への申請通知
 --   ・★star2:   「スター1育成」タブに候補者が表示される／Star1を招待できる／
 --                条件達成後「スター1認定」で Star1.status='certified' が書ける
 --   ・★star3:   「スター2育成」タブに候補者が表示される／Star2を招待できる／
---                Star2の認定ボタンは無い（監視のみ＝仕様どおり）
+--                担当割当のある Star2 は条件達成後「スター2認定」で status='certified' が書ける
+--   ・メンター未割当（mentored_by=null）の Star1/Star2 は、施設が認定申請の承認で認定する
 -- ============================================================
 
 -- ============================================================
