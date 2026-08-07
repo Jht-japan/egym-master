@@ -135,9 +135,47 @@
 動作が確認できたら、本番運用に耐える契約へ切り替えます。
 
 - [ ] **Supabase を Pro プランに** アップグレード（自動停止を防ぐ・月額 約25米ドル）。
-- [ ] **メール送信（Resend 等）を設定**（独自ドメインのDNS設定 → Supabase の SMTP 設定）。本格運用の招待メール制限を解消。
+- [ ] **メール送信（カスタムSMTP / Resend 等）を設定** → 下記「Phase 6-A」の手順に従う。**招待・パスワード再設定メールが届かない問題はこれで解消**します。
 - [ ] **（要確認）Vercel プラン:** 商用利用の場合、無料(Hobby)プランの規約上 **Pro（月額 約20米ドル）** が必要な可能性 → 確認。
 - [ ] **（任意）独自ドメインを設定**（Vercel にカスタムドメインを追加 + Supabase の Site URL / Redirect URL を更新）。
+
+---
+
+### Phase 6-A — カスタムSMTP（メール送信）設定 ★招待メールが届かない場合の本対策
+
+> ⚠️ **なぜ必要か:** Supabase の**標準（内蔵）メール送信は「開発・テスト専用」**です。
+> 送信数が **1時間あたり数通に制限**され、**任意の外部アドレスには届かないことが多い**（自組織メンバー宛のみ届く場合あり）。
+> そのため「アプリ上は『送信しました』と成功表示 → 受信箱には届かない」が発生します。
+> 本番の招待・パスワード再設定を確実に届けるには、**カスタムSMTP（Resend 等）が必須**です。
+
+**手順（Resend を例に）:**
+
+- [ ] **6A-1. Resend アカウント作成** — `https://resend.com` でサインアップ。
+- [ ] **6A-2. 送信ドメインを認証** — Resend → **Domains** → 独自ドメイン（例 `mail.example.jp`）を追加。
+      表示される **DNS レコードをドメインのDNSに登録**：
+  - `SPF`（TXT） / `DKIM`（TXT、Resend 指定のホスト名） / 必要に応じ `DMARC`（TXT）。
+  - 反映後、Resend 側で **Verified（緑）** になることを確認（数分〜最大48時間）。
+- [ ] **6A-3. Resend の API キー発行** — Resend → **API Keys** → 新規作成（`re_...`）。控えておく。
+- [ ] **6A-4. Supabase にカスタムSMTPを設定** — Supabase → **Authentication → Emails → SMTP Settings** →
+      **Enable Custom SMTP** をオンにして入力：
+  - **Sender email**: 認証済みドメインの差出人（例 `no-reply@mail.example.jp`）
+  - **Sender name**: 例 `EGYM マスタートレーナー`
+  - **Host**: `smtp.resend.com`
+  - **Port**: `465`（SSL）または `587`（STARTTLS）
+  - **Username**: `resend`
+  - **Password**: 6A-3 の API キー（`re_...`）
+  - → **Save**。
+- [ ] **6A-5. レート上限を引き上げ** — Supabase → **Authentication → Rate Limits** →
+      「Emails per hour」等を運用規模に合わせて増やす（標準の数通/時のままだと大量招待で詰まる）。
+- [ ] **6A-6. Site URL / Redirect URL を確認** — Supabase → **Authentication → URL Configuration** →
+      **Site URL** を本番URL（例 `https://egym-master.vercel.app`）に設定。
+      招待・再設定リンクは `login.html` に着地するため、**Redirect URLs** に本番URL（および必要なら `…/login.html`）を許可登録。
+- [ ] **6A-7. 動作確認** — super 画面で**新規テストアドレス**へ施設/トレーナーを招待 →
+      **数秒以内にメールが届く**こと、リンク → パスワード設定 → ログインまで通ることを確認。迷惑メールも一応確認。
+
+> 💡 **設定前に今すぐ1人だけ通したい場合の回避策:** Supabase → **Authentication → Users** で対象ユーザーを開き、
+> **招待/リカバリーリンクを発行**して、そのリンクを自分から直接（メール/チャット）本人へ渡す。本人はそのリンクからパスワード設定できます。
+> （既に「作成済み・招待済み」になっているユーザーは、標準メールが届かなかっただけで**アカウント自体は存在**します。）
 
 ---
 
@@ -154,7 +192,7 @@
 | 症状 | 対処 |
 |---|---|
 | セキュリティ適用後に画面が動かない | `tighten-rls.sql` 末尾のロールバックを Run → 全許可に戻す → 失敗操作を共有。 |
-| 招待メールが届かない | 迷惑メール確認／`email rate limit exceeded` は約1時間待つ／既存メール宛は届かない仕様。 |
+| 招待メールが届かない（アプリは「送信しました」表示なのに届かない） | **標準メールが原因**。**Phase 6-A のカスタムSMTP設定**で解決。暫定は迷惑メール確認／`email rate limit exceeded` は約1時間待つ／自組織メンバー宛以外は届きにくい／既存ユーザー宛は再送されない。今すぐ1人通すなら Auth→Users からリンク発行（Phase 6-A 末尾）。 |
 | Star2/3 の育成タブに候補者が出ない | super の「育成対象の割り当て（mentored_by）」で担当を設定（新規招待は自動設定）。 |
 | AI採点が動かない | `grade-test` が Deployed か／`ANTHROPIC_API_KEY` が登録済みか／旧版なら再デプロイ。 |
 | サイトが数分たっても更新されない | GitHub main への push を確認／Vercel のデプロイ状況を確認。 |
@@ -174,4 +212,4 @@
 | 判断①の経緯 | `file6/WORK_LOG_2026-08-04.md` |
 | 技術仕様（原本） | `claude code/EGYM_技術仕様書_ClaudeCode用.md` |
 
-*最終更新: 2026-08-04*
+*最終更新: 2026-08-07*
