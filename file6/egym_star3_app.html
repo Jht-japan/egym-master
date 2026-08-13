@@ -707,7 +707,7 @@ async function doCertify(cid){
   try{
     var up=await _sb.from('trainers').update({status:'certified',cert_date:today}).eq('id',cid);
     if(up.error) throw up.error;
-    try{ await _sb.from('cert_requests').update({status:'approved'}).eq('trainer_id',cid).eq('status','pending'); }catch(e){}
+    try{ var cr=await _sb.from('cert_requests').update({status:'approved'}).eq('trainer_id',cid).eq('status','pending'); if(cr.error) throw cr.error; }catch(e){ console.error('cert_requests approve failed:', e); toast('認定は完了しましたが、施設への申請の承認更新に失敗しました'); }
     ST.modal=null;
     await loadCandidates();
     toast(c.name+'さんをスター2として認定しました');

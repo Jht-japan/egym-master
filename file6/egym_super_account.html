@@ -912,6 +912,8 @@ async function promoteTrainer(btn){
       star_level: toLevel,
       status: 'active',
       cl_pct: 0,
+      prog1_done: false,
+      prog2_done: false,
       cert_date: null,
     }).eq('id', trainerId);
     if(trUpdateErr) throw trUpdateErr;

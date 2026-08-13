@@ -225,7 +225,7 @@ function rTrainers(){
       +(t.certDate?'<div style="font-size:10px;color:var(--text3);margin-top:3px">'+t.certDate+'</div>':'')
       +'</div>'
       +((t.status==='certified'&&(t.star==='star1'||t.star==='star2'))
-        ?'<button class="btn btnsm" title="昇格" onclick="promoteTrainer(\''+t.id+'\')" style="flex-shrink:0;margin-left:8px;padding:6px 8px;background:var(--green-l);color:var(--green);border-color:var(--green-m)"><i class="ti ti-arrow-up" style="font-size:14px"></i></button>'
+        ?'<button class="btn btnsm" title="昇格" onclick="promoteTrainer(\''+t.id+'\')" style="flex-shrink:0;margin-left:8px;padding:6px 10px;background:var(--green-l);color:var(--green);border-color:var(--green-m)"><i class="ti ti-arrow-up" style="font-size:14px"></i> 昇格</button>'
         :'')
       +'<button class="btn btnsm" title="削除" onclick="delTrainer(\''+t.id+'\')" style="flex-shrink:0;margin-left:8px;padding:6px 8px;color:var(--red)"><i class="ti ti-trash" style="font-size:14px"></i></button>'
       +'</div>';
@@ -297,6 +297,8 @@ async function promoteTrainer(id){
       star_level: toLevel,
       status: 'active',
       cl_pct: 0,
+      prog1_done: false,
+      prog2_done: false,
       cert_date: null,
     }).eq('id', id);
     if(up.error) throw up.error;
