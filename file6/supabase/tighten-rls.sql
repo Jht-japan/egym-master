@@ -245,6 +245,8 @@ create policy inv_select on public.invitations for select to authenticated
 --    ※ create-test-records.sql を先に Run しておくこと。
 -- ─────────────────────────────────────────────
 alter table public.test_records enable row level security;
+-- Phase 3 の全許可ポリシーを解除（create-test-records.sql で作成したもの）
+drop policy if exists allow_all_test_records on public.test_records;
 
 drop policy if exists trec_select on public.test_records;
 create policy trec_select on public.test_records for select to authenticated

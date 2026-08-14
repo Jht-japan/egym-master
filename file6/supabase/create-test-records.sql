@@ -37,3 +37,15 @@ create index if not exists idx_test_records_facility  on public.test_records(fac
 create index if not exists idx_test_records_status    on public.test_records(unlock_status);
 create index if not exists idx_test_records_submitted on public.test_records(submitted_at);
 create index if not exists idx_test_records_level     on public.test_records(star_level);
+
+-- ------------------------------------------------------------
+-- Phase 3（機能テスト）用のポリシー
+--   このプロジェクトは新規テーブルで RLS が有効になるため、ポリシーが無いと
+--   ログイン済みユーザーでも読み書きできず、テスト解放申請・提出が失敗する。
+--   他テーブルと同様に、テスト中は「ログイン済みは全許可」にしておく。
+--   → Phase 4 の tighten-rls.sql が、このポリシーを drop してロール別に厳格化する。
+-- ------------------------------------------------------------
+alter table public.test_records enable row level security;
+drop policy if exists allow_all_test_records on public.test_records;
+create policy allow_all_test_records on public.test_records
+  for all to authenticated using (true) with check (true);
