@@ -237,6 +237,38 @@ create policy inv_select on public.invitations for select to authenticated
   using ( public.is_super() );
 
 
+-- ─────────────────────────────────────────────
+-- 9) test_records（テスト解放申請＋提出結果）
+--    ・閲覧: super（全件）／施設管理者（自施設）／担当メンター（担当スター2/3）／本人
+--    ・作成/更新(申請・提出): 本人のみ
+--    ・更新(解放の承認/却下): super のみ
+--    ※ create-test-records.sql を先に Run しておくこと。
+-- ─────────────────────────────────────────────
+alter table public.test_records enable row level security;
+
+drop policy if exists trec_select on public.test_records;
+create policy trec_select on public.test_records for select to authenticated
+  using (
+    public.is_super()
+    or public.is_facility_admin(facility_id)
+    or trainer_id in (select public.my_trainer_ids())
+    or exists (
+      select 1 from public.trainers t
+      where t.id = test_records.trainer_id
+        and t.mentored_by in (select public.my_trainer_ids())
+    )
+  );
+
+drop policy if exists trec_insert on public.test_records;
+create policy trec_insert on public.test_records for insert to authenticated
+  with check ( trainer_id in (select public.my_trainer_ids()) );
+
+drop policy if exists trec_update on public.test_records;
+create policy trec_update on public.test_records for update to authenticated
+  using ( public.is_super() or trainer_id in (select public.my_trainer_ids()) )
+  with check ( public.is_super() or trainer_id in (select public.my_trainer_ids()) );
+
+
 -- ============================================================
 -- 動作確認（適用後、各ロールでログインして確認すること）
 --   ・super:     施設/トレーナーの一覧表示・追加・削除・昇格・育成割当
@@ -259,5 +291,6 @@ create policy inv_select on public.invitations for select to authenticated
 -- create policy allow_all_trainer_progress  on public.trainer_progress  for all using (true) with check (true);
 -- create policy allow_all_cert_requests     on public.cert_requests     for all using (true) with check (true);
 -- create policy allow_all_test_results      on public.test_results      for all using (true) with check (true);
+-- create policy allow_all_test_records      on public.test_records      for all using (true) with check (true);
 -- create policy allow_all_invitations       on public.invitations       for all using (true) with check (true);
 -- create policy allow_read_own_role         on public.user_roles        for select using (auth.uid() = user_id);

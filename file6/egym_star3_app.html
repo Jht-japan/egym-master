@@ -319,7 +319,7 @@ function rHome(){
     '<div class="card"><div class="ctitle">認定までの手順</div>'+
     '<div class="step"><div class="sdot '+(clComplete()?'s-done':'s-prog')+'"><i class="ti '+(clComplete()?'ti-check':'ti-checkbox')+'" style="font-size:13px"></i></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">チェックリストを全て完了する</div><div style="font-size:11px;color:var(--text3);margin-top:3px">'+done+'/'+total+'項目完了（'+p+'%）</div></div><span class="tag '+(clComplete()?'td':'tp')+'">'+(clComplete()?'完了':'進行中')+'</span></div>'+
     '<div class="step"><div class="sdot '+(sc>=2?'s-done':'s-prog')+'"><i class="ti '+(sc>=2?'ti-check':'ti-star')+'" style="font-size:13px"></i></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">スター2を2名以上育成・認定する</div><div style="font-size:11px;color:var(--text3);margin-top:3px">現在 '+sc+'名認定済み（認定状況タブで管理）</div></div><span class="tag '+(sc>=2?'td':'tp')+'">'+(sc>=2?'達成':'進行中')+'</span></div>'+
-    '<div class="step" style="cursor:pointer" onclick="go(\'test\')"><div class="sdot '+(tp?'s-done':testUnlocked()?'s-prog':'s-lock')+'"><i class="ti '+(tp?'ti-check':'ti-clipboard-check')+'" style="font-size:13px"></i></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">確認テストに合格する</div><div style="font-size:11px;color:var(--text3);margin-top:3px">'+(ST.testSubmitted?('スコア: '+ST.testScore+'点（80点以上で合格）'):testUnlocked()?'受験可能 → タップ':'チェック・スター2認定(2名)・B/A入力の完了後に解放')+'</div></div><span class="tag '+(tp?'td':ST.testSubmitted?'tf':'tg')+'">'+(tp?'合格':ST.testSubmitted?'不合格':'未受験')+'</span></div>'+
+    '<div class="step" style="cursor:pointer" onclick="go(\'test\')"><div class="sdot '+(tp?'s-done':testUnlocked()?'s-prog':'s-lock')+'"><i class="ti '+(tp?'ti-check':'ti-clipboard-check')+'" style="font-size:13px"></i></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">確認テストに合格する</div><div style="font-size:11px;color:var(--text3);margin-top:3px">'+(ST.testSubmitted?('スコア: '+ST.testScore+'点（80点以上で合格）'):testUnlockedDesc())+'</div></div><span class="tag '+(tp?'td':ST.testSubmitted?'tf':'tg')+'">'+(tp?'合格':ST.testSubmitted?'不合格':'未受験')+'</span></div>'+
     '<div class="step"><div class="sdot s-lock"><i class="ti ti-award" style="font-size:13px"></i></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">JHTJapanによる最終認定</div><div style="font-size:11px;color:var(--text3);margin-top:3px">スター3はJHTJapanが認定します</div></div><span class="tag tg">待機中</span></div>'+
     '</div>'+
     '<div class="card"><div class="ctitle">グループ別 進捗</div>'+
@@ -530,7 +530,7 @@ function rCert(){
     '<div class="step"><div class="sdot '+(clComplete()?'s-done':'s-prog')+'"><i class="ti '+(clComplete()?'ti-check':'ti-checkbox')+'" style="font-size:13px"></i></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">チェックリスト 全項目完了</div><div style="font-size:11px;color:var(--text3);margin-top:3px">'+doneCount()+'/'+totalCount()+'項目（'+p+'%）</div></div><span class="tag '+(clComplete()?'td':'tp')+'">'+(clComplete()?'完了':'未完了')+'</span></div>'+
     '<div class="step"><div class="sdot '+(sc>=2?'s-done':'s-prog')+'"><i class="ti '+(sc>=2?'ti-check':'ti-star')+'" style="font-size:13px"></i></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">スター2を2名以上育成・認定する</div><div style="font-size:11px;color:var(--text3);margin-top:3px">現在 '+sc+'名認定済み</div></div><span class="tag '+(sc>=2?'td':'tp')+'">'+(sc>=2?'達成':'進行中')+'</span></div>'+
     '<div class="step" style="cursor:pointer" onclick="go(\'beforeafter\')"><div class="sdot '+(baOk?'s-done':'s-prog')+'"><i class="ti '+(baOk?'ti-check':'ti-chart-line')+'" style="font-size:13px"></i></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">お客様2名のB/Aデータ作成（Before・Mid・After）</div><div style="font-size:11px;color:var(--text3);margin-top:3px">'+(baOk?'全項目入力済み':'未入力の項目があります → タップして記録')+'</div></div><span class="tag '+(baOk?'td':'tp')+'">'+(baOk?'完了':'未完了')+'</span></div>'+
-    '<div class="step" style="cursor:pointer" onclick="go(\'test\')"><div class="sdot '+(tp?'s-done':testUnlocked()?'s-prog':'s-lock')+'"><i class="ti '+(tp?'ti-check':'ti-clipboard-check')+'" style="font-size:13px"></i></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">確認テスト合格（80点以上）</div><div style="font-size:11px;color:var(--text3);margin-top:3px">'+(ST.testSubmitted?('スコア: '+ST.testScore+'点'):testUnlocked()?'受験可能 → タップ':'チェック・スター2認定(2名)・B/A入力の完了後に解放')+'</div></div><span class="tag '+(tp?'td':ST.testSubmitted?'tf':'tp')+'">'+(tp?'合格':ST.testSubmitted?'不合格':'未受験')+'</span></div>'+
+    '<div class="step" style="cursor:pointer" onclick="go(\'test\')"><div class="sdot '+(tp?'s-done':testUnlocked()?'s-prog':'s-lock')+'"><i class="ti '+(tp?'ti-check':'ti-clipboard-check')+'" style="font-size:13px"></i></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">確認テスト合格（80点以上）</div><div style="font-size:11px;color:var(--text3);margin-top:3px">'+(ST.testSubmitted?('スコア: '+ST.testScore+'点'):testUnlockedDesc())+'</div></div><span class="tag '+(tp?'td':ST.testSubmitted?'tf':'tp')+'">'+(tp?'合格':ST.testSubmitted?'不合格':'未受験')+'</span></div>'+
     '</div>';
 
   // STAR2 MANAGEMENT
@@ -547,7 +547,7 @@ function rCert(){
 
   ST.candidates.forEach(c=>{
     const pct=c.cl_pct||0;const isCert=c.status==='certified';
-    const ready=pct===100&&c.prog1_done&&c.prog2_done;
+    const ready=pct===100&&c.prog1_done&&c.prog2_done&&c.testPassed;
     const canCert=ready&&!isCert;
     html+='<div class="s2-card '+(isCert?'cert-s2':'')+'">'+
       '<div class="s2-head"><div class="av-sm" style="background:'+(isCert?'var(--green-l)':'var(--blue-l)')+';color:'+(isCert?'var(--green)':'var(--blue)')+';border-color:'+(isCert?'var(--green-m)':'var(--blue-m)')+'">'+c.initials+'</div>'+
@@ -559,12 +559,13 @@ function rCert(){
       '<div style="display:flex;flex-wrap:wrap;gap:6px">'+
       '<div style="padding:8px 10px;background:var(--bg);border-radius:var(--r-sm);flex:1;min-width:100px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:11px;font-weight:700">プログラム①</span><span class="tag '+(c.prog1_done?'td':'tp')+'">'+(c.prog1_done?'完了':'未完了')+'</span></div>'+
       '<div style="padding:8px 10px;background:var(--bg);border-radius:var(--r-sm);flex:1;min-width:100px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:11px;font-weight:700">プログラム②</span><span class="tag '+(c.prog2_done?'td':'tp')+'">'+(c.prog2_done?'完了':'未完了')+'</span></div>'+
+      '<div style="padding:8px 10px;background:var(--bg);border-radius:var(--r-sm);flex:1;min-width:100px;display:flex;justify-content:space-between;align-items:center"><span style="font-size:11px;font-weight:700">確認テスト</span><span class="tag '+(c.testPassed?'td':'tp')+'">'+(c.testPassed?('合格'+(c.testScore!=null?(' '+c.testScore+'点'):'')):'未合格')+'</span></div>'+
       '</div>'+
       (isCert
         ?'<div style="margin-top:12px;padding:8px;background:var(--green-l);border-radius:var(--r-sm);font-size:12px;color:var(--green);font-weight:700;text-align:center"><i class="ti ti-shield-check"></i> スター2認定済み'+(c.certifiedAt?(' '+c.certifiedAt):'')+'</div>'
         :canCert
           ?'<button class="btn btnpur btnsm" style="width:100%;margin-top:12px;padding:11px" onclick="ST.modal=\'certify:'+c.id+'\';render()"><i class="ti ti-award" style="font-size:13px"></i> スター2認定</button>'
-          :'<div style="margin-top:12px;padding:8px;background:var(--bg);border-radius:var(--r-sm);font-size:11px;color:var(--text3);text-align:center"><i class="ti ti-info-circle"></i> チェックリスト100%＋プログラム①②完了で認定できます</div>'
+          :'<div style="margin-top:12px;padding:8px;background:var(--bg);border-radius:var(--r-sm);font-size:11px;color:var(--text3);text-align:center"><i class="ti ti-info-circle"></i> チェックリスト100%＋プログラム①②完了＋確認テスト合格で認定できます</div>'
       )+
       '</div>';
   });
@@ -706,6 +707,7 @@ function sendJHT(){ST.modal=null;render();toast('JHTJapanへスター3認定申�
 // 担当するスター2候補者を認定（ハンドシェイク）。
 async function doCertify(cid){
   var c=ST.candidates.find(function(x){return x.id===cid;});if(!c)return;
+  if(!c.testPassed){ alert('このトレーナーはまだ確認テストに合格していません。テスト合格後に認定できます。'); return; }
   var today=new Date().toISOString().slice(0,10);
   try{
     var up=await _sb.from('trainers').update({status:'certified',cert_date:today}).eq('id',cid);
@@ -780,10 +782,91 @@ const S3_TEST_SECTIONS = [
 ];
 
 var _testTimer=null;
+var SELF_NAME='';
+var SELF_EMAIL='';
+var TEST_UNLOCK='none';   // 'none' | 'requested' | 'approved' | 'rejected'（Super管理者の承認状態）
 function p1Done(){return ST.p1.phases.every(function(p){return p.done;});}
 function p2Done(){return ST.p2.phases.every(function(p){return p.done;});}
-function testUnlocked(){return clComplete()&&certifiedCount()>=2&&baAllComplete();}
+// 前提条件（チェックリスト＋スター2認定2名＋B/A）。テスト受験にはこれに加えSuper管理者の解放承認が必要。
+function testPrereqsMet(){return clComplete()&&certifiedCount()>=2&&baAllComplete();}
+function testUnlocked(){return testPrereqsMet()&&TEST_UNLOCK==='approved';}
 function testPass(){return ST.testSubmitted&&ST.testScore>=80;}
+// 認定手順ステップの説明文（未提出時）。前提未達 / 解放申請要 / 申請中 / 却下 / 受験可 を出し分け。
+function testUnlockedDesc(){
+  if(testUnlocked()) return '受験可能 → タップ';
+  if(!testPrereqsMet()) return 'チェック・スター2認定(2名)・B/A入力の完了後に解放';
+  if(TEST_UNLOCK==='requested') return 'テスト解放を申請中（Super承認待ち）';
+  if(TEST_UNLOCK==='rejected') return '解放申請が却下 → 再申請してください';
+  return 'テスト解放をSuper管理者へ申請 → タップ';
+}
+
+async function loadTestRecord(){
+  if(!TRAINER_ID) return;
+  try{
+    var r=await _sb.from('test_records').select('unlock_status').eq('trainer_id',TRAINER_ID).maybeSingle();
+    if(!r.error && r.data){ TEST_UNLOCK=r.data.unlock_status||'none'; }
+  }catch(e){ console.warn('test_records read failed:', e); }
+}
+async function requestTestUnlock(){
+  if(!TRAINER_ID){alert('ログイン情報が取得できません。ログインし直してください。');return;}
+  if(!testPrereqsMet()){alert('前提条件がまだ満たされていません。');return;}
+  try{
+    var now=new Date().toISOString();
+    var up=await _sb.from('test_records').upsert({
+      trainer_id:TRAINER_ID, facility_id:FACILITY_ID, star_level:'star3',
+      trainer_name:SELF_NAME, trainer_email:SELF_EMAIL,
+      unlock_status:'requested', unlock_requested_at:now, updated_at:now
+    },{onConflict:'trainer_id'});
+    if(up.error) throw up.error;
+    TEST_UNLOCK='requested';
+    toast('Super管理者へテスト解放を申請しました');
+    render();
+  }catch(err){ alert('申請に失敗しました: '+(err.message||'')); }
+}
+function buildTestReport(){
+  var scoreMap={}; (ST.testResult&&ST.testResult.scores||[]).forEach(function(s){scoreMap[s.id]=s;});
+  var items=[]; var qNum=0;
+  S3_TEST_SECTIONS.forEach(function(sec){ sec.questions.forEach(function(q){ qNum++;
+    var sr=scoreMap[q.id];
+    items.push({num:qNum, section:sec.title, question:q.text, answer:ST.testAnswers[q.id]||'', scored:!!q.scored,
+      score:(sr&&typeof sr.score==='number')?sr.score:null, feedback:(sr&&sr.feedback)?sr.feedback:''});
+  });});
+  return {overall_comment:(ST.testResult&&ST.testResult.overall_comment)||'', items:items};
+}
+async function saveTestRecordSubmission(){
+  if(!TRAINER_ID) return;
+  try{
+    var now=new Date().toISOString();
+    var up=await _sb.from('test_records').upsert({
+      trainer_id:TRAINER_ID, facility_id:FACILITY_ID, star_level:'star3',
+      trainer_name:SELF_NAME, trainer_email:SELF_EMAIL,
+      score:ST.testScore, passed:(ST.testScore>=80),
+      report:buildTestReport(), submitted_at:now, updated_at:now
+    },{onConflict:'trainer_id'});
+    if(up.error) throw up.error;
+  }catch(e){ console.warn('test_records submission save failed:', e); }
+}
+function rTestUnlockGate(){
+  var st=TEST_UNLOCK, head, body, extra='', btn='';
+  if(st==='requested'){
+    head='テスト解放を申請中';
+    body='Super管理者（JHTJapan）の承認をお待ちください。承認されるとテストが受験可能になります。';
+    extra='<div style="margin-top:16px;padding:10px 12px;background:var(--amber-l);border-radius:var(--r-sm);font-size:12px;color:var(--amber);font-weight:700">承認待ち</div>';
+  } else if(st==='rejected'){
+    head='テスト解放が却下されました';
+    body='Super管理者により却下されました。準備を整えたうえで、再度申請してください。';
+    btn='<button class="btn btnpur btnfull" style="padding:13px;margin-top:16px" onclick="requestTestUnlock()"><i class="ti ti-send"></i> 再申請する</button>';
+  } else {
+    head='前提条件を達成しました';
+    body='テストを受験するには、Super管理者（JHTJapan）へテスト解放を申請し、承認を受ける必要があります。';
+    btn='<button class="btn btnpur btnfull" style="padding:13px;margin-top:16px" onclick="requestTestUnlock()"><i class="ti ti-send"></i> Super管理者へテスト解放を申請</button>';
+  }
+  return '<div class="card" style="text-align:center;padding:40px 20px">'
+    +'<i class="ti '+(st==='requested'?'ti-clock-hour-4':st==='rejected'?'ti-x':'ti-lock-open')+'" style="font-size:52px;color:var(--purple);display:block;margin-bottom:14px"></i>'
+    +'<div style="font-size:17px;font-weight:700;margin-bottom:8px">'+head+'</div>'
+    +'<div style="font-size:13px;color:var(--text2);line-height:1.7">'+body+'</div>'
+    +extra+btn+'</div>';
+}
 function testAllItems(){return S3_TEST_SECTIONS.flatMap(function(s){return s.questions;});}
 function testAnsweredCount(){return testAllItems().filter(function(q){return (ST.testAnswers[q.id]||'').trim().length>10;}).length;}
 function testTotalQ(){return testAllItems().length;}
@@ -818,7 +901,7 @@ function loadTestState(){
 
 function rTest(){
   loadTestState();
-  if(!testUnlocked()){
+  if(!testPrereqsMet()){
     return '<div class="card" style="text-align:center;padding:40px 20px">'
       +'<i class="ti ti-lock" style="font-size:52px;color:var(--text3);display:block;margin-bottom:14px"></i>'
       +'<div style="font-size:17px;font-weight:700;margin-bottom:8px">テストはロック中</div>'
@@ -836,6 +919,7 @@ function rTest(){
       +'<button class="btn btnfull" style="padding:13px" onclick="go(&quot;beforeafter&quot;)"><i class="ti ti-chart-line"></i> B/A記録へ</button>'
       +'</div></div>';
   }
+  if(TEST_UNLOCK!=='approved'){ return rTestUnlockGate(); }
 
   if(!ST.testStartedAt){ST.testStartedAt=Date.now();saveTestState();}
   if(ST.testSubmitted && ST.testResult){return rTestResult();}
@@ -928,7 +1012,9 @@ async function submitTestAI(){
     var result=await response.json();
     if(!response.ok||result.error){throw new Error(result.error||'採点に失敗しました');}
     ST.testResult=result;ST.testSubmitted=true;ST.testScore=result.total_score;
-    saveTestState();saveP();render();
+    saveTestState();saveP();
+    await saveTestRecordSubmission();
+    render();
   }catch(err){
     render();
     alert('採点中にエラーが発生しました。もう一度お試しください。\n'+err.message);
@@ -1013,8 +1099,20 @@ async function loadCandidates(){
       status:tr.status==='certified'?'certified':'progress',
       certifiedAt:tr.cert_date||null,
       cl_pct:tr.cl_pct||0, prog1_done:!!tr.prog1_done, prog2_done:!!tr.prog2_done,
+      testPassed:false, testScore:null,
     };
   });
+  // 各候補者(スター2)の確認テスト合否を取得（認定要件）
+  var ids=ST.candidates.map(function(c){return c.id;});
+  if(ids.length){
+    try{
+      var tr2=await _sb.from('test_records').select('trainer_id,passed,score').in('trainer_id',ids);
+      if(!tr2.error && tr2.data){
+        var pm={}; tr2.data.forEach(function(x){pm[x.trainer_id]={passed:!!x.passed,score:x.score};});
+        ST.candidates.forEach(function(c){ var p=pm[c.id]; if(p){ c.testPassed=p.passed; c.testScore=(p.score!=null)?p.score:null; } });
+      }
+    }catch(e){ console.warn('candidate test_records load failed:', e); }
+  }
   ST.certified=ST.candidates.filter(function(c){return c.status==='certified';});
 }
 
@@ -1091,10 +1189,13 @@ async function loadProgress(){
     var tr=r1.data[0];
     TRAINER_ID=tr.id;
     FACILITY_ID=tr.facility_id||null;
+    SELF_NAME=tr.name||'';
+    SELF_EMAIL=tr.email||'';
     var facName='';
     if(tr.facility_id){ var rf=await _sb.from('facilities').select('name').eq('id',tr.facility_id).maybeSingle(); if(rf.data) facName=rf.data.name; }
     updateIdentity(tr, facName);
     await loadCandidates();
+    await loadTestRecord();
     var r2=await _sb.from('trainer_progress').select('*').eq('trainer_id',TRAINER_ID).maybeSingle();
     if(r2.error){ console.warn('trainer_progress read failed (table not created yet?):', r2.error.message); }
     else { hydrate(r2.data); }

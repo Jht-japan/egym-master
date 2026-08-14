@@ -58,7 +58,11 @@
   - `file6/supabase/functions/grade-test/index.ts` を貼り付け → **Deploy**（設定は既存 `bright-endpoint` と同じでOK）。
   - **Secrets** → `ANTHROPIC_API_KEY` = Phase 0 で取得した `sk-ant-...` を登録。
   - 確認: `grade-test` が「Deployed」表示。
-  - ⚠️ 旧バージョン（`{prompt}` を受け取る版）をデプロイ済みなら、最新 `index.ts` で**再デプロイ**。
+  - ⚠️ 旧バージョン（`{prompt}` を受け取る版）や Star2 のみ対応版をデプロイ済みなら、最新 `index.ts` で**再デプロイ**（Star3 の採点基準を含む）。
+- [ ] **1-4. テスト解放申請＆テストレポート用テーブル作成**
+  - **SQL Editor** → `file6/supabase/create-test-records.sql` を貼り付け → **Run**。
+  - 確認: **Table Editor** に `test_records` が表示される。
+  - ※ これは Star2/Star3 の「テスト解放申請（Super承認）」と「テスト結果の共有（施設・Superが閲覧）」に必要です。
 
 ---
 
@@ -207,6 +211,7 @@
 | 進捗テーブル作成 | `file6/supabase/create-trainer-progress.sql` |
 | 施設削除の修正 | `file6/supabase/fix-facility-delete-cascade.sql` |
 | AI採点関数 | `file6/supabase/functions/grade-test/index.ts` |
+| テスト解放申請＆結果テーブル | `file6/supabase/create-test-records.sql` |
 | セキュリティ（RLS） | `file6/supabase/tighten-rls.sql` |
 | 詳細チェックリスト | `file6/SETUP_CHECKLIST.md` |
 | 判断①の経緯 | `file6/WORK_LOG_2026-08-04.md` |

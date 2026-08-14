@@ -387,7 +387,86 @@ function p1Done(){return ST.p1.phases.every(p=>p.done);}
 function p2Done(){return ST.p2.phases.every(p=>p.done);}
 function certifiedCount(){return ST.candidates.filter(c=>c.status==='certified').length;}
 function canInvite(){return p1Done();}// プログラム①完了後から招待可
-function testUnlocked(){return clComplete()&&p1Done()&&p2Done();}
+// 前提条件（チェックリスト＋プログラム①②）。テスト受験にはこれに加えSuper管理者の解放承認が必要。
+function testPrereqsMet(){return clComplete()&&p1Done()&&p2Done();}
+function testUnlocked(){return testPrereqsMet()&&TEST_UNLOCK==='approved';}
+function testUnlockedDesc(){
+  if(testUnlocked()) return '受験可能 → タップ';
+  if(!testPrereqsMet()) return 'チェック＋プログラム①②完了後に解放';
+  if(TEST_UNLOCK==='requested') return 'テスト解放を申請中（Super承認待ち）';
+  if(TEST_UNLOCK==='rejected') return '解放申請が却下 → 再申請してください';
+  return 'テスト解放をSuper管理者へ申請 → タップ';
+}
+var TEST_UNLOCK='none';   // 'none' | 'requested' | 'approved' | 'rejected'（Super管理者の承認状態）
+var SELF_NAME='';
+var SELF_EMAIL='';
+async function loadTestRecord(){
+  if(!TRAINER_ID) return;
+  try{
+    var r=await _sb.from('test_records').select('unlock_status').eq('trainer_id',TRAINER_ID).maybeSingle();
+    if(!r.error && r.data){ TEST_UNLOCK=r.data.unlock_status||'none'; }
+  }catch(e){ console.warn('test_records read failed:', e); }
+}
+async function requestTestUnlock(){
+  if(!TRAINER_ID){alert('ログイン情報が取得できません。ログインし直してください。');return;}
+  if(!testPrereqsMet()){alert('前提条件がまだ満たされていません。');return;}
+  try{
+    var now=new Date().toISOString();
+    var up=await _sb.from('test_records').upsert({
+      trainer_id:TRAINER_ID, facility_id:FACILITY_ID, star_level:'star2',
+      trainer_name:SELF_NAME, trainer_email:SELF_EMAIL,
+      unlock_status:'requested', unlock_requested_at:now, updated_at:now
+    },{onConflict:'trainer_id'});
+    if(up.error) throw up.error;
+    TEST_UNLOCK='requested';
+    toast('Super管理者へテスト解放を申請しました');
+    render();
+  }catch(err){ alert('申請に失敗しました: '+(err.message||'')); }
+}
+function buildTestReport(){
+  var scoreMap={}; (ST.testResult&&ST.testResult.scores||[]).forEach(function(s){scoreMap[s.id]=s;});
+  var items=[]; var qNum=0;
+  TEST_SECTIONS.forEach(function(sec){ sec.questions.forEach(function(q){ qNum++;
+    var sr=scoreMap[q.id];
+    items.push({num:qNum, section:sec.title, question:q.text, answer:ST.testAnswers[q.id]||'', scored:!!q.scored,
+      score:(sr&&typeof sr.score==='number')?sr.score:null, feedback:(sr&&sr.feedback)?sr.feedback:''});
+  });});
+  return {overall_comment:(ST.testResult&&ST.testResult.overall_comment)||'', items:items};
+}
+async function saveTestRecordSubmission(){
+  if(!TRAINER_ID) return;
+  try{
+    var now=new Date().toISOString();
+    var up=await _sb.from('test_records').upsert({
+      trainer_id:TRAINER_ID, facility_id:FACILITY_ID, star_level:'star2',
+      trainer_name:SELF_NAME, trainer_email:SELF_EMAIL,
+      score:ST.testScore, passed:(ST.testScore>=80),
+      report:buildTestReport(), submitted_at:now, updated_at:now
+    },{onConflict:'trainer_id'});
+    if(up.error) throw up.error;
+  }catch(e){ console.warn('test_records submission save failed:', e); }
+}
+function rTestUnlockGate(){
+  var st=TEST_UNLOCK, head, body, extra='', btn='';
+  if(st==='requested'){
+    head='テスト解放を申請中';
+    body='Super管理者（JHTJapan）の承認をお待ちください。承認されるとテストが受験可能になります。';
+    extra='<div style="margin-top:16px;padding:10px 12px;background:var(--amber-l);border-radius:var(--r-sm);font-size:12px;color:var(--amber);font-weight:700">承認待ち</div>';
+  } else if(st==='rejected'){
+    head='テスト解放が却下されました';
+    body='Super管理者により却下されました。準備を整えたうえで、再度申請してください。';
+    btn='<button class="btn btnp btnfull" style="padding:13px;margin-top:16px" onclick="requestTestUnlock()"><i class="ti ti-send"></i> 再申請する</button>';
+  } else {
+    head='前提条件を達成しました';
+    body='テストを受験するには、Super管理者（JHTJapan）へテスト解放を申請し、承認を受ける必要があります。';
+    btn='<button class="btn btnp btnfull" style="padding:13px;margin-top:16px" onclick="requestTestUnlock()"><i class="ti ti-send"></i> Super管理者へテスト解放を申請</button>';
+  }
+  return '<div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);text-align:center;padding:40px 20px">'
+    +'<i class="ti '+(st==='requested'?'ti-clock-hour-4':st==='rejected'?'ti-x':'ti-lock-open')+'" style="font-size:52px;color:var(--blue);display:block;margin-bottom:14px"></i>'
+    +'<div style="font-size:17px;font-weight:700;margin-bottom:8px">'+head+'</div>'
+    +'<div style="font-size:13px;color:var(--text2);line-height:1.7">'+body+'</div>'
+    +extra+btn+'</div>';
+}
 
 function totalSess(pk){return ST[pk].phases.reduce((a,ph)=>a+ph.sessions.filter(Boolean).length,0);}
 function donePh(pk){return ST[pk].phases.filter(p=>p.done).length;}
@@ -406,12 +485,12 @@ const NAV_CFG=[
 ];
 
 function go(pg){
-  if(pg==='test'&&!testUnlocked()){
+  if(pg==='test'&&!testPrereqsMet()){
     toast('チェックリスト完了＋プログラム①②完了後にテストが解放されます');return;
   }
   ST.page=pg;ST.cal.show=false;ST.modal=null;
   document.getElementById('nav').innerHTML=NAV_CFG.map(n=>{
-    const locked=n.k==='test'&&!testUnlocked();
+    const locked=n.k==='test'&&!testPrereqsMet();
     const on=ST.page===n.k;
     const isS1=n.k==='star1';
     const sc=certifiedCount();
@@ -473,7 +552,7 @@ function rHome(){
       {l:'プログラム① 完了',s:'全4フェーズ完了（完了後にスター1育成が解放）',ok:p1Done(),icon:p1Done()?'ti-check':'ti-calendar',lock:false},
       {l:'プログラム② 完了',s:'全4フェーズ完了',ok:p2Done(),icon:p2Done()?'ti-check':'ti-calendar',lock:false},
       {l:'スター1を2名以上育成・認定',s:`現在 ${sc}名認定済み（プログラム①完了後から招待可）`,ok:sc>=2,icon:sc>=2?'ti-check':'ti-star',lock:false},
-      {l:'確認テスト合格（80点以上）',s:ST.testSubmitted?`スコア: ${ST.testScore}点`:testUnlocked()?'受験可能':'チェック＋プログラム①②完了後に解放',ok:testPass,icon:testPass?'ti-check':testUnlocked()?'ti-clipboard-check':'ti-lock',lock:!testUnlocked()},
+      {l:'確認テスト合格（80点以上）',s:ST.testSubmitted?`スコア: ${ST.testScore}点`:testUnlockedDesc(),ok:testPass,icon:testPass?'ti-check':testUnlocked()?'ti-clipboard-check':'ti-lock',lock:!testPrereqsMet()},
     ].map(it=>`
     <div class="step">
       <div class="sdot ${it.ok?'s-done':it.lock?'s-lock':'s-prog'}"><i class="ti ${it.icon}" style="font-size:14px"></i></div>
@@ -965,7 +1044,7 @@ function loadTestState(){
 var _testTimer=null;
 function rTest(){
   loadTestState();
-  if(!testUnlocked()){
+  if(!testPrereqsMet()){
     return '<div class="lock-screen">'
       +'<i class="ti ti-lock" style="font-size:52px;color:var(--text3);display:block;margin-bottom:14px"></i>'
       +'<div style="font-size:17px;font-weight:700;margin-bottom:8px">テストはロック中</div>'
@@ -982,6 +1061,7 @@ function rTest(){
       +'<button class="btn btnfull" style="padding:13px" onclick="go(&quot;schedule&quot;)"><i class="ti ti-calendar"></i> スケジュールへ</button>'
       +'</div></div>';
   }
+  if(TEST_UNLOCK!=='approved'){ return rTestUnlockGate(); }
 
   // Start timer on first open
   if(!ST.testStartedAt){ST.testStartedAt=Date.now();saveTestState();}
@@ -1080,7 +1160,9 @@ async function submitTestAI(){
     var result=await response.json();
     if(!response.ok||result.error){throw new Error(result.error||'採点に失敗しました');}
     ST.testResult=result;ST.testSubmitted=true;ST.testScore=result.total_score;
-    saveTestState();saveP();render();
+    saveTestState();saveP();
+    await saveTestRecordSubmission();
+    render();
   }catch(err){
     render();
     alert('採点中にエラーが発生しました。もう一度お試しください。\n'+err.message);
@@ -1150,7 +1232,7 @@ function rCert(){
     {l:'プログラム① 完了',s:'全4フェーズ',ok:p1Done()},
     {l:'プログラム② 完了',s:'全4フェーズ',ok:p2Done()},
     {l:'スター1を2名以上育成・認定',s:`現在 ${sc}名認定済み`,ok:sc>=2},
-    {l:'確認テスト合格（80点以上）',s:ST.testSubmitted?`スコア: ${ST.testScore}点`:tu?'受験可能':'ロック中',ok:testPass},
+    {l:'確認テスト合格（80点以上）',s:ST.testSubmitted?`スコア: ${ST.testScore}点`:testUnlockedDesc(),ok:testPass},
   ];
   const dn=conds.filter(c=>c.ok).length;
   return`
@@ -1368,6 +1450,8 @@ async function loadProgress(){
     var tr=r1.data[0];
     TRAINER_ID=tr.id;
     FACILITY_ID=tr.facility_id||null;
+    SELF_NAME=tr.name||'';
+    SELF_EMAIL=tr.email||'';
     MENTORED_BY=tr.mentored_by||null;
     MENTOR_NAME='';
     if(tr.mentored_by){
@@ -1378,6 +1462,7 @@ async function loadProgress(){
     if(tr.facility_id){ var rf=await _sb.from('facilities').select('name').eq('id',tr.facility_id).maybeSingle(); if(rf.data) facName=rf.data.name; }
     updateIdentity(tr, facName);
     await loadCandidates();
+    await loadTestRecord();
     var r2=await _sb.from('trainer_progress').select('*').eq('trainer_id',TRAINER_ID).maybeSingle();
     if(r2.error){ console.warn('trainer_progress read failed (table not created yet?):', r2.error.message); }
     else { hydrate(r2.data); }

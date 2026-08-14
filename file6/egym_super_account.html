@@ -123,6 +123,7 @@ var NAV=[
   {k:'home',     i:'ti-home',     l:'ホーム'},
   {k:'facilities',i:'ti-building', l:'施設管理'},
   {k:'trainers', i:'ti-users',    l:'全トレーナー'},
+  {k:'tests',    i:'ti-clipboard-check',l:'テスト'},
   {k:'reports',  i:'ti-chart-bar',l:'レポート'},
 ];
 
@@ -146,7 +147,7 @@ function toast(msg){
 
 function render(){
   document.getElementById('content').scrollTop=0;
-  var fns={home:rHome,facilities:rFacilities,trainers:rTrainers,reports:rReports};
+  var fns={home:rHome,facilities:rFacilities,trainers:rTrainers,tests:rTests,reports:rReports};
   document.getElementById('content').innerHTML=(fns[ST.page]||rHome)();
   document.getElementById('modal-slot').innerHTML=ST.modal?rModal():'';
 }
@@ -615,6 +616,10 @@ function rModal(){
     return h2;
   }
 
+  if(ST.modal && ST.modal.indexOf('testreport|')===0){
+    return rTestReportModal(ST.modal.split('|')[1]);
+  }
+
   return '';
 }
 
@@ -680,9 +685,115 @@ async function doAddFac(){
 }
 
 /* ══════════════════════════════
+   テスト解放申請 ＆ テストレポート（Super管理者）
+══════════════════════════════ */
+function escS(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+
+function rTests(){
+  var pending = TEST_RECORDS.filter(function(r){return r.unlock_status==='requested';});
+  var submitted = TEST_RECORDS.filter(function(r){return r.submitted_at;});
+  var html='';
+  // A. テスト解放申請
+  html+='<div style="font-size:15px;font-weight:700;margin-bottom:4px">テスト解放申請 '+(pending.length?('('+pending.length+')'):'')+'</div>';
+  html+='<div style="font-size:12px;color:var(--text3);margin-bottom:12px">Star2/Star3 トレーナーからのテスト解放申請を承認/却下します。</div>';
+  if(pending.length===0){
+    html+='<div style="padding:20px;text-align:center;color:var(--text3);font-size:13px;background:var(--card);border:1px solid var(--border);border-radius:var(--r);margin-bottom:22px">保留中の申請はありません</div>';
+  } else {
+    pending.forEach(function(r){
+      var lvl=(r.star_level==='star3')?'★★★ Star3':'★★ Star2';
+      html+='<div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:10px">'
+        +'<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px">'
+        +'<div style="min-width:0"><div style="font-size:14px;font-weight:700">'+escS(r.trainer_name||'(氏名未設定)')+'</div>'
+        +'<div style="font-size:11px;color:var(--text3)">'+escS(r.trainer_email||'')+' · '+lvl+'</div></div>'
+        +'<span class="tag" style="background:var(--amber-l);color:var(--amber)">申請中</span></div>'
+        +'<div style="display:flex;gap:8px">'
+        +'<button class="btn btnsm btnd" style="flex:1" onclick="approveUnlock(\''+r.trainer_id+'\')"><i class="ti ti-check"></i> 承認（解放）</button>'
+        +'<button class="btn btnsm" style="flex:1;color:var(--red)" onclick="rejectUnlock(\''+r.trainer_id+'\')"><i class="ti ti-x"></i> 却下</button>'
+        +'</div></div>';
+    });
+  }
+  // B. テストレポート
+  html+='<div style="font-size:15px;font-weight:700;margin:22px 0 4px">テストレポート '+(submitted.length?('('+submitted.length+')'):'')+'</div>';
+  html+='<div style="font-size:12px;color:var(--text3);margin-bottom:12px">提出された確認テストの結果一覧。タップで詳細（回答・AIフィードバック）を表示します。</div>';
+  if(submitted.length===0){
+    html+='<div style="padding:20px;text-align:center;color:var(--text3);font-size:13px;background:var(--card);border:1px solid var(--border);border-radius:var(--r)">提出されたテストはありません</div>';
+  } else {
+    submitted.forEach(function(r){
+      var lvl=(r.star_level==='star3')?'★★★ Star3':'★★ Star2';
+      var pass=!!r.passed;
+      html+='<div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:10px;cursor:pointer" onclick="ST.modal=\'testreport|'+r.trainer_id+'\';render()">'
+        +'<div style="display:flex;justify-content:space-between;align-items:center;gap:10px">'
+        +'<div style="min-width:0"><div style="font-size:14px;font-weight:700">'+escS(r.trainer_name||'(氏名未設定)')+'</div>'
+        +'<div style="font-size:11px;color:var(--text3)">'+escS(r.trainer_email||'')+' · '+lvl+(r.submitted_at?(' · '+new Date(r.submitted_at).toLocaleDateString('ja-JP')):'')+'</div></div>'
+        +'<div style="display:flex;align-items:center;gap:10px;flex-shrink:0">'
+        +'<div style="font-size:20px;font-weight:700;color:'+(pass?'var(--green)':'var(--red)')+'">'+(r.score!=null?r.score:'-')+'<span style="font-size:11px;color:var(--text3)">点</span></div>'
+        +'<span class="tag" style="background:'+(pass?'var(--green-l)':'var(--red-l)')+';color:'+(pass?'var(--green)':'var(--red)')+'">'+(pass?'合格':'不合格')+'</span>'
+        +'<i class="ti ti-chevron-right" style="color:var(--text3)"></i></div></div></div>';
+    });
+  }
+  return html;
+}
+
+function rTestReportModal(trainerId){
+  var r=TEST_RECORDS.find(function(x){return x.trainer_id===trainerId;});
+  if(!r) return '';
+  var rep=r.report||{}; var items=rep.items||[];
+  var pass=!!r.passed; var lvl=(r.star_level==='star3')?'★★★ Star3':'★★ Star2';
+  var h='<div class="modal-bg" onclick="if(event.target===this){ST.modal=null;render()}">'
+    +'<div class="modal" style="max-height:88vh;overflow-y:auto"><div class="modal-handle"></div>'
+    +'<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:8px">'
+    +'<div style="min-width:0"><div style="font-size:17px;font-weight:700">'+escS(r.trainer_name||'(氏名未設定)')+'</div>'
+    +'<div style="font-size:12px;color:var(--text3)">'+escS(r.trainer_email||'')+' · '+lvl+'</div></div>'
+    +'<div style="text-align:right;flex-shrink:0"><div style="font-size:26px;font-weight:700;color:'+(pass?'var(--green)':'var(--red)')+'">'+(r.score!=null?r.score:'-')+'<span style="font-size:12px;color:var(--text3)">点</span></div>'
+    +'<span class="tag" style="background:'+(pass?'var(--green-l)':'var(--red-l)')+';color:'+(pass?'var(--green)':'var(--red)')+'">'+(pass?'合格':'不合格')+'</span></div></div>';
+  if(rep.overall_comment){
+    h+='<div style="margin:10px 0;padding:12px;background:var(--bg);border-radius:var(--r-sm);font-size:13px;color:var(--text2);line-height:1.7"><b>総評:</b> '+escS(rep.overall_comment)+'</div>';
+  }
+  if(items.length===0){
+    h+='<div style="padding:16px;text-align:center;color:var(--text3);font-size:13px">回答内容がありません</div>';
+  }
+  items.forEach(function(it){
+    h+='<div style="border:1px solid var(--border);border-radius:var(--r-sm);margin-bottom:10px;overflow:hidden">'
+      +'<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;padding:10px 12px;background:var(--bg)">'
+      +'<div style="flex:1;min-width:0"><div style="font-size:11px;color:var(--text3);font-weight:700">Q'+it.num+(it.section?(' · '+escS(it.section)):'')+'</div>'
+      +'<div style="font-size:13px;font-weight:700;line-height:1.4">'+escS(it.question)+'</div></div>'
+      +(it.scored?('<div style="text-align:center;flex-shrink:0"><div style="font-size:20px;font-weight:700;color:'+(it.score>=8?'var(--green)':it.score>=5?'var(--amber)':'var(--red)')+'">'+(it.score!=null?it.score:'-')+'</div><div style="font-size:10px;color:var(--text3)">/10</div></div>'):'<span class="tag" style="background:var(--amber-l);color:var(--amber);flex-shrink:0">自己確認</span>')
+      +'</div><div style="padding:10px 12px">'
+      +'<div style="font-size:11px;font-weight:700;color:var(--text3);margin-bottom:4px">回答</div>'
+      +'<div style="background:var(--bg);border-radius:var(--r-sm);padding:10px;font-size:13px;line-height:1.7;white-space:pre-wrap;color:var(--text2)">'+escS(it.answer||'（未回答）')+'</div>'
+      +(it.feedback?('<div style="font-size:11px;font-weight:700;color:var(--purple);margin:8px 0 3px">AIフィードバック</div><div style="font-size:13px;color:var(--text2);line-height:1.7">'+escS(it.feedback)+'</div>'):'')
+      +'</div></div>';
+  });
+  h+='<button class="btn btnfull" style="margin-top:8px" onclick="ST.modal=null;render()">閉じる</button>';
+  h+='</div></div>';
+  return h;
+}
+
+async function approveUnlock(trainerId){
+  try{
+    var now=new Date().toISOString();
+    var up=await _sb.from('test_records').update({unlock_status:'approved', unlock_decided_at:now, updated_at:now}).eq('trainer_id',trainerId);
+    if(up.error) throw up.error;
+    toast('テスト解放を承認しました');
+    await loadAllData();
+  }catch(err){ alert('承認に失敗しました: '+(err.message||'')); }
+}
+async function rejectUnlock(trainerId){
+  if(!confirm('このテスト解放申請を却下しますか？'))return;
+  try{
+    var now=new Date().toISOString();
+    var up=await _sb.from('test_records').update({unlock_status:'rejected', unlock_decided_at:now, updated_at:now}).eq('trainer_id',trainerId);
+    if(up.error) throw up.error;
+    toast('申請を却下しました');
+    await loadAllData();
+  }catch(err){ alert('却下に失敗しました: '+(err.message||'')); }
+}
+
+/* ══════════════════════════════
    SUPABASE DATA LAYER
 ══════════════════════════════ */
 var FACILITIES = [];
+var TEST_RECORDS = [];
 var LOADING = true;
 var LOAD_ERROR = null;
 
@@ -731,6 +842,12 @@ async function loadAllData(){
         trainers: trainers,
       };
     });
+
+    // 4. Load test records (テスト解放申請＋提出結果)
+    try{
+      var {data: tRecs} = await _sb.from('test_records').select('*').order('updated_at',{ascending:false});
+      TEST_RECORDS = tRecs||[];
+    }catch(e){ console.warn('test_records load failed:', e); TEST_RECORDS=[]; }
 
     LOADING=false;
   } catch(err){
