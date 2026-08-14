@@ -319,7 +319,7 @@ function rHome(){
     '<div class="card"><div class="ctitle">認定までの手順</div>'+
     '<div class="step"><div class="sdot '+(clComplete()?'s-done':'s-prog')+'"><i class="ti '+(clComplete()?'ti-check':'ti-checkbox')+'" style="font-size:13px"></i></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">チェックリストを全て完了する</div><div style="font-size:11px;color:var(--text3);margin-top:3px">'+done+'/'+total+'項目完了（'+p+'%）</div></div><span class="tag '+(clComplete()?'td':'tp')+'">'+(clComplete()?'完了':'進行中')+'</span></div>'+
     '<div class="step"><div class="sdot '+(sc>=2?'s-done':'s-prog')+'"><i class="ti '+(sc>=2?'ti-check':'ti-star')+'" style="font-size:13px"></i></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">スター2を2名以上育成・認定する</div><div style="font-size:11px;color:var(--text3);margin-top:3px">現在 '+sc+'名認定済み（認定状況タブで管理）</div></div><span class="tag '+(sc>=2?'td':'tp')+'">'+(sc>=2?'達成':'進行中')+'</span></div>'+
-    '<div class="step" style="cursor:pointer" onclick="go(\'test\')"><div class="sdot '+(tp?'s-done':testUnlocked()?'s-prog':'s-lock')+'"><i class="ti '+(tp?'ti-check':'ti-clipboard-check')+'" style="font-size:13px"></i></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">確認テストに合格する</div><div style="font-size:11px;color:var(--text3);margin-top:3px">'+(ST.testSubmitted?('スコア: '+ST.testScore+'点（80点以上で合格）'):testUnlocked()?'受験可能 → タップ':'チェックリスト＋プログラム①②完了後に解放')+'</div></div><span class="tag '+(tp?'td':ST.testSubmitted?'tf':'tg')+'">'+(tp?'合格':ST.testSubmitted?'不合格':'未受験')+'</span></div>'+
+    '<div class="step" style="cursor:pointer" onclick="go(\'test\')"><div class="sdot '+(tp?'s-done':testUnlocked()?'s-prog':'s-lock')+'"><i class="ti '+(tp?'ti-check':'ti-clipboard-check')+'" style="font-size:13px"></i></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">確認テストに合格する</div><div style="font-size:11px;color:var(--text3);margin-top:3px">'+(ST.testSubmitted?('スコア: '+ST.testScore+'点（80点以上で合格）'):testUnlocked()?'受験可能 → タップ':'チェック・スター2認定(2名)・B/A入力の完了後に解放')+'</div></div><span class="tag '+(tp?'td':ST.testSubmitted?'tf':'tg')+'">'+(tp?'合格':ST.testSubmitted?'不合格':'未受験')+'</span></div>'+
     '<div class="step"><div class="sdot s-lock"><i class="ti ti-award" style="font-size:13px"></i></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">JHTJapanによる最終認定</div><div style="font-size:11px;color:var(--text3);margin-top:3px">スター3はJHTJapanが認定します</div></div><span class="tag tg">待機中</span></div>'+
     '</div>'+
     '<div class="card"><div class="ctitle">グループ別 進捗</div>'+
@@ -530,7 +530,7 @@ function rCert(){
     '<div class="step"><div class="sdot '+(clComplete()?'s-done':'s-prog')+'"><i class="ti '+(clComplete()?'ti-check':'ti-checkbox')+'" style="font-size:13px"></i></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">チェックリスト 全項目完了</div><div style="font-size:11px;color:var(--text3);margin-top:3px">'+doneCount()+'/'+totalCount()+'項目（'+p+'%）</div></div><span class="tag '+(clComplete()?'td':'tp')+'">'+(clComplete()?'完了':'未完了')+'</span></div>'+
     '<div class="step"><div class="sdot '+(sc>=2?'s-done':'s-prog')+'"><i class="ti '+(sc>=2?'ti-check':'ti-star')+'" style="font-size:13px"></i></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">スター2を2名以上育成・認定する</div><div style="font-size:11px;color:var(--text3);margin-top:3px">現在 '+sc+'名認定済み</div></div><span class="tag '+(sc>=2?'td':'tp')+'">'+(sc>=2?'達成':'進行中')+'</span></div>'+
     '<div class="step" style="cursor:pointer" onclick="go(\'beforeafter\')"><div class="sdot '+(baOk?'s-done':'s-prog')+'"><i class="ti '+(baOk?'ti-check':'ti-chart-line')+'" style="font-size:13px"></i></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">お客様2名のB/Aデータ作成（Before・Mid・After）</div><div style="font-size:11px;color:var(--text3);margin-top:3px">'+(baOk?'全項目入力済み':'未入力の項目があります → タップして記録')+'</div></div><span class="tag '+(baOk?'td':'tp')+'">'+(baOk?'完了':'未完了')+'</span></div>'+
-    '<div class="step" style="cursor:pointer" onclick="go(\'test\')"><div class="sdot '+(tp?'s-done':testUnlocked()?'s-prog':'s-lock')+'"><i class="ti '+(tp?'ti-check':'ti-clipboard-check')+'" style="font-size:13px"></i></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">確認テスト合格（80点以上）</div><div style="font-size:11px;color:var(--text3);margin-top:3px">'+(ST.testSubmitted?('スコア: '+ST.testScore+'点'):testUnlocked()?'受験可能 → タップ':'チェックリスト＋プログラム①②完了後に解放')+'</div></div><span class="tag '+(tp?'td':ST.testSubmitted?'tf':'tp')+'">'+(tp?'合格':ST.testSubmitted?'不合格':'未受験')+'</span></div>'+
+    '<div class="step" style="cursor:pointer" onclick="go(\'test\')"><div class="sdot '+(tp?'s-done':testUnlocked()?'s-prog':'s-lock')+'"><i class="ti '+(tp?'ti-check':'ti-clipboard-check')+'" style="font-size:13px"></i></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">確認テスト合格（80点以上）</div><div style="font-size:11px;color:var(--text3);margin-top:3px">'+(ST.testSubmitted?('スコア: '+ST.testScore+'点'):testUnlocked()?'受験可能 → タップ':'チェック・スター2認定(2名)・B/A入力の完了後に解放')+'</div></div><span class="tag '+(tp?'td':ST.testSubmitted?'tf':'tp')+'">'+(tp?'合格':ST.testSubmitted?'不合格':'未受験')+'</span></div>'+
     '</div>';
 
   // STAR2 MANAGEMENT
@@ -772,7 +772,7 @@ const S3_TEST_SECTIONS = [
 var _testTimer=null;
 function p1Done(){return ST.p1.phases.every(function(p){return p.done;});}
 function p2Done(){return ST.p2.phases.every(function(p){return p.done;});}
-function testUnlocked(){return clComplete()&&p1Done()&&p2Done();}
+function testUnlocked(){return clComplete()&&certifiedCount()>=2&&baAllComplete();}
 function testPass(){return ST.testSubmitted&&ST.testScore>=80;}
 function testAllItems(){return S3_TEST_SECTIONS.flatMap(function(s){return s.questions;});}
 function testAnsweredCount(){return testAllItems().filter(function(q){return (ST.testAnswers[q.id]||'').trim().length>10;}).length;}
@@ -814,15 +814,16 @@ function rTest(){
       +'<div style="font-size:17px;font-weight:700;margin-bottom:8px">テストはロック中</div>'
       +'<div style="font-size:13px;color:var(--text2);margin-bottom:20px">以下の条件を全て満たすと解放されます</div>'
       +[{l:'チェックリスト 全項目完了',ok:clComplete(),s:clPct()+'%'},
-        {l:'プログラム① 全フェーズ完了',ok:p1Done(),s:''},
-        {l:'プログラム② 全フェーズ完了',ok:p2Done(),s:''}].map(function(it){
+        {l:'スター2を2名以上 育成・認定',ok:certifiedCount()>=2,s:certifiedCount()+'/2'},
+        {l:'お客様2名のB/Aデータ入力（Before/Mid/After）',ok:baAllComplete(),s:''}].map(function(it){
           return '<div style="display:flex;align-items:center;gap:10px;padding:12px;background:var(--bg);border-radius:var(--r-sm);margin-bottom:8px;font-size:13px;text-align:left">'
             +'<i class="ti '+(it.ok?'ti-check':'ti-x')+'" style="color:'+(it.ok?'var(--green)':'var(--red)')+';font-size:20px;flex-shrink:0"></i>'
             +'<span>'+it.l+(it.s?' ('+it.s+')':'')+'</span></div>';
         }).join('')
       +'<div style="display:flex;flex-direction:column;gap:8px;margin-top:20px">'
       +'<button class="btn btnpur btnfull" style="padding:13px" onclick="go(&quot;checklist&quot;)"><i class="ti ti-checkbox"></i> チェックリストへ</button>'
-      +'<button class="btn btnfull" style="padding:13px" onclick="go(&quot;schedule&quot;)"><i class="ti ti-calendar"></i> プログラムへ</button>'
+      +'<button class="btn btnfull" style="padding:13px" onclick="go(&quot;cert&quot;)"><i class="ti ti-award"></i> スター2育成・認定へ</button>'
+      +'<button class="btn btnfull" style="padding:13px" onclick="go(&quot;beforeafter&quot;)"><i class="ti ti-chart-line"></i> B/A記録へ</button>'
       +'</div></div>';
   }
 
