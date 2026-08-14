@@ -257,6 +257,7 @@ const ST={
   candidates:[], // Supabaseの実データ（mentored_by=自分のスター2）
   certified:[],
   modal:null,
+  testAnswers:{},testSubmitted:false,testScore:null,testResult:null,testStartedAt:null,
 };
 
 function allItems(){return GROUPS.flatMap(g=>g.sections.flatMap(s=>s.items));}
@@ -282,7 +283,7 @@ function diffBadge(pre,post,goodUp){
   return '<span class="diff-badge '+cls+'">'+sign+d.toFixed(1)+'</span>';
 }
 
-const NAV=[{k:'home',i:'ti-home',l:'ホーム'},{k:'checklist',i:'ti-checkbox',l:'チェック'},{k:'beforeafter',i:'ti-chart-line',l:'B/A記録'},{k:'schedule',i:'ti-calendar',l:'プログラム'},{k:'cert',i:'ti-award',l:'認定状況'}];
+const NAV=[{k:'home',i:'ti-home',l:'ホーム'},{k:'checklist',i:'ti-checkbox',l:'チェック'},{k:'beforeafter',i:'ti-chart-line',l:'B/A'},{k:'schedule',i:'ti-calendar',l:'プログラム'},{k:'test',i:'ti-clipboard-check',l:'テスト'},{k:'cert',i:'ti-award',l:'認定'}];
 
 function go(pg){
   ST.page=pg;ST.modal=null;ST.cal.show=false;
@@ -300,7 +301,7 @@ function toast(msg){const ex=document.getElementById('_toast');if(ex)ex.remove()
 
 function render(){
   document.getElementById('content').scrollTop=0;
-  const fns={home:rHome,checklist:rChecklist,beforeafter:rBeforeAfter,schedule:rSchedule,cert:rCert};
+  const fns={home:rHome,checklist:rChecklist,beforeafter:rBeforeAfter,schedule:rSchedule,test:rTest,cert:rCert};
   document.getElementById('content').innerHTML=(fns[ST.page]||rHome)();
   document.getElementById('modal-slot').innerHTML=ST.modal?rModal():'';
   saveP();
@@ -309,15 +310,16 @@ function render(){
 /* HOME */
 function rHome(){
   const p=clPct();const done=doneCount();const total=totalCount();const sc=certifiedCount();
+  const tp=testPass();const canApply=clComplete()&&sc>=2&&baAllComplete()&&tp;
   return '<div class="g3">'+
     '<div class="met"><div class="mv" style="color:var(--purple)">'+p+'%</div><div class="ml">チェック完了率</div><div class="pb"><div class="pf pfp" style="width:'+p+'%"></div></div></div>'+
     '<div class="met"><div class="mv" style="color:'+(sc>=2?'var(--green)':'var(--amber)')+'">'+sc+'<span style="font-size:11px;color:var(--text3)">/2</span></div><div class="ml">★★育成数</div><div class="pb"><div class="pf pfg" style="width:'+Math.min(100,sc/2*100)+'%"></div></div></div>'+
-    '<div class="met"><div class="mv" style="font-size:13px;padding-top:2px">'+(clComplete()&&sc>=2?'<span style="color:var(--amber)">申請可</span>':'<span style="color:var(--text3)">待機中</span>')+'</div><div class="ml">認定</div></div>'+
+    '<div class="met"><div class="mv" style="font-size:13px;padding-top:2px">'+(canApply?'<span style="color:var(--amber)">申請可</span>':'<span style="color:var(--text3)">待機中</span>')+'</div><div class="ml">認定</div></div>'+
     '</div>'+
     '<div class="card"><div class="ctitle">認定までの手順</div>'+
     '<div class="step"><div class="sdot '+(clComplete()?'s-done':'s-prog')+'"><i class="ti '+(clComplete()?'ti-check':'ti-checkbox')+'" style="font-size:13px"></i></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">チェックリストを全て完了する</div><div style="font-size:11px;color:var(--text3);margin-top:3px">'+done+'/'+total+'項目完了（'+p+'%）</div></div><span class="tag '+(clComplete()?'td':'tp')+'">'+(clComplete()?'完了':'進行中')+'</span></div>'+
     '<div class="step"><div class="sdot '+(sc>=2?'s-done':'s-prog')+'"><i class="ti '+(sc>=2?'ti-check':'ti-star')+'" style="font-size:13px"></i></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">スター2を2名以上育成・認定する</div><div style="font-size:11px;color:var(--text3);margin-top:3px">現在 '+sc+'名認定済み（認定状況タブで管理）</div></div><span class="tag '+(sc>=2?'td':'tp')+'">'+(sc>=2?'達成':'進行中')+'</span></div>'+
-    '<div class="step"><div class="sdot s-lock"><i class="ti ti-clipboard-check" style="font-size:13px"></i></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">確認テストに合格する</div><div style="font-size:11px;color:var(--text3);margin-top:3px">テスト内容は準備中です</div></div><span class="tag tg">準備中</span></div>'+
+    '<div class="step" style="cursor:pointer" onclick="go(\'test\')"><div class="sdot '+(tp?'s-done':testUnlocked()?'s-prog':'s-lock')+'"><i class="ti '+(tp?'ti-check':'ti-clipboard-check')+'" style="font-size:13px"></i></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">確認テストに合格する</div><div style="font-size:11px;color:var(--text3);margin-top:3px">'+(ST.testSubmitted?('スコア: '+ST.testScore+'点（80点以上で合格）'):testUnlocked()?'受験可能 → タップ':'チェックリスト＋プログラム①②完了後に解放')+'</div></div><span class="tag '+(tp?'td':ST.testSubmitted?'tf':'tg')+'">'+(tp?'合格':ST.testSubmitted?'不合格':'未受験')+'</span></div>'+
     '<div class="step"><div class="sdot s-lock"><i class="ti ti-award" style="font-size:13px"></i></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">JHTJapanによる最終認定</div><div style="font-size:11px;color:var(--text3);margin-top:3px">スター3はJHTJapanが認定します</div></div><span class="tag tg">待機中</span></div>'+
     '</div>'+
     '<div class="card"><div class="ctitle">グループ別 進捗</div>'+
@@ -517,7 +519,7 @@ function baAllComplete(){
   });
 }
 function rCert(){
-  const p=clPct();const sc=certifiedCount();const baOk=baAllComplete();const certified=clComplete()&&sc>=2&&baOk;
+  const p=clPct();const sc=certifiedCount();const baOk=baAllComplete();const tp=testPass();const certified=clComplete()&&sc>=2&&baOk&&tp;
   let html='<div class="card" style="text-align:center;padding:28px 16px">'+
     '<div style="width:92px;height:92px;border-radius:50%;background:'+(certified?'var(--purple-l)':'var(--bg2)')+';border:3px solid '+(certified?'var(--purple-m)':'var(--border)')+';display:flex;align-items:center;justify-content:center;margin:0 auto 16px;'+(certified?'':'opacity:.35;filter:grayscale(1)')+'"><i class="ti ti-award" style="font-size:46px;color:'+(certified?'var(--purple)':'var(--text3)')+'"></i></div>'+
     '<div style="font-size:17px;font-weight:700;margin-bottom:4px">'+(certified?'スター3 認定バッジ解除！':'スター3 認定バッジ')+'</div>'+
@@ -528,7 +530,7 @@ function rCert(){
     '<div class="step"><div class="sdot '+(clComplete()?'s-done':'s-prog')+'"><i class="ti '+(clComplete()?'ti-check':'ti-checkbox')+'" style="font-size:13px"></i></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">チェックリスト 全項目完了</div><div style="font-size:11px;color:var(--text3);margin-top:3px">'+doneCount()+'/'+totalCount()+'項目（'+p+'%）</div></div><span class="tag '+(clComplete()?'td':'tp')+'">'+(clComplete()?'完了':'未完了')+'</span></div>'+
     '<div class="step"><div class="sdot '+(sc>=2?'s-done':'s-prog')+'"><i class="ti '+(sc>=2?'ti-check':'ti-star')+'" style="font-size:13px"></i></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">スター2を2名以上育成・認定する</div><div style="font-size:11px;color:var(--text3);margin-top:3px">現在 '+sc+'名認定済み</div></div><span class="tag '+(sc>=2?'td':'tp')+'">'+(sc>=2?'達成':'進行中')+'</span></div>'+
     '<div class="step" style="cursor:pointer" onclick="go(\'beforeafter\')"><div class="sdot '+(baOk?'s-done':'s-prog')+'"><i class="ti '+(baOk?'ti-check':'ti-chart-line')+'" style="font-size:13px"></i></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">お客様2名のB/Aデータ作成（Before・Mid・After）</div><div style="font-size:11px;color:var(--text3);margin-top:3px">'+(baOk?'全項目入力済み':'未入力の項目があります → タップして記録')+'</div></div><span class="tag '+(baOk?'td':'tp')+'">'+(baOk?'完了':'未完了')+'</span></div>'+
-    '<div class="step"><div class="sdot s-lock"><i class="ti ti-clipboard-check" style="font-size:13px"></i></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">確認テスト合格</div><div style="font-size:11px;color:var(--text3);margin-top:3px">テスト内容は準備中です</div></div><span class="tag tg">準備中</span></div>'+
+    '<div class="step" style="cursor:pointer" onclick="go(\'test\')"><div class="sdot '+(tp?'s-done':testUnlocked()?'s-prog':'s-lock')+'"><i class="ti '+(tp?'ti-check':'ti-clipboard-check')+'" style="font-size:13px"></i></div><div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700">確認テスト合格（80点以上）</div><div style="font-size:11px;color:var(--text3);margin-top:3px">'+(ST.testSubmitted?('スコア: '+ST.testScore+'点'):testUnlocked()?'受験可能 → タップ':'チェックリスト＋プログラム①②完了後に解放')+'</div></div><span class="tag '+(tp?'td':ST.testSubmitted?'tf':'tp')+'">'+(tp?'合格':ST.testSubmitted?'不合格':'未受験')+'</span></div>'+
     '</div>';
 
   // STAR2 MANAGEMENT
@@ -574,6 +576,7 @@ function rCert(){
     if(!clComplete())missing.push('チェックリストの完了');
     if(sc<2)missing.push('スター2の育成・認定（あと'+(2-sc)+'名）');
     if(!baOk)missing.push('お客様B/Aデータの入力（Before/Mid/After）');
+    if(!tp)missing.push('確認テストの合格（80点以上）');
     html+='<div class="card" style="margin-top:8px"><div style="font-size:13px;font-weight:700;color:var(--text2);margin-bottom:10px">未達成の条件</div>'
       +missing.map(function(m){return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;font-size:12px;color:var(--text2)"><i class="ti ti-circle-dot" style="color:var(--amber);font-size:14px"></i>'+m+'</div>';}).join('')
       +'<button class="btn btnfull" style="padding:14px;margin-top:10px;opacity:.4;cursor:not-allowed" disabled><i class="ti ti-send"></i> JHTJapanへ申請通知を送る</button></div>';
@@ -716,6 +719,262 @@ async function doCertify(cid){
 }
 
 /* ══════════════════════════════
+   確認テスト（スター3・AI採点）
+   ── 模範解答（ANSWER_KEY）はサーバー側 grade-test Edge Function が保持。
+      設問IDに対応するキーが無ければ、設問文のみでAIが採点する（フォールバック）。
+   ── ※設問・採点基準は下書き。JHTJapan にて内容を確定してください。
+══════════════════════════════ */
+const S3_TEST_SECTIONS = [
+  {
+    title:'マスタートレーナーの役割・指導', icon:'ti-users',
+    questions:[
+      {id:'s3q1',text:'スター2トレーナーを育成する際、どのような観点で指導・評価しますか？重要なポイントを3つ挙げて説明してください。',scored:true},
+      {id:'s3q2',text:'新しく着任したトレーナーがEGYMシステムに不慣れな場合、どのような順序でオンボーディングを進めますか？',scored:true},
+      {id:'s3q3',text:'トレーナー間で指導方法にばらつきが出ないよう、店舗としてどのように標準化・品質管理を行いますか？',scored:true},
+    ]
+  },
+  {
+    title:'高度なプログラム設計', icon:'ti-barbell',
+    questions:[
+      {id:'s3q4',text:'会員の目的が複数（例：減量＋筋力向上＋姿勢改善）にまたがる場合、EGYMプログラムをどのように組み合わせて設計しますか？',scored:true},
+      {id:'s3q5',text:'BioAgeの各要素（筋力・柔軟性・代謝・持久力）のうち特定の項目だけが極端に低い会員に対し、どのようにトレーニングを設計しますか？',scored:true},
+      {id:'s3q6',text:'高齢者やリハビリ目的の会員に対して、負荷方法とフェーズ設計をどのように調整しますか？安全面の配慮も含めて説明してください。',scored:true},
+    ]
+  },
+  {
+    title:'店舗運営・データ活用', icon:'ti-chart-bar',
+    questions:[
+      {id:'s3q7',text:'会員の継続率（リテンション）を高めるために、EGYMのデータ（来館頻度・BioAge・タスク）をどのように活用しますか？',scored:true},
+      {id:'s3q8',text:'店舗のトレーニング成果を経営層や会員に示す際、どのような指標・データを用いて説明しますか？',scored:true},
+      {id:'s3q9',text:'タスク機能を店舗全体で運用する上で、スター3として仕組み化・チーム運用のために工夫すべき点を挙げてください。',scored:true},
+    ]
+  },
+  {
+    title:'ケーススタディー（上級）', icon:'ti-user',
+    caseDesc:'【ケース】担当するスター2トレーナーの1人が、担当会員の退会が続き成果が出ていない。データ上は来館頻度・BioAgeの改善が停滞している。',
+    questions:[
+      {id:'s3q10',text:'この状況の原因をどのように分析しますか？確認すべきデータと観点を挙げてください。',scored:true},
+      {id:'s3q11',text:'担当スター2トレーナーに対してどのように指導・サポートしますか？',scored:true},
+      {id:'s3q12',text:'会員の退会を防ぎ成果を改善するために、具体的にどのような打ち手を実行しますか？',scored:true},
+    ]
+  },
+  {
+    title:'自己確認', icon:'ti-tool',
+    note:'※この3問はご自身で読んで自己確認します。AI採点は行いません。',
+    questions:[
+      {id:'s3ts1',text:'トレーナー間で意見の対立が起きた場合、リーダーとしてどのように調整しますか？',scored:false},
+      {id:'s3ts2',text:'EGYM機器のトラブルやアップデート時、店舗としてどのように対応体制を整えますか？',scored:false},
+      {id:'s3ts3',text:'あなた自身がマスタートレーナーとして今後伸ばしたいスキルと、その理由を述べてください。',scored:false},
+    ]
+  },
+];
+
+var _testTimer=null;
+function p1Done(){return ST.p1.phases.every(function(p){return p.done;});}
+function p2Done(){return ST.p2.phases.every(function(p){return p.done;});}
+function testUnlocked(){return clComplete()&&p1Done()&&p2Done();}
+function testPass(){return ST.testSubmitted&&ST.testScore>=80;}
+function testAllItems(){return S3_TEST_SECTIONS.flatMap(function(s){return s.questions;});}
+function testAnsweredCount(){return testAllItems().filter(function(q){return (ST.testAnswers[q.id]||'').trim().length>10;}).length;}
+function testTotalQ(){return testAllItems().length;}
+function testScoredCount(){return testAllItems().filter(function(q){return q.scored;}).length;}
+function testDeadline(){return ST.testStartedAt?(ST.testStartedAt+(5*24*60*60*1000)):null;}
+function testRemaining(){var dl=testDeadline();return dl?Math.max(0,dl-Date.now()):null;}
+function testFmtRemaining(){
+  var ms=testRemaining();if(ms===null)return '未開始';
+  var d=Math.floor(ms/(24*60*60*1000));
+  var h=Math.floor((ms%(24*60*60*1000))/(60*60*1000));
+  var m=Math.floor((ms%(60*60*1000))/60000);
+  if(d>0)return d+'日 '+h+'時間';
+  if(h>0)return h+'時間 '+m+'分';
+  return m+'分';
+}
+function saveTestState(){
+  try{localStorage.setItem('egym_s3_test',JSON.stringify({
+    answers:ST.testAnswers,startedAt:ST.testStartedAt,
+    submitted:ST.testSubmitted,score:ST.testScore,result:ST.testResult
+  }));}catch(e){}
+}
+function loadTestState(){
+  try{
+    var raw=localStorage.getItem('egym_s3_test');
+    if(!raw)return;
+    var d=JSON.parse(raw);
+    ST.testAnswers=d.answers||{};ST.testStartedAt=d.startedAt||null;
+    ST.testSubmitted=d.submitted||false;ST.testScore=(d.score!=null)?d.score:null;
+    ST.testResult=d.result||null;
+  }catch(e){}
+}
+
+function rTest(){
+  loadTestState();
+  if(!testUnlocked()){
+    return '<div class="card" style="text-align:center;padding:40px 20px">'
+      +'<i class="ti ti-lock" style="font-size:52px;color:var(--text3);display:block;margin-bottom:14px"></i>'
+      +'<div style="font-size:17px;font-weight:700;margin-bottom:8px">テストはロック中</div>'
+      +'<div style="font-size:13px;color:var(--text2);margin-bottom:20px">以下の条件を全て満たすと解放されます</div>'
+      +[{l:'チェックリスト 全項目完了',ok:clComplete(),s:clPct()+'%'},
+        {l:'プログラム① 全フェーズ完了',ok:p1Done(),s:''},
+        {l:'プログラム② 全フェーズ完了',ok:p2Done(),s:''}].map(function(it){
+          return '<div style="display:flex;align-items:center;gap:10px;padding:12px;background:var(--bg);border-radius:var(--r-sm);margin-bottom:8px;font-size:13px;text-align:left">'
+            +'<i class="ti '+(it.ok?'ti-check':'ti-x')+'" style="color:'+(it.ok?'var(--green)':'var(--red)')+';font-size:20px;flex-shrink:0"></i>'
+            +'<span>'+it.l+(it.s?' ('+it.s+')':'')+'</span></div>';
+        }).join('')
+      +'<div style="display:flex;flex-direction:column;gap:8px;margin-top:20px">'
+      +'<button class="btn btnpur btnfull" style="padding:13px" onclick="go(&quot;checklist&quot;)"><i class="ti ti-checkbox"></i> チェックリストへ</button>'
+      +'<button class="btn btnfull" style="padding:13px" onclick="go(&quot;schedule&quot;)"><i class="ti ti-calendar"></i> プログラムへ</button>'
+      +'</div></div>';
+  }
+
+  if(!ST.testStartedAt){ST.testStartedAt=Date.now();saveTestState();}
+  if(ST.testSubmitted && ST.testResult){return rTestResult();}
+
+  var answered=testAnsweredCount();var total=testTotalQ();
+  var ms=testRemaining();var urgent=ms!==null&&ms<24*60*60*1000;
+
+  var html='<div class="card" style="padding:12px 14px;display:flex;align-items:center;justify-content:space-between">'
+    +'<div><div style="font-size:11px;color:var(--text2);font-weight:700">残り時間</div>'
+    +'<div style="font-size:14px;font-weight:700;color:'+(urgent?'var(--red)':'var(--text)')+'" id="test-timer">'+testFmtRemaining()+'</div></div>'
+    +'<div style="flex:1;height:6px;background:var(--bg2);border-radius:3px;overflow:hidden;margin:0 14px">'
+    +'<div class="pf pfp" style="width:'+Math.round(answered/total*100)+'%"></div></div>'
+    +'<div style="text-align:right"><div style="font-size:20px;font-weight:700">'+answered+'<span style="font-size:13px;color:var(--text3)">/'+total+'</span></div>'
+    +'<div style="font-size:10px;color:var(--text3)">回答済</div></div></div>';
+
+  html+='<div style="padding:10px 14px;background:var(--purple-l);border-radius:var(--r-sm);font-size:12px;color:var(--purple);margin-bottom:14px;line-height:1.6">'
+    +'<i class="ti ti-info-circle"></i> 回答は自動保存されます。5日以内に提出してください。AIが理解度を判断し80点以上で合格です。</div>';
+
+  var qNum=0;
+  S3_TEST_SECTIONS.forEach(function(sec){
+    html+='<div style="font-size:13px;font-weight:700;color:var(--purple);padding:8px 0 6px;border-bottom:2px solid var(--purple-m);margin-bottom:12px">'
+      +'<i class="ti '+sec.icon+'" style="font-size:14px"></i> '+sec.title+'</div>';
+    if(sec.note){
+      html+='<div style="padding:10px 12px;background:var(--amber-l);border-radius:var(--r-sm);font-size:12px;color:var(--amber);font-weight:700;margin-bottom:10px">'+sec.note+'</div>';
+    }
+    if(sec.caseDesc){
+      html+='<div style="background:var(--amber-l);border:1px solid var(--amber-m);border-radius:var(--r-sm);padding:12px;margin-bottom:12px;font-size:13px;font-weight:700">'+sec.caseDesc+'</div>';
+    }
+    sec.questions.forEach(function(q){
+      qNum++;
+      var ans=ST.testAnswers[q.id]||'';
+      html+='<div class="card" style="padding:14px">'
+        +'<div style="font-size:11px;color:var(--text3);font-weight:700;margin-bottom:6px">Q'+qNum+(sec.note?' ＜自己確認＞':'')+'</div>'
+        +'<div style="font-size:14px;font-weight:700;margin-bottom:10px;line-height:1.5">'+q.text+'</div>'
+        +'<textarea id="ta-'+q.id+'" placeholder="こちらに回答を入力してください..." '
+        +'style="width:100%;padding:11px;border:1.5px solid var(--border);border-radius:var(--r-sm);background:var(--card);color:var(--text);font-size:14px;line-height:1.7;resize:vertical;min-height:110px;font-family:inherit" '
+        +'oninput="onTestAnswer(&quot;'+q.id+'&quot;,this)" onblur="onTestAnswer(&quot;'+q.id+'&quot;,this)">'+(ans.replace(/</g,'&lt;').replace(/>/g,'&gt;'))+'</textarea>'
+        +'<div style="font-size:11px;color:var(--text3);text-align:right;margin-top:4px" id="cc-'+q.id+'">'+ans.length+' 文字</div>'
+        +'</div>';
+    });
+  });
+
+  html+='<div class="card" style="padding:18px">'
+    +'<div style="font-size:15px;font-weight:700;margin-bottom:6px">提出する</div>'
+    +'<div style="font-size:13px;color:var(--text2);margin-bottom:14px;line-height:1.6">'+testScoredCount()+'問がAIにより採点されます（80点以上で合格）。<br>自己確認3問は採点対象外です。</div>'
+    +'<button class="btn btng btnfull" style="padding:14px;font-size:15px" onclick="submitTestAI()"><i class="ti ti-send"></i> テストを提出してAI採点する</button>'
+    +'</div>';
+
+  clearInterval(_testTimer);
+  _testTimer=setInterval(function(){
+    var el=document.getElementById('test-timer');
+    if(el)el.textContent=testFmtRemaining();
+  },60000);
+
+  return html;
+}
+
+var _s3SaveTimers={};
+function onTestAnswer(qid,el){
+  ST.testAnswers[qid]=el.value;
+  var cc=document.getElementById('cc-'+qid);
+  if(cc)cc.textContent=el.value.length+' 文字';
+  clearTimeout(_s3SaveTimers[qid]);
+  _s3SaveTimers[qid]=setTimeout(function(){saveTestState();},800);
+  saveP();
+}
+
+async function submitTestAI(){
+  if(!ST.testStartedAt){ST.testStartedAt=Date.now();}
+  var answered=testAnsweredCount();
+  if(answered<testScoredCount()){if(!confirm('まだ'+(testTotalQ()-answered)+'問が未回答です。このまま提出しますか？'))return;}
+
+  document.getElementById('content').innerHTML='<div style="text-align:center;padding:60px 20px">'
+    +'<div style="width:48px;height:48px;border:3px solid var(--bg2);border-top-color:var(--purple);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 16px"></div>'
+    +'<div style="font-size:15px;font-weight:700;margin-bottom:6px">AIが採点中です...</div>'
+    +'<div style="font-size:13px;color:var(--text3)">回答の理解度を評価しています。しばらくお待ちください</div></div>'
+    +'<style>@keyframes spin{to{transform:rotate(360deg)}}</style>';
+
+  var scoredQs=[];var qNum=0;
+  S3_TEST_SECTIONS.forEach(function(sec){sec.questions.forEach(function(q){qNum++;
+    if(q.scored)scoredQs.push({num:qNum,id:q.id,question:q.text,answer:ST.testAnswers[q.id]||'（未回答）'});
+  });});
+
+  try{
+    var response=await fetch(SUPABASE_URL+'/functions/v1/grade-test',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+SUPABASE_KEY,'apikey':SUPABASE_KEY},
+      body:JSON.stringify({questions:scoredQs})
+    });
+    var result=await response.json();
+    if(!response.ok||result.error){throw new Error(result.error||'採点に失敗しました');}
+    ST.testResult=result;ST.testSubmitted=true;ST.testScore=result.total_score;
+    saveTestState();saveP();render();
+  }catch(err){
+    render();
+    alert('採点中にエラーが発生しました。もう一度お試しください。\n'+err.message);
+  }
+}
+
+function rTestResult(){
+  var result=ST.testResult;if(!result)return rTest();
+  var total=result.total_score||0;var pass=total>=80;
+  var scoreMap={};(result.scores||[]).forEach(function(s){scoreMap[s.id]=s;});
+
+  var html='<div class="card" style="padding:28px 16px;text-align:center">'
+    +'<div style="width:84px;height:84px;border-radius:50%;background:'+(pass?'var(--green-l)':'var(--red-l)')+';border:3px solid '+(pass?'var(--green-m)':'#e8a9a9')+';display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;margin:0 auto 14px;color:'+(pass?'var(--green)':'var(--red)')+'">'+total+'点</div>'
+    +'<div style="font-size:18px;font-weight:700;margin-bottom:6px">'+(pass?'合格おめでとうございます！':'もう一度挑戦しましょう')+'</div>'
+    +'<span style="display:inline-block;font-size:13px;padding:5px 20px;border-radius:20px;font-weight:700;background:'+(pass?'var(--green-l)':'var(--red-l)')+';color:'+(pass?'var(--green)':'var(--red)')+';">'+(pass?'合格 — 80点以上':'不合格 — 80点未満')+'</span>';
+  if(result.overall_comment){
+    html+='<div style="margin-top:14px;padding:12px;background:var(--bg);border-radius:var(--r-sm);font-size:13px;color:var(--text2);text-align:left;line-height:1.7">'+result.overall_comment+'</div>';
+  }
+  if(!pass){html+='<div style="margin-top:14px"><button class="btn btnsm btnfull" onclick="retakeTest()"><i class="ti ti-refresh"></i> 再受験する</button></div>';}
+  html+='</div>';
+
+  html+='<div style="font-size:14px;font-weight:700;margin-bottom:12px">問題別 結果</div>';
+  var qNum=0;
+  S3_TEST_SECTIONS.forEach(function(sec){
+    html+='<div style="font-size:12px;font-weight:700;color:var(--text2);padding:6px 10px;background:var(--bg2);border-radius:var(--r-sm);margin-bottom:8px"><i class="ti '+sec.icon+'" style="font-size:13px"></i> '+sec.title+'</div>';
+    sec.questions.forEach(function(q){
+      qNum++;var ans=ST.testAnswers[q.id]||'（未回答）';var sr=scoreMap[q.id];
+      html+='<div class="card" style="margin-bottom:10px;overflow:hidden;padding:0">'
+        +'<div style="display:flex;align-items:flex-start;justify-content:space-between;padding:10px 12px;background:var(--bg);gap:10px">'
+        +'<div style="flex:1;min-width:0"><div style="font-size:11px;color:var(--text3);font-weight:700;margin-bottom:3px">Q'+qNum+'</div>'
+        +'<div style="font-size:13px;font-weight:700;line-height:1.4">'+q.text+'</div></div>';
+      if(q.scored&&sr){
+        var sc=sr.score;var col=sc>=8?'var(--green)':sc>=5?'var(--amber)':'var(--red)';
+        html+='<div style="text-align:center;flex-shrink:0;margin-left:10px"><div style="font-size:22px;font-weight:700;color:'+col+'">'+sc+'</div><div style="font-size:10px;color:var(--text3)">/ 10点</div></div>';
+      }else{
+        html+='<span style="font-size:10px;padding:3px 8px;border-radius:20px;background:var(--amber-l);color:var(--amber);font-weight:700;flex-shrink:0">自己確認</span>';
+      }
+      html+='</div><div style="padding:12px">'
+        +'<div style="font-size:11px;font-weight:700;color:var(--text3);margin-bottom:5px">あなたの回答</div>'
+        +'<div style="background:var(--bg);border-radius:var(--r-sm);padding:10px;font-size:13px;line-height:1.7;white-space:pre-wrap;color:var(--text2)">'+escH(ans)+'</div>';
+      if(q.scored&&sr&&sr.feedback){
+        html+='<div style="font-size:11px;font-weight:700;color:var(--purple);margin:8px 0 4px"><i class="ti ti-robot"></i> AIフィードバック</div>'
+          +'<div style="font-size:13px;color:var(--text2);line-height:1.7">'+sr.feedback+'</div>';
+      }
+      html+='</div></div>';
+    });
+  });
+  return html;
+}
+
+function retakeTest(){
+  if(!confirm('再受験しますか？回答がリセットされます。'))return;
+  ST.testAnswers={};ST.testStartedAt=Date.now();ST.testSubmitted=false;ST.testScore=null;ST.testResult=null;
+  saveTestState();saveP();render();
+}
+
+/* ══════════════════════════════
    SUPABASE 同期（クラウド保存）
 ══════════════════════════════ */
 var TRAINER_ID=null;
@@ -791,6 +1050,14 @@ function hydrate(prog){
     });
   }
   if(Array.isArray(prog.ba_data)){ prog.ba_data.forEach(function(bd,i){ if(ST.baData[i] && bd) ST.baData[i]=bd; }); }
+  if(prog.test){
+    ST.testAnswers=prog.test.answers||{};
+    ST.testStartedAt=prog.test.startedAt||null;
+    ST.testSubmitted=!!prog.test.submitted;
+    ST.testScore=(prog.test.score!=null)?prog.test.score:null;
+    ST.testResult=prog.test.result||null;
+    try{ localStorage.setItem('egym_s3_test', JSON.stringify({answers:ST.testAnswers,startedAt:ST.testStartedAt,submitted:ST.testSubmitted,score:ST.testScore,result:ST.testResult})); }catch(e){}
+  }
   // 候補者はSupabaseの実データ(loadCandidates)から読み込むため、進捗ブロブには保存しない
   if(Array.isArray(prog.notes)){ try{ localStorage.setItem(notesStorageKey(), JSON.stringify(prog.notes)); }catch(e){} }
 }
@@ -799,6 +1066,7 @@ function serializeProgress(){
     checklist: ST.cl,
     programs: { p1:{selected:ST.p1.selected, phases:ST.p1.phases.map(serPhase)}, p2:{selected:ST.p2.selected, phases:ST.p2.phases.map(serPhase)} },
     ba_data: ST.baData,
+    test: {answers:ST.testAnswers, startedAt:ST.testStartedAt, submitted:ST.testSubmitted, score:ST.testScore, result:ST.testResult},
     notes: loadNotes(),
   };
 }
