@@ -180,8 +180,8 @@ textarea{padding:11px 12px;border:1px solid var(--border);border-radius:var(--r-
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const SUPABASE_URL = "https://gcqqhjeqvnfbgdenflmk.supabase.co";
-const SUPABASE_KEY = "sb_publishable_P9Ze3fOsCIpuhzx4AYednA_Gbxf9OO1";
+const SUPABASE_URL = "https://wmkjcoonegfjcbvefiay.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indta2pjb29uZWdmamNidmVmaWF5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg1MzI4MjksImV4cCI6MjEwNDEwODgyOX0.X89vwhuajwwn22ubhnj1s52JEFteN9LcpiIEsA9HJUg";
 const _sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
 async function egymLogout(){
@@ -1152,7 +1152,7 @@ async function submitTestAI(){
   });});
 
   try{
-    var response=await fetch('https://gcqqhjeqvnfbgdenflmk.supabase.co/functions/v1/grade-test',{
+    var response=await fetch('https://wmkjcoonegfjcbvefiay.supabase.co/functions/v1/quick-service',{
       method:'POST',
       headers:{'Content-Type':'application/json','Authorization':'Bearer '+SUPABASE_KEY,'apikey':SUPABASE_KEY},
       body:JSON.stringify({questions:scoredQs})
@@ -1336,7 +1336,7 @@ var MENTORED_BY=null;   // 担当スター3（メンター）の trainer id。�
 var MENTOR_NAME='';     // 担当スター3の氏名（表示用）。
 var _saveTimer=null;
 
-const EDGE_FUNCTION_URL='https://gcqqhjeqvnfbgdenflmk.supabase.co/functions/v1/bright-endpoint';
+const EDGE_FUNCTION_URL='https://wmkjcoonegfjcbvefiay.supabase.co/functions/v1/bright-endpoint';
 async function callEdgeFunction(payload){
   var res=await fetch(EDGE_FUNCTION_URL,{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+SUPABASE_KEY,'apikey':SUPABASE_KEY},body:JSON.stringify(payload)});
   var json=await res.json();
